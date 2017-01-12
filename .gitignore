@@ -49,7 +49,7 @@ local.properties
 .recommenders/
 
 # Maven target
-/target/
+target/
 
 # Log do JUnit
 *.tlog
