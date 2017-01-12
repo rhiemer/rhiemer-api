@@ -1,0 +1,4 @@
+br\com\rhiemer\api\rest\client\log\PrintLogger.class
+br\com\rhiemer\api\rest\client\log\LoggingRequestFilter$MyLoggingOutputStreamWrapper.class
+br\com\rhiemer\api\rest\client\log\LoggingRequestFilter.class
+br\com\rhiemer\api\rest\client\log\LoggingResponseFilter.class

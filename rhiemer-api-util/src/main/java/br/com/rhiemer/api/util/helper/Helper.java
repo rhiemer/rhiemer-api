@@ -1,0 +1,1313 @@
+package br.com.rhiemer.api.util.helper;
+
+import static br.com.rhiemer.api.util.helper.ConstantesAPI.ANNOTATIOSID;
+import static br.com.rhiemer.api.util.helper.ConstantesAPI.DOT_FIELD;
+import static br.com.rhiemer.api.util.helper.ConstantesAPI.ENCONDING_PADRAO;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import br.com.rhiemer.api.util.annotations.Chave;
+import br.com.rhiemer.api.util.annotations.ToString;
+import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
+
+public final class Helper {
+
+	private Helper() {
+	}
+
+	public static <T> String[] toArrayString(T[] arrayObj) {
+		if (arrayObj == null)
+			return null;
+
+		String[] result = new String[arrayObj.length];
+		for (int i = 0; i < arrayObj.length; i++)
+			result[i] = arrayObj[i] == null ? null : arrayObj[i] + "";
+		return result;
+	}
+
+	public static <T> String getStrOfArray(T[] arrayObj, String separator) {
+		String[] resultArray = toArrayString(arrayObj);
+		String result = "";
+		for (String strId : resultArray)
+			if (strId != null && !strId.trim().equals(""))
+				result = result + (result.equals("") ? "" : separator) + strId;
+
+		return result.equals("") ? null : result;
+	}
+
+	public static Object clone(Object obj) {
+		try {
+
+			final ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+			final ObjectOutputStream objOutputStream = new ObjectOutputStream(byteArray);
+			try {
+				objOutputStream.writeObject(obj);
+			} finally {
+				objOutputStream.close();
+			}
+			ObjectInputStream objInputStream = null;
+			final Object result;
+			try {
+				objInputStream = new ObjectInputStream(new ByteArrayInputStream(byteArray.toByteArray()));
+				result = (Object) objInputStream.readObject();
+			} finally {
+				if (objInputStream != null)
+					objInputStream.close();
+			}
+			return result;
+		} catch (final Throwable t) {
+			throw new RuntimeException(t);
+		}
+	}
+
+	public static <T> Object getValueMethodOrField(T objeto, String property, String separator) {
+
+		String[] s = property.split(separator);
+		Object _objeto = objeto;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			_objeto = getValueProperty(_objeto, s[i]);
+			if (_objeto == null)
+				return null;
+		}
+
+		return _objeto;
+
+	}
+
+	public static <T> Object getValueMethodOrField(T objeto, String property) {
+		return getValueMethodOrField(objeto, property, DOT_FIELD);
+	}
+
+	public static Class getPropertyType(Object objeto, String property) {
+		return getTypePropertyComplex(objeto, property, DOT_FIELD);
+	}
+
+	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
+
+		String[] s = property.split(separetor);
+		Object _objeto = objeto;
+		Class propertie = null;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			_objeto = getValueProperty(_objeto, s[i]);
+			if (_objeto == null)
+				break;
+
+			if (i == s.length - 1)
+				propertie = getTypeProperty(_objeto, property);
+		}
+
+		return propertie;
+
+	}
+
+	public static <T> Class<?> getTypeProperty(T objeto, String property) {
+
+		return getPropertyTypeClass(objeto.getClass(), property);
+
+	}
+
+	public static Class getPropertyTypeClass(Class clazz, String property) {
+		for (Method method : clazz.getMethods())
+			if (method.getName().equalsIgnoreCase("get" + property) || (method.getName().equalsIgnoreCase(property))) {
+				return method.getReturnType();
+			}
+
+		List<Field> fields = allFields(clazz);
+		for (Field field : fields)
+			if (field.getName().equalsIgnoreCase(property)) {
+
+				boolean _setacessible = false;
+				if (field.getModifiers() != Member.PUBLIC) {
+					field.setAccessible(true);
+					_setacessible = true;
+				}
+
+				try {
+					return field.getType();
+				} finally {
+					if (_setacessible)
+						field.setAccessible(false);
+				}
+			}
+		return null;
+	}
+
+	public static <T> Object getValueProperty(T objeto, String property) {
+
+		for (Method method : objeto.getClass().getMethods())
+			if (method.getName().equalsIgnoreCase("get" + property)) {
+				try {
+					return method.invoke(objeto, (Object[]) null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				}
+			}
+
+		List<Field> fields = allFields(objeto.getClass());
+		for (Field field : fields)
+			if (field.getName().equalsIgnoreCase(property)) {
+
+				boolean _setacessible = false;
+				if (field.getModifiers() != Member.PUBLIC) {
+					field.setAccessible(true);
+					_setacessible = true;
+				}
+
+				try {
+					return field.get(objeto);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new RuntimeException(e);
+				} finally {
+					if (_setacessible)
+						field.setAccessible(false);
+				}
+			}
+		return null;
+
+	}
+
+	public static Object constructorObject(Object t, Class<?> tClass) {
+		for (Constructor c : tClass.getConstructors()) {
+			if (c.getParameterTypes() == null || c.getParameterTypes().length == 0)
+				if (t == null)
+					try {
+						return c.newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					}
+				else
+					continue;
+
+			if (t != null && c.getParameterTypes().length == 1
+					&& (c.getParameterTypes()[0]).getName().equals(t.getClass().getName()))
+				try {
+					return c.newInstance(t);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException e) {
+					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				}
+		}
+
+		if (t != null)
+			for (Constructor c : tClass.getConstructors()) {
+				if (c.getParameterTypes().length == 1
+						&& (c.getParameterTypes()[0]).getName().equals("a".getClass().getName()))
+					try {
+						return c.newInstance(t.toString());
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					}
+
+			}
+
+		return null;
+	}
+
+	public static Class getTypePropertyComplexClass(Class clazz, String property, String separetor) {
+
+		String[] s = property.split(separetor);
+		Class _clazz = clazz;
+		for (int i = 0; clazz != null && i < s.length; i++) {
+			_clazz = getPropertyTypeClass(_clazz, s[i]);
+		}
+
+		return _clazz;
+
+	}
+
+	public static Class<?> converteTypeToClass(java.lang.reflect.Type type) {
+		Class<?> result = null;
+		if (type instanceof ParameterizedType) {
+			ParameterizedType aType = (ParameterizedType) type;
+			java.lang.reflect.Type[] parameterArgTypes = aType.getActualTypeArguments();
+			for (java.lang.reflect.Type parameterArgType : parameterArgTypes) {
+				result = (Class) parameterArgType;
+				break;
+			}
+
+		}
+
+		return result;
+
+	}
+
+	public static <T> Class<?> getGenericTypeProperty(T objeto, String property) {
+
+		java.lang.reflect.Type genericReturnType = null;
+		Class<?> result = null;
+		for (Method method : objeto.getClass().getMethods())
+			if (method.getName().equalsIgnoreCase("get" + property) || (method.getName().equalsIgnoreCase(property))) {
+				genericReturnType = method.getGenericReturnType();
+				break;
+			}
+
+		if (genericReturnType != null) {
+			List<Field> fields = allFields(objeto.getClass());
+			for (Field field : fields)
+				if (field.getName().equalsIgnoreCase(property)) {
+
+					boolean _setacessible = false;
+					if (field.getModifiers() != Member.PUBLIC) {
+						field.setAccessible(true);
+						_setacessible = true;
+					}
+
+					try {
+						genericReturnType = field.getGenericType();
+						break;
+					} finally {
+						if (_setacessible)
+							field.setAccessible(false);
+					}
+				}
+		}
+
+		result = converteTypeToClass(genericReturnType);
+		if (result == null)
+			result = getTypeProperty(objeto, property);
+		return result;
+
+	}
+
+	public static Class<?> getGenericTypePropertyComplex(Object objeto, String property) {
+		return getGenericTypePropertyComplex(objeto, property, "[.]");
+	}
+
+	public static Class<?> getGenericTypePropertyComplex(Object objeto, String property, String separetor) {
+
+		String[] s = property.split(separetor);
+		Object _objeto = objeto;
+		Class<?> propertie = null;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			_objeto = getValueProperty(_objeto, s[i]);
+			if (_objeto == null)
+				break;
+
+			if (i == s.length - 1)
+				propertie = getGenericTypeProperty(_objeto, property);
+		}
+
+		return propertie;
+
+	}
+
+	public static String printStackTrace(Exception ex) {
+
+		Writer writer = new StringWriter();
+		ex.printStackTrace(new PrintWriter(writer));
+		return writer.toString();
+
+	}
+
+	public static <T, O> void setValueMethodOrField(T objeto, String property, O value) {
+		setValueMethodOrField(objeto, property, value, DOT_FIELD);
+	}
+
+	public static <T, O> Object setValueMethodOrField(T objeto, String property, O value, String separator) {
+
+		String[] s = property.split(separator);
+		Object _objeto = objeto;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			if (i != s.length - 1) {
+				Object _objetoNull = getValueProperty(_objeto, s[i]);
+				if (_objetoNull != null)
+					_objeto = _objetoNull;
+				else
+					_objeto = setNewValueProperty(_objeto, s[i]);
+			} else
+				setValueProperty(_objeto, s[i], value);
+
+		}
+
+		return _objeto;
+
+	}
+
+	public static <T> void setNewValueMethodOrField(T objeto, String property) {
+		setNewValueMethodOrField(objeto, property, DOT_FIELD);
+	}
+
+	public static <T, O> void setNewValueMethodOrField(T objeto, String property, String separator) {
+
+		String[] s = property.split(separator);
+		Object _objeto = objeto;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			if (i != s.length - 1) {
+				Object _objetoNull = getValueProperty(_objeto, s[i]);
+				if (_objetoNull != null)
+					_objeto = _objetoNull;
+				else
+					setNewValueProperty(_objeto, s[i]);
+			} else
+				setNewValueProperty(_objeto, s[i]);
+
+		}
+	}
+
+	public static Collection createCollectionDefault(Class classeInterface) {
+		if (classeInterface == null)
+			return null;
+
+		Collection result = null;
+		if (List.class.isAssignableFrom(classeInterface))
+			result = new ArrayList();
+		else if (Set.class.isAssignableFrom(classeInterface))
+			result = new HashSet();
+
+		return result;
+
+	}
+
+	public static <T> Object setNewValueProperty(T objeto, String property) {
+
+		Object result = null;
+
+		List<Field> fields = allFields(objeto.getClass());
+
+		for (Field field : fields)
+			if (field.getName().equalsIgnoreCase(property)) {
+				boolean _setacessible = false;
+				if (field.getModifiers() != Member.PUBLIC) {
+					field.setAccessible(true);
+					_setacessible = true;
+				}
+
+				try {
+					if (field.getType().isInterface() && Collection.class.isAssignableFrom(field.getType())) {
+						result = createCollectionDefault(field.getType());
+					} else {
+						try {
+							result = (Object) field.getType().newInstance();
+						} catch (InstantiationException | IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
+					}
+					try {
+						field.set(objeto, result);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						throw new RuntimeException(e);
+					}
+					return result;
+				} finally {
+					if (_setacessible)
+						field.setAccessible(false);
+				}
+			}
+
+		return result;
+
+	}
+
+	public static <T, O> Object convertObjectReflextion(O objetoTarget, Class classe) {
+		// if (classe.getSuperclass().equals(objetoTarget.getClass()))
+		if (objetoTarget == null || classe.isInstance(objetoTarget) || ProxyUtils.isProxiedCdi(objetoTarget.getClass()))
+			return objetoTarget;
+
+		String s = objetoTarget + "";
+		if (classe.isPrimitive()) {
+			if (classe.equals(int.class))
+				return Integer.parseInt(s);
+			else if (classe.isInstance(new Integer(0).longValue()))
+				return Long.parseLong(s);
+			else if (classe.isInstance(new Integer(0).doubleValue()))
+				return Double.parseDouble(s);
+			else if (classe.isInstance(new Integer(0).shortValue()))
+				return Short.parseShort(s);
+			else if (classe.isInstance(new Integer(0).byteValue()))
+				return Byte.parseByte(s);
+			else if (classe.isInstance(true))
+				return charToBoolean(s);
+			else if (classe.isInstance(s.toCharArray()[0]))
+				return s.toCharArray()[0];
+		}
+
+		// if (classe.isInstance(new Long(0)) || classe.isInstance(new
+		// Integer(0)))
+		// s = new Integer(objetoTarget + "") + "";
+
+		if (classe.isInstance(new Boolean(true)))
+			return charToBoolean(s);
+		else if (classe.isInstance(new Date())) {
+			if (objetoTarget instanceof Calendar)
+				return ((Calendar) objetoTarget).getTime();
+		} else if (classe.isInstance(Calendar.getInstance())) {
+			if (objetoTarget instanceof Date) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime((Date) objetoTarget);
+				return calendar;
+			}
+		}
+
+		try {
+			return classe.getConstructor(String.class).newInstance(s);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+		}
+
+	}
+
+	public static boolean charToBoolean(String value) {
+		return ("true".equalsIgnoreCase(value) || "S".equalsIgnoreCase(value) || "T".equalsIgnoreCase(value)
+				|| "1".equalsIgnoreCase(value));
+	}
+
+	public static <T, O> void setValueProperty(T objeto, String property, O value) {
+
+		for (Method method : objeto.getClass().getMethods())
+			if (method.getName().equalsIgnoreCase("set" + property) || method.getName().equalsIgnoreCase(property)) {
+				try {
+					method.invoke(objeto,
+							new Object[] { convertObjectReflextion(value, method.getParameterTypes()[0]) });
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				}
+				return;
+			}
+
+		List<Field> fields = allFields(objeto.getClass());
+		for (Field field : fields)
+			if (field.getName().equalsIgnoreCase(property)) {
+				boolean _setacessible = false;
+				if (field.getModifiers() != Member.PUBLIC) {
+					field.setAccessible(true);
+					_setacessible = true;
+				}
+
+				try {
+					field.set(objeto, convertObjectReflextion(value, field.getType()));
+					return;
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new RuntimeException(e);
+				} finally {
+					if (_setacessible)
+						field.setAccessible(false);
+				}
+			}
+
+	}
+
+	public static <C, T> String getStrOfMap(Map<C, T> map) {
+		if (map == null)
+			return null;
+
+		String result = "";
+		for (Map.Entry<C, T> e : map.entrySet())
+			if (e.getValue() == null)
+				result += e.getKey() + " = null";
+			else if (e.getValue() instanceof Object[])
+				result += e.getKey() + " = " + Arrays.deepToString((T[]) e.getValue()) + " ;";
+			else if (e.getValue() instanceof Map)
+				result += e.getKey() + " = ( " + getStrOfMap((Map) e.getValue()) + " ) ;";
+			else
+				result += e.getKey() + " =  " + e.getValue() + " ;";
+
+		result = "(" + result + ")";
+
+		return result;
+
+	}
+
+	public static void setPropertiesObjectByMap(Map<String, Object> map, Object object, String divisor,
+			boolean sobrescrever) {
+
+		Object aObject = null;
+		if (object instanceof Class)
+			try {
+				aObject = ((Class) object).newInstance();
+			} catch (InstantiationException | IllegalAccessException e1) {
+				throw new RuntimeException(e1);
+			}
+		else
+			aObject = object;
+
+		for (Map.Entry<String, Object> e : map.entrySet()) {
+			if (sobrescrever) {
+				setValueMethodOrField(aObject, e.getKey(), e.getValue(), divisor);
+
+			} else {
+				Object value = getValueMethodOrField(aObject, e.getKey(), divisor);
+				if (value == null)
+					setValueMethodOrField(aObject, e.getKey(), e.getValue(), divisor);
+			}
+		}
+
+	}
+
+	public static void setPropertiesObjectByMap(Map<String, Object> map, Object object) {
+		setPropertiesObjectByMap(map, object, DOT_FIELD, true);
+	}
+
+	public static Map<String, Object> mapPropertiesByRoot(String root, Map<String, Object> map) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		for (Map.Entry<String, Object> e : map.entrySet()) {
+
+			if (!e.getKey().equals(root) && e.getKey().indexOf(root) == 1) {
+				String newKey = e.getKey().substring(root.length() + 2);
+				result.put(newKey, e.getValue());
+			}
+		}
+
+		if (result.size() == 0)
+			return null;
+		else
+			return result;
+
+	}
+
+	public static void setObjectByProperties(String root, Map properties, Object object, String divisor,
+			boolean sobrescrever) {
+		if (root != null) {
+			Map<String, Object> map = mapPropertiesByRoot(root, properties);
+			if (map != null)
+				setPropertiesObjectByMap(map, object, divisor, sobrescrever);
+		} else
+			setPropertiesObjectByMap(properties, object, divisor, sobrescrever);
+
+	}
+
+	public static void setObjectByProperties(String root, Map properties, Object object) {
+		setObjectByProperties(root, properties, object, DOT_FIELD, true);
+	}
+
+	public static <C, T> Object objectByPropertiesNivel(String root, Map<C, T> properties, Class classObject,
+			String divisor) {
+		Map<String, Object> mapResult = null;
+		Object aObject = null;
+		String aRoot = "root";
+		int len = divisor.length();
+
+		for (Map.Entry<C, T> e : properties.entrySet()) {
+			String newKey = null;
+			String key = e.getKey() + "";
+
+			if (key.indexOf(root) == 0) {
+				newKey = key.substring(root.length() + len, key.length());
+
+			}
+
+			if (newKey != null && !(newKey.trim().equals("")))
+				if (newKey.indexOf(divisor) >= 0) {
+
+					String[] split = newKey.replace(divisor, "#").split("#");
+					if (mapResult == null || mapResult.get(split[0]) == null) {
+
+						String newRoot = root + divisor + split[0];
+						Object result2 = objectByPropertiesNivel(newRoot, properties, classObject, divisor);
+						if (result2 != null) {
+							if (mapResult == null)
+								mapResult = new HashMap<String, Object>();
+							mapResult.put(split[0], result2);
+						}
+					}
+				} else {
+					if (classObject != null && newKey != null && !(newKey.trim().equals(""))) {
+						if (aObject == null || aObject instanceof String)
+							try {
+								aObject = classObject.newInstance();
+							} catch (InstantiationException | IllegalAccessException e1) {
+								throw new RuntimeException(e1);
+							}
+						setValueMethodOrField(aObject, newKey, e.getValue());
+					} else if (aObject == null)
+						aObject = (e.getValue() + "");
+				}
+
+		}
+
+		Object result = null;
+		if (mapResult != null) {
+			if (aObject != null)
+				mapResult.put(aRoot, aObject);
+			result = mapResult;
+		} else
+			result = aObject;
+
+		return result;
+	}
+
+	public static Object valueAnnotationOfFieldSplit(Object objeto, String strField, Class annotationClass,
+			String property) {
+
+		return valueAnnotationOfFieldSplit(objeto, strField, annotationClass, property, DOT_FIELD);
+
+	}
+
+	public static Object valueAnnotationOfFieldSplit(Object objeto, String strField, Class annotationClass,
+			String property, String strSplit) {
+
+		String[] s = strField.split(strSplit);
+		Object _objeto = objeto;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			if (i != s.length - 1) {
+				_objeto = getValueProperty(_objeto, s[i]);
+			} else
+				return valueAnnotationOfField(_objeto, s[i], annotationClass, property);
+
+		}
+
+		return null;
+
+	}
+
+	public static Class verifyClassHandler(Object objeto) {
+		if (objeto == null)
+			return null;
+
+		Class classHandle = (Class) getValueMethodOrField(objeto, "handler_persistentClass");
+		if (classHandle != null)
+			return classHandle;
+		else
+			return objeto.getClass();
+
+	}
+
+	public static List<AccessibleObject> allMethodsFieldsObj(Object objeto, String prefix) {
+		if (objeto == null)
+			return null;
+		Class clazz = verifyClassHandler(objeto);
+		List<AccessibleObject> lista = allMethodsFields(clazz, prefix);
+		return lista;
+	}
+
+	public static List<AccessibleObject> allMethodsFields(Class classe, String prefix) {
+
+		List<AccessibleObject> lista = new ArrayList<AccessibleObject>();
+		for (Method method : classe.getDeclaredMethods())
+			if (prefix == null || method.getName().startsWith(prefix)) {
+				lista.add(method);
+			}
+		List<Field> fields = allFields(classe);
+
+		for (Field field : fields) {
+			Boolean include = true;
+			if (prefix != null)
+				for (AccessibleObject aObj : lista) {
+
+					if ((aObj instanceof Method
+							&& ((Method) aObj).getName().equalsIgnoreCase(prefix + field.getName()))) {
+						include = false;
+						break;
+					}
+				}
+
+			if (include)
+				lista.add(field);
+
+		}
+
+		return lista;
+	}
+
+	public static boolean isClasseParametrizada(Class classe) {
+
+		if (classe.getGenericSuperclass() != null && classe.getGenericSuperclass() instanceof ParameterizedType
+				&& ((ParameterizedType) classe.getGenericSuperclass()).getActualTypeArguments().length > 0
+				&& ((ParameterizedType) classe.getGenericSuperclass()).getActualTypeArguments()[0] instanceof Class)
+
+		{
+			return true;
+		} else
+			return false;
+
+	}
+
+	public static Class getClassPrincipal(Class classe) {
+
+		if (classe.isArray()) {
+			Class componente = classe.getComponentType();
+			if (componente != null)
+				return componente;
+		} else if (isClasseParametrizada(classe)) {
+			String className = ((ParameterizedType) classe.getGenericSuperclass()).getActualTypeArguments()[0]
+					.getTypeName();
+			Class clazz = (Class) ((ParameterizedType) classe.getGenericSuperclass()).getActualTypeArguments()[0];
+			return clazz;
+
+		}
+
+		return classe;
+	}
+
+	public static Object valueAnnotationOfField(Object objeto, String strField, Class annotationClass,
+			String property) {
+
+		List<AccessibleObject> lista = allMethodsFieldsObj(objeto, null);
+		for (AccessibleObject field : lista) {
+			String _name = field instanceof Field ? ((Field) field).getName() : ((Method) field).getName();
+
+			if (strField.equals(_name) && field.getAnnotation(annotationClass) != null) {
+				Annotation _annotation = field.getAnnotation(annotationClass);
+				if (property == null)
+					return _annotation;
+				else
+					try {
+						return annotationClass.getMethod(property).invoke(_annotation, (Object[]) null);
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+							| NoSuchMethodException | SecurityException e) {
+						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					}
+
+			}
+
+		}
+
+		return null;
+
+	}
+
+	public static Object valueAnnotationClass(Class classe, Class<? extends Annotation> annotationClass,
+			String strField) {
+
+		for (Annotation annotation : classe.getAnnotations()) {
+			if (annotation.annotationType().toString().equalsIgnoreCase(annotationClass.toString().toLowerCase())) {
+				for (Method method : annotation.getClass().getMethods())
+					if (method.getName().equalsIgnoreCase(strField)) {
+						try {
+							return method.invoke(annotation, (Object[]) null);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+						}
+					}
+			}
+		}
+
+		return null;
+
+	}
+
+	public static Object valueAnnotationClass(Class classe, Class<? extends Annotation> annotationClass) {
+
+		return valueAnnotationClass(classe, annotationClass, "value");
+
+	}
+
+	public static String[] allStrFromFields(Class classe, Class[] annotations, Boolean include) {
+
+		List<AccessibleObject> lista = new ArrayList<AccessibleObject>();
+		List<String> result = new ArrayList<String>();
+		List<AccessibleObject> aAllMethodsFields = allMethodsFields(classe, null);
+		for (AccessibleObject field : aAllMethodsFields) {
+			boolean _include = false;
+			
+			if (field instanceof Field &&  Modifier.isStatic(((Field) field).getModifiers()))
+				continue;	
+
+			if (field instanceof Method && Modifier.isStatic(((Method) field).getModifiers()))
+				continue;
+
+			String _name = field instanceof Field ? ((Field) field).getName() : ((Method) field).getName();
+
+			if (annotations != null && annotations.length > 0) {
+				for (Class annotation : annotations)
+					if (field.getAnnotation(annotation) != null) {
+						_include = true;
+						break;
+					}
+
+			} else {
+				_include = true;
+			}
+
+			if (include == _include) {
+				if (field instanceof Method && (_name.startsWith("get") || _name.startsWith("set"))) {
+					String vName = _name.substring(3, 4).toLowerCase() + _name.substring(4);
+					try {
+						if (classe.getDeclaredField(vName) != null)
+							_name = vName;
+					} catch (NoSuchFieldException | SecurityException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+				if (result.indexOf(_name) == -1)
+					result.add(_name);
+			}
+
+		}
+
+		return (result == null || result.size() == 0) ? null : result.toArray(new String[1]);
+
+	}
+
+	public static String[] allStrFromFields(Class classe, Boolean include) {
+
+		String[] result = allStrFromFields(classe, new Class[] {}, include);
+		return result;
+
+	}
+
+	public static String[] allStrFromFields(Class classe) {
+
+		String[] result = allStrFromFields(classe, true);
+		return result;
+
+	}
+
+	public static Object copyObjectNewObject(Object objTarget, boolean isNotNull, String[] noMethodos) {
+		return copyObjectNewObject(objTarget, isNotNull, noMethodos);
+
+	}
+
+	public static Object copyObjectNewObject(Object objTarget, boolean isNotNull) {
+		Object copia;
+		try {
+			copia = objTarget.getClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		copyObject(objTarget, copia, isNotNull);
+		return copia;
+
+	}
+
+	public static void copyObject(Object objTarget, Object objSource, boolean isNotNull) {
+		copyObject(objTarget, objSource, isNotNull, null);
+	}
+
+	public static void copyObject(Object objTarget, Object objSource, boolean isNotNull, String[] noMethodos) {
+
+		String[] aAllMethodsFields = allStrFromFields(objSource.getClass());
+		for (String field : aAllMethodsFields) {
+			if (noMethodos != null) {
+				int i;
+				for (i = 0; i < noMethodos.length; i++) {
+					if (noMethodos[i].equalsIgnoreCase(field)) {
+						break;
+					}
+				}
+				if (i != noMethodos.length)
+					continue;
+			}
+			Object value = getValueMethodOrField(objTarget, field);
+			if (!isNotNull || value != null)
+				setValueMethodOrField(objSource, field, value);
+		}
+
+	}
+
+	public static Object execMethodStr(Object obj, String nameMethod, Object[] paramsMethod) {
+
+		if (obj == null)
+			return null;
+
+		for (Method method : obj.getClass().getMethods()) {
+			if (method.getName().equalsIgnoreCase(nameMethod)) {
+				boolean invoke = false;
+				if (paramsMethod != null) {
+					if (method.getParameterTypes() == null || method.getParameterTypes().length != paramsMethod.length)
+						continue;
+
+					for (int i = 0; i < paramsMethod.length; i++) {
+						Class _type = method.getParameterTypes()[i];
+						Object o = paramsMethod[i];
+						if (!_type.isInstance(o))
+							break;
+					}
+
+					invoke = true;
+				} else
+					invoke = true;
+
+				if (invoke)
+					try {
+						return method.invoke(obj, (Object[]) paramsMethod);
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					}
+			}
+		}
+
+		return null;
+	}
+
+	public static <T extends Comparable<? super T>> int compareMethodsObjects(T fromObject, T toObject,
+			String[] strMethods) {
+
+		for (int i = 0; i < strMethods.length; i++) {
+			strMethods[i] = "get" + strMethods[i].substring(0, 1).toUpperCase() + strMethods[i].substring(1);
+		}
+
+		List<String> listNameMethods = Arrays.asList(strMethods);
+
+		for (Method method : fromObject.getClass().getMethods()) {
+
+			if (listNameMethods.indexOf(method.getName()) == -1)
+				continue;
+
+			Object resultMethodFrom;
+			try {
+				resultMethodFrom = method.invoke(fromObject, (Object[]) null);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+			}
+			Object resultMethodTo;
+			try {
+				resultMethodTo = method.invoke(toObject, (Object[]) null);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+			}
+
+			int result = 0;
+			if (resultMethodFrom != null || resultMethodTo != null)
+				if (resultMethodFrom == null && resultMethodTo != null)
+					return -1;
+				else
+					result = ((Comparable) resultMethodFrom).compareTo(resultMethodTo);
+
+			if (result != 0)
+				return result;
+
+		}
+
+		return 0;
+	}
+
+	public static String inputStreamToString(InputStream inputStream) {
+
+		return inputStreamToString(inputStream, ENCONDING_PADRAO);
+
+	}
+
+	public static String inputStreamToString(InputStream inputStream, String enconding) {
+		String result = null;
+		StringWriter writer = new StringWriter();
+		try {
+			IOUtils.copy(inputStream, writer, Charset.forName(enconding));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		result = writer.toString();
+
+		return result;
+
+	}
+
+	public static String fileToString(File file, String enconding) {
+		String result = null;
+		try {
+			InputStream input = new FileInputStream(file);
+			try {
+				result = inputStreamToString(input, enconding);
+			} finally {
+				input.close();
+			}
+		} catch (Throwable e) {
+			new RuntimeException(e);
+		}
+		return result;
+	}
+
+	static public String strEncondig(String value, String enconding) {
+		String result = null;
+		try {
+
+			InputStream is = new ByteArrayInputStream(value.getBytes());
+			try {
+				result = inputStreamToString(is, enconding);
+			} finally {
+				is.close();
+			}
+		} catch (Throwable e) {
+			new RuntimeException(e);
+		}
+		return result;
+	}
+
+	static public String strEncondig(String value) {
+		return strEncondig(value, null);
+	}
+
+	static public void copyFile(File source, File destination) {
+
+		if (destination.exists())
+			destination.delete();
+
+		FileChannel sourceChannel = null;
+		FileChannel destinationChannel = null;
+
+		try {
+			try {
+				sourceChannel = new FileInputStream(source).getChannel();
+				destinationChannel = new FileOutputStream(destination).getChannel();
+				sourceChannel.transferTo(0, sourceChannel.size(), destinationChannel);
+			} finally {
+				if (sourceChannel != null && sourceChannel.isOpen())
+					sourceChannel.close();
+				if (destinationChannel != null && destinationChannel.isOpen())
+					destinationChannel.close();
+			}
+		} catch (Throwable t) {
+			new RuntimeException(t);
+		}
+	}
+
+	public static String pojoToString(Object object) {
+
+		if (object == null)
+			return null;
+
+		String result = "";
+		try {
+
+			String[] fields = allStrFromFields(object.getClass(), new Class[] { Chave.class }, true);
+			if (fields == null || fields.length == 0)
+				return null;
+
+			for (String field : fields) {
+
+				Object valor = getValueMethodOrField(object, field);
+				String strValor = null;
+				if (valor != null)
+					strValor = valor.toString();
+				else
+					strValor = "null";
+
+				String titulo = (String) valueAnnotationOfField(object, field, ToString.class, "value");
+				if (titulo == null || "".equals(titulo))
+					titulo = field;
+
+				result += (result.equals("") ? "" : ",") + String.format("%s=%s", titulo, strValor);
+
+			}
+
+			return ("".equals(result) ? null : result);
+
+		} catch (Throwable t) {
+			new RuntimeException(t);
+		}
+
+		return result;
+	}
+
+	public static String pojoToStringClass(Object object) {
+
+		String valueQgString = pojoToStringClass(object);
+		if (valueQgString == null)
+			return null;
+
+		String result = String.format("%s [%s]}", object.getClass().getSimpleName(), valueQgString);
+		return result;
+
+	}
+
+	public static <K> List<K> objectNoEqualsCollection(Collection<? extends K> collectionSource,
+			Collection<? extends K> collectionTarget, boolean equals) {
+
+		List result;
+		try {
+			result = new ArrayList<K>();
+
+			for (Object objSource : collectionSource) {
+				if (objSource == null)
+					continue;
+
+				int indObjTarget = 0;
+				for (Object objTarget : collectionTarget) {
+
+					if (objTarget == null) {
+						indObjTarget++;
+						continue;
+					}
+
+					if (objTarget instanceof PojoKeyAbstract
+							&& (((PojoKeyAbstract) objTarget).getPrimaryKey() == null)) {
+						indObjTarget++;
+						continue;
+					}
+
+					boolean aEquals = (objSource == objTarget);
+					if (!aEquals)
+						aEquals = objSource.equals(objTarget);
+
+					if (aEquals) {
+						if (equals) {
+							if (aEquals)
+								result.add(objSource);
+						} else
+							break;
+					}
+
+					indObjTarget++;
+				}
+
+				if (!equals) {
+					if (collectionTarget.size() == indObjTarget)
+						result.add(objSource);
+				}
+
+			}
+		} catch (Throwable e) {
+
+			throw new RuntimeException(e);
+		}
+		return result;
+
+	}
+
+	public static boolean valueIsEmpty(Object value) {
+		if (value == null)
+			return true;
+		else if (value instanceof String && StringUtils.isBlank(value.toString()))
+			return true;
+		else if (value instanceof Array && value.getClass().isArray() && Array.getLength(value) == 0)
+			return true;
+		else if (value instanceof Collection && ((Collection) value).size() == 0)
+			return true;
+		else
+			return false;
+
+	}
+
+	public static Set<Class<?>> carregarInterfaces(Class<?> classe) {
+		Class<?> classePai = classe;
+		Set<Class<?>> result = new HashSet<>();
+		while (classePai != null && classePai.equals(Object.class)) {
+			if (classePai.getInterfaces().length > 0) {
+
+				result.addAll(new HashSet(Arrays.asList(classePai.getInterfaces())));
+			}
+			classePai = classe.getSuperclass();
+		}
+		return result;
+	}
+
+	public static Map<String, Class<?>> getPrimaryKeyList(Class<?> classe) {
+
+		final Map<String, Class<?>> primaryKeyTypes = new HashMap<>();
+
+		for (Class<?> annotation : ANNOTATIOSID) {
+			List<Field> fields = allFields(classe);
+			for (Field f : fields) {
+
+				if (f.getAnnotation((Class<? extends Annotation>) annotation) != null) {
+					primaryKeyTypes.put(f.getName(), f.getType());
+				}
+			}
+		}
+
+		return primaryKeyTypes;
+	}
+
+	public static Object validaPrimaryKeyValor(Class<?> classe, String id) {
+
+		Map<String, Class<?>> primaryKeyTypes = getPrimaryKeyList(classe);
+		if (id != null && primaryKeyTypes.size() == 1) {
+			for (Map.Entry<String, Class<?>> entry : primaryKeyTypes.entrySet()) {
+
+				return convertObjectReflextion(id, entry.getValue());
+			}
+		}
+
+		return id;
+	}
+
+	public static List<Field> allFields(Class<?> classe) {
+
+		Class<?> clazz = classe;
+		List<Field> result = new ArrayList<>();
+		while (clazz != null && !clazz.equals(Object.class)) {
+			for (Field f : clazz.getDeclaredFields()) {
+				result.add(f);
+			}
+			clazz = clazz.getSuperclass();
+		}
+
+		return result;
+	}
+
+	public static List<Field> allFields(Class<?> classe, Class<?>... annotations) {
+
+		Class<?> clazz = classe;
+		List<Field> result = new ArrayList<>();
+		while (clazz != null && !clazz.equals(Object.class)) {
+			loopField: for (Field f : clazz.getDeclaredFields()) {
+				for (Class annotation : annotations) {
+					Annotation _annotation = f.getAnnotation(annotation);
+					if (_annotation != null) {
+						result.add(f);
+						continue loopField;
+					}
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+
+		return result;
+	}
+
+	public static <T extends Annotation> T buscarAnnotation(Class<?> classe, Class<T> annotation) {
+
+		Class<?> clazz = classe;
+		Annotation result = null;
+		while (clazz != null && !clazz.equals(Object.class)) {
+			result = clazz.getAnnotation(annotation);
+			if (result != null)
+				return (T) result;
+			clazz = clazz.getSuperclass();
+		}
+
+		result = buscarAnnotation(classe.getInterfaces(), annotation);
+		if (result != null)
+			return (T) result;
+
+		return null;
+	}
+
+	public static <T extends Annotation> T buscarAnnotation(Class<?>[] interfaces, Class<T> annotation) {
+
+		Annotation result = null;
+		for (int i = 0; interfaces != null && i < interfaces.length; i++) {
+			result = interfaces[i].getAnnotation(annotation);
+			if (result != null)
+				return (T) result;
+			else {
+				result = buscarAnnotation(interfaces[i].getInterfaces(), annotation);
+				if (result != null)
+					return (T) result;
+			}
+		}
+
+		return null;
+	}
+
+}

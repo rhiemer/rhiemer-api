@@ -1,0 +1,3 @@
+br\com\rhiemer\api\test\testcategory\UnitaryTests.class
+br\com\rhiemer\api\test\testcategory\ExcludeTests.class
+br\com\rhiemer\api\test\matcher\StringsContains.class

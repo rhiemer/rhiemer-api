@@ -1,0 +1,4 @@
+br.com.rhiemer.api.cdi.extension.BeanDiscoveryExtensionCDI
+br.com.rhiemer.api.cdi.extension.InterceptorExtensionCDI
+br.com.rhiemer.api.cdi.extension.ThreadContextExtension
+br.com.rhiemer.api.cdi.extension.BeanEJBDiscoveryExtensionCDI
