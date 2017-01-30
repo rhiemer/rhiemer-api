@@ -47,6 +47,8 @@
 			<artifactId>rhiemer-api-rest-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
+		
 
 		<!-- Arquillian -->
 		<dependency>

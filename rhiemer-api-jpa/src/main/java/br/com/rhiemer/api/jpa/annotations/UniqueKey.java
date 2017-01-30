@@ -15,7 +15,7 @@ public @interface UniqueKey {
 
     String messageValidate() default "{UniqueKey.message}";
     
-    boolean validar = false;
+    boolean validar() default false;
 
     @Target({ ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)

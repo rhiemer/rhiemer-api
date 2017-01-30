@@ -1,9 +1,9 @@
 package br.com.rhiemer.api.jpa.entity;
 
-public interface EntityComId extends Entity {
+public interface EntityComId<Chave> extends Entity {
 	
-	Integer getId();
+	Chave getId();
 
-	void setId(Integer id);
+	void setId(Chave id);
 
 }

@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class GenericEntityComIdIncremental extends GenericEntity implements EntityComId
+public abstract class GenericEntityComIdIncremental extends GenericEntityComId<Integer> implements EntityComIdIncremental
 {
 
 	/**
@@ -27,17 +27,6 @@ public abstract class GenericEntityComIdIncremental extends GenericEntity implem
 		this.id = id;
 	}
 
-	@Override
-	protected void posCopia(Object copia) {
-		super.posCopia(copia);
-		((GenericEntityComIdIncremental) copia).id = null;
-	}
-
-	@Override
-	public Object clone() {
-		GenericEntityComIdIncremental clone = (GenericEntityComIdIncremental) super.clone();
-		((GenericEntityComIdIncremental) clone).id = null;
-		return clone;
-	}
+	
 
 }
