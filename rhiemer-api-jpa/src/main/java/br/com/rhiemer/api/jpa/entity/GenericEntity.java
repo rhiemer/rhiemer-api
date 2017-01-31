@@ -89,6 +89,8 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 		this.ativo = ativo;
 	}
 
+	@JsonIgnore
+	@XmlTransient
 	public Date getExclusao() {
 		return exclusao;
 	}
