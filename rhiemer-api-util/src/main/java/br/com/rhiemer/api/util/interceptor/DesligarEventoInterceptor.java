@@ -15,8 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
-import br.com.rhiemer.api.util.cdi.desligar.evento.DesligamentoEventoContext;
-import br.com.rhiemer.api.util.cdi.desligar.evento.DesligamentoEventoDto;
+import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoContext;
+import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoDto;
 import br.com.rhiemer.api.util.helper.Helper;
 
 @Interceptor
@@ -85,6 +85,7 @@ public class DesligarEventoInterceptor {
 					final DesligamentoEventoContext desligamentoEventoContext2 = desligamentoEventoContext;
 					lista.forEach(t -> desligamentoEventoContext2.addDesligamentoEventoDto(t));
 				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 
@@ -94,7 +95,10 @@ public class DesligarEventoInterceptor {
 			return invocationContext.proceed();
 		} finally {
 			if (desligamentoEventoContext != null) {
-				desligamentoEventoContext.removeDesligamentoEventoDto(chaveMetodo);
+				try {
+					desligamentoEventoContext.removeDesligamentoEventoDto(chaveMetodo);
+				} catch (Exception e) {
+				}
 			}
 		}
 

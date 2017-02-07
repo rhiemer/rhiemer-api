@@ -9,9 +9,9 @@ import javax.ejb.Stateless;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.rhiemer.api.util.cdi.desligar.evento.DesligamentoEventoContext;
-import br.com.rhiemer.api.util.cdi.desligar.evento.DesligamentoEventoDto;
-import br.com.rhiemer.api.util.cdi.desligar.evento.ParametrosBuscaDesligamentoEventoDto;
+import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoContext;
+import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoDto;
+import br.com.rhiemer.api.util.cdi.evento.desligar.ParametrosBuscaDesligamentoEventoDto;
 
 @Stateless(name = "desligarEventoContext", mappedName = "desligarEventoContext")
 @Remote(DesligamentoEventoContext.class)

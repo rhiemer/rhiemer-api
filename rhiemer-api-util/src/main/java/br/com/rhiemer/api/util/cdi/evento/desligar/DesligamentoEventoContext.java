@@ -1,11 +1,13 @@
-package br.com.rhiemer.api.util.cdi.desligar.evento;
+package br.com.rhiemer.api.util.cdi.evento.desligar;
 
+import javax.ejb.Remote;
 import javax.enterprise.context.Dependent;
 
 import br.com.rhiemer.api.util.annotations.bean.BeanDiscoveryEJB;
 
 @Dependent
-@BeanDiscoveryEJB(classe = DesligamentoEventoContext.class, app = "app", modulo = "rhiemer-api-ejb", beanName = "desligamentoEventoContext")
+@BeanDiscoveryEJB(classe = DesligamentoEventoContext.class, modulo = "rhiemer-api-ejb", beanName = "desligarEventoContext")
+@Remote
 public interface DesligamentoEventoContext {
 
 	Boolean temDesligamentoEvento(ParametrosBuscaDesligamentoEventoDto parametro);

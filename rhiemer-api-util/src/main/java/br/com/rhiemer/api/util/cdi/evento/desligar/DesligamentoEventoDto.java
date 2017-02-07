@@ -1,4 +1,4 @@
-package br.com.rhiemer.api.util.cdi.desligar.evento;
+package br.com.rhiemer.api.util.cdi.evento.desligar;
 
 import java.io.Serializable;
 
