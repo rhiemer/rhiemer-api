@@ -2,7 +2,6 @@ package br.com.rhiemer.api.util.proxy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
 
 public abstract class ProxyCallMetodoInterceptor {
 
@@ -20,24 +19,17 @@ public abstract class ProxyCallMetodoInterceptor {
 			else {
 
 				Class<?> classeTarget = target.getClass();
-				LinkedHashSet<Class<?>> listaClassesMetodoTarget = null;
-				for (Object arg : args) {
-					if (listaClassesMetodoTarget == null)
-						listaClassesMetodoTarget = new LinkedHashSet<Class<?>>();
-					listaClassesMetodoTarget.add(arg.getClass());
-				}
-
 				Method methodTarget = null;
-				if (listaClassesMetodoTarget == null)
+				if (args == null || args.length == 0)
 					methodTarget = classeTarget.getMethod(method.getName(), (Class[]) null);
 				else {
 					Method methodDefault = null;
 					loopMethod: for (Method methodList : classeTarget.getMethods()) {
 						if (!method.getName().equals(methodList.getName()))
 							continue;
-						
+
 						if (methodList.getParameterTypes().length != args.length)
-							continue;	
+							continue;
 
 						methodDefault = methodList;
 						for (Class<?> classeParam : methodList.getParameterTypes()) {

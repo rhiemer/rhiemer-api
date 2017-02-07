@@ -7,7 +7,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.rhiemer.api.util.annotations.LogApp;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 
 /**

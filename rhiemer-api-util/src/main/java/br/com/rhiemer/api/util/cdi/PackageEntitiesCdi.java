@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import org.reflections.Reflections;
 
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.reflection.PackageEntities;
 

@@ -22,7 +22,7 @@ import org.reflections.util.ConfigurationBuilder;
 
 import br.com.rhiemer.api.jpa.annotations.PersistenceServiceBeanEntities;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.service.PersistenceServiceBean;
 
 @ApplicationScoped

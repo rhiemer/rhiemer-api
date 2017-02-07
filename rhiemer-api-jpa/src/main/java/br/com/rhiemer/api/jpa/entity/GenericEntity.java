@@ -6,6 +6,10 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
@@ -103,6 +107,10 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 		if (ativo == null)
 			ativo = true;
 	}
+	
+	@PostPersist
+	protected void postPersist() {
+	}
 
 	@PreUpdate
 	protected void preUpdate() {
@@ -110,11 +118,24 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 		if (ativo == null)
 			ativo = true;
 	}
+	
+	@PostUpdate
+	protected void postUpdate() {
+	}
 
 	@PreRemove
 	protected void preRemove() {
 		exclusao = new Date();
 	}
+	
+	@PostRemove
+	protected void postRemove() {
+	}
+	
+	@PostLoad
+	protected void postLoad() {
+	}
+	
 
 	@Override
 	protected void posCopia(Object copia) {

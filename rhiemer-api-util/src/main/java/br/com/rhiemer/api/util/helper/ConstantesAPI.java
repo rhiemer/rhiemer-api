@@ -2,7 +2,7 @@ package br.com.rhiemer.api.util.helper;
 
 import javax.ws.rs.core.MediaType;
 
-import br.com.rhiemer.api.util.annotations.Chave;
+import br.com.rhiemer.api.util.annotations.entity.Chave;
 
 public interface ConstantesAPI {
 	

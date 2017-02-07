@@ -1,5 +1,7 @@
 package br.com.rhiemer.api.jpa.dao;
 
+import static br.com.rhiemer.api.jpa.constantes.ConstantesDesligarEvenetosJPA.PRE_UPDATE;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -14,8 +16,11 @@ import br.com.rhiemer.api.jpa.builder.BuildJPA;
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.HelperJPA;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
-import br.com.rhiemer.api.util.annotations.SemTrace;
-import br.com.rhiemer.api.util.annotations.Trace;
+import br.com.rhiemer.api.util.annotations.bean.BeanDiscovery;
+import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
+import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
+import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
+import br.com.rhiemer.api.util.annotations.interceptor.Trace;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 /**
@@ -26,7 +31,6 @@ import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
  */
 
 @Trace
-@Dependent
 public class DaoJPAImpl implements DaoJPA {
 
 	private EntityManager em;
@@ -93,6 +97,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#remover(T)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> void remover(T t) {
 		em.remove(em.merge(t));
 	}
@@ -103,6 +109,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#procurarPeloId(java.lang.Class, K)
 	 */
 	@Override
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <K, T> T procurarPeloId(Class<T> t, K k) {
 		return em.find(t, k);
 	}
@@ -114,6 +121,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * K)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <K, T> T procurarPeloIdLazy(Class<T> classe, K k) {
 
 		T result = null;
@@ -140,6 +149,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#listarTodos(java.lang.Class)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> List<T> listarTodos(Class<T> t) {
 		Query q = em.createQuery("select n from " + t.getName() + " n");
 		return q.getResultList();
@@ -234,6 +245,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#contarTodos(java.lang.Class)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> int contarTodos(Class<T> classe) {
 		long result = (Long) em.createQuery("select count(n) from " + classe.getName() + " n").getSingleResult();
 
@@ -247,6 +260,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * int, int)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> List<T> listaTodosPaginada(Class<T> classe, int firstResult, int maxResults) {
 		Query q = em.createQuery("select n from " + classe.getName() + " n");
 		List<T> lista = q.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
@@ -272,6 +287,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * builder.BuildJPA)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> List<T> excutarQueryList(BuildJPA query) {
 		return query.buildQuery(em).getResultList();
 	}
@@ -284,7 +301,10 @@ public class DaoJPAImpl implements DaoJPA {
 	 * api.jpa.builder.BuildJPA)
 	 */
 	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> T excutarQueryUniqueResult(BuildJPA query) {
+
 		return (T) query.buildQuery(em).getSingleResult();
 	}
 

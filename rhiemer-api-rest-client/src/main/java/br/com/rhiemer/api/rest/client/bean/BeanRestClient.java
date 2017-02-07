@@ -2,45 +2,42 @@ package br.com.rhiemer.api.rest.client.bean;
 
 import java.util.Arrays;
 
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+
 import br.com.rhiemer.api.rest.client.annotation.BeanDiscoveryRestClient;
 import br.com.rhiemer.api.rest.client.factory.RestClientProxyType;
 import br.com.rhiemer.api.util.cdi.bean.BeanAPI;
 
 public class BeanRestClient<T> extends BeanAPI<T> {
 
-	
-    private final BeanDiscoveryRestClient beanDiscoveryRestClient;
-    
-     
-    
-	public BeanRestClient(Class<T> classe,BeanDiscoveryRestClient beanDiscoveryRestClient) {
-		super(classe,beanDiscoveryRestClient.proxyType());
+	private final BeanDiscoveryRestClient beanDiscoveryRestClient;
+
+	public BeanRestClient(Class<T> classe, BeanDiscoveryRestClient beanDiscoveryRestClient, BeanManager bm,AnnotatedType annotatedType) {
+		super(classe, beanDiscoveryRestClient.proxyType(), bm,annotatedType);
 		this.beanDiscoveryRestClient = beanDiscoveryRestClient;
 	}
-	
+
 	@Override
 	protected Object createClass() {
-		
+
 		RestClientProxyType restClientProxyType = new RestClientProxyType(getClass());
 		restClientProxyType.setUrl(beanDiscoveryRestClient.url());
 		restClientProxyType.setPropriedade(beanDiscoveryRestClient.propriedade());
-		
+
 		Class[] filters = null;
 		BeanDiscoveryRestClient.RestClientAppFilters filtersAnnotation = this.getClass()
 				.getAnnotation(BeanDiscoveryRestClient.RestClientAppFilters.class);
-		if (filtersAnnotation != null)
-		{	
+		if (filtersAnnotation != null) {
 			restClientProxyType.setFiltersClass(Arrays.asList(filtersAnnotation.filters()));
-		}	
+		}
 
 		Object servico = restClientProxyType.getService();
-	    return servico;	
+		return servico;
 	}
-
 
 	public BeanDiscoveryRestClient getBeanDiscoveryRestClient() {
 		return beanDiscoveryRestClient;
 	}
 
-	
 }

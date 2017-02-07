@@ -7,8 +7,8 @@ import javax.ws.rs.core.Response;
 
 import br.com.rhiemer.api.jpa.service.factory.PersistenceServiceBeanFacroty;
 import br.com.rhiemer.api.rest.helper.JsonResponse;
-import br.com.rhiemer.api.util.annotations.SemTrace;
-import br.com.rhiemer.api.util.annotations.Trace;
+import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
+import br.com.rhiemer.api.util.annotations.interceptor.Trace;
 import br.com.rhiemer.api.util.exception.NotFoundException;
 import br.com.rhiemer.api.util.helper.JsonHelper;
 import br.com.rhiemer.api.util.service.PersistenceServiceBean;

@@ -8,8 +8,8 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 
-import br.com.rhiemer.api.util.annotations.PastaPropriedades;
-import br.com.rhiemer.api.util.annotations.PastaPropriedadesRootServidor;
+import br.com.rhiemer.api.util.annotations.app.PastaPropriedades;
+import br.com.rhiemer.api.util.annotations.app.PastaPropriedadesRootServidor;
 
 /***
  * Classe abstrata criada com os procedimentos de carga das propriedades de

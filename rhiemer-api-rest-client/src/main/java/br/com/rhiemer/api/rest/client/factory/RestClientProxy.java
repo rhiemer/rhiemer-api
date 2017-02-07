@@ -11,8 +11,8 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import br.com.rhiemer.api.rest.client.log.LoggingRequestFilter;
 import br.com.rhiemer.api.rest.client.log.LoggingResponseFilter;
-import br.com.rhiemer.api.util.annotations.RestClientFilters;
-import br.com.rhiemer.api.util.annotations.RestClientPoxyMetodoInterceptor;
+import br.com.rhiemer.api.util.annotations.rest.RestClientFilters;
+import br.com.rhiemer.api.util.annotations.rest.RestClientPoxyMetodoInterceptor;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.proxy.ProxyCallMetodo;
 import br.com.rhiemer.api.util.proxy.ProxyCallMetodoHandlerJavassit;

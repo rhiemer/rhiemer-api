@@ -10,6 +10,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,9 @@ import br.com.rhiemer.api.util.producer.Producer;
 public class ConfiguracoesAplicacao {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfiguracoesAplicacao.class);
-
+	@Inject
+	private BeanManager beanManager;
+	
 	private Properties configuracoes = new Properties();
 	protected List<String> listaArquivosConfiguracoes = new ArrayList<>();
 
@@ -78,12 +82,12 @@ public class ConfiguracoesAplicacao {
 			configuracoesProperties(arquivoConfiguracao);
 		}
 	}
-	
+
 	@PostConstruct
 	public void init(@Observes @Initialized(ApplicationScoped.class) Object ctx) {
 		logarConfiguracoesAplicacao();
+		logger.info("BeanManager: {}.", beanManager.toString());
 	}
-	
-	
+
 
 }

@@ -8,7 +8,7 @@ import javax.ws.rs.ext.Provider;
 import com.fasterxml.jackson.core.JsonParseException;
 
 import br.com.rhiemer.api.rest.helper.JsonResponse;
-import br.com.rhiemer.api.util.annotations.LogApp;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 
 /**

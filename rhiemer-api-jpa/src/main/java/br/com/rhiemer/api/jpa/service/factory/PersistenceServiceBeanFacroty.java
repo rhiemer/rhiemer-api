@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
 import org.reflections.Reflections;
@@ -17,8 +19,8 @@ import org.reflections.Reflections;
 import br.com.rhiemer.api.jpa.annotations.InjetarDaoEntidade;
 import br.com.rhiemer.api.jpa.dao.factory.DaoFactory;
 import br.com.rhiemer.api.jpa.service.PersistenceServiceCrud;
-import br.com.rhiemer.api.util.annotations.ProxyBuilderAplicacao;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ProxyBuilderAplicacao;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.cdi.CDIUtil;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.proxy.ProxyMetodoBuilder;
@@ -40,6 +42,9 @@ public class PersistenceServiceBeanFacroty {
 	@Inject
 	@ReflectionBasePackage
 	private Reflections reflections;
+	
+	@Inject
+	private BeanManager bm;
 
 	private Map<Class<?>, Class<?>> mapPersistenceServiceBeanEntity = new HashMap<>();
 
@@ -60,7 +65,7 @@ public class PersistenceServiceBeanFacroty {
 
 		if (clazz.getPackage().getName().startsWith(BASE_PACKAGE_API))
 			return;
-
+		
 		if (!Helper.isClasseParametrizada(clazz))
 			return;
 
@@ -91,6 +96,7 @@ public class PersistenceServiceBeanFacroty {
 					bean = CDIUtil.createBeanByClasse(PersistenceServiceAPI.class);
 
 				}
+				
 			}
 			Helper.setValueMethodOrField(bean, "classeObjeto", clazz);
 			mapPersistenceServiceBean.put(clazz, bean);

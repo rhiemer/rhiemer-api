@@ -124,7 +124,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 				if (resultMethodFrom == null && resultMethodTo != null)
 					return -1;
 				else
-					result = ((Comparable) resultMethodFrom).compareTo(resultMethodTo);
+					result = Helper.compareToObj(resultMethodFrom, resultMethodTo);
 
 			if (result != 0)
 				return result;

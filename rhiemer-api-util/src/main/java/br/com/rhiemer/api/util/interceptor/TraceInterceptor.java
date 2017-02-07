@@ -14,9 +14,9 @@ import javax.interceptor.InvocationContext;
 
 import org.slf4j.LoggerFactory;
 
-import br.com.rhiemer.api.util.annotations.ProxyBuilderAplicacao;
-import br.com.rhiemer.api.util.annotations.SemTrace;
-import br.com.rhiemer.api.util.annotations.Trace;
+import br.com.rhiemer.api.util.annotations.app.ProxyBuilderAplicacao;
+import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
+import br.com.rhiemer.api.util.annotations.interceptor.Trace;
 import br.com.rhiemer.api.util.cdi.CDIUtil;
 import br.com.rhiemer.api.util.enums.EnumTypeEventoSessao;
 import br.com.rhiemer.api.util.log.LogAplicacao;
@@ -49,7 +49,7 @@ public class TraceInterceptor {
 
 	@Inject
 	@Any
-	Event<EventoSessaoDto> eventoSessao;
+	private Event<EventoSessaoDto> eventoSessao;
 
 	@AroundInvoke
 	public Object logMethodEntry(InvocationContext invocationContext) throws Exception {
@@ -69,8 +69,7 @@ public class TraceInterceptor {
 		TransactionContext transactionContext = null;
 		boolean localThread = false;
 
-		// SessionThreadContextAPI sessionThreadContextAPI =
-		// CDIUtil.getBeanOrCreate(SessionThreadContextAPI.class);
+		
 		SessionThreadContextAPI sessionThreadContextAPI = null;
 
 		try {
@@ -163,7 +162,7 @@ public class TraceInterceptor {
 						logger.trace(logarSucesso(transactionContext, invocationContext, watch));
 					else
 						logger.debug(logarSucesso(transactionContext, invocationContext, watch));
-				} else {
+				} else if (isMetodoInicio) {
 					logger.error(logarFalha(transactionContext, invocationContext, watch), _t);
 
 				}

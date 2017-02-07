@@ -19,7 +19,7 @@ import org.reflections.Reflections;
 import br.com.rhiemer.api.jpa.annotations.PuName;
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.cdi.ConfiguracoesAplicacao;
 
 @Dependent

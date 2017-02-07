@@ -16,7 +16,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import org.reflections.Reflections;
 
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 
 /**
  * Devido a ser mapear no JAX-RS o provider Exception foi desenvolvida uma

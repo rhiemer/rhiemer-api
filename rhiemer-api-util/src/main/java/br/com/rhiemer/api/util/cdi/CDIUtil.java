@@ -7,6 +7,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 import br.com.rhiemer.api.util.cdi.qualifier.ProxyBuilderAplicacaoQualifier;
 import br.com.rhiemer.api.util.proxy.ProxyMetodoBuilder;
@@ -55,6 +56,7 @@ public final class CDIUtil {
 			return null;
 
 		final Bean<?> bean = bm.resolve(beans);
+		
 		if (bean != null) {
 			CreationalContext ctx = bm.createCreationalContext(bean);
 			Object o = bean.create(ctx);

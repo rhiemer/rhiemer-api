@@ -8,7 +8,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
-import br.com.rhiemer.api.util.annotations.PropriedadeAplicacao;
+import br.com.rhiemer.api.util.annotations.app.PropriedadeAplicacao;
 import br.com.rhiemer.api.util.propriedades.ConfigurationFilesAplicacao;
 
 public class PropriedadeAplicacaoProducer {

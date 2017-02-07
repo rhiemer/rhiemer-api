@@ -11,8 +11,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import br.com.rhiemer.api.util.annotations.RestClientMetodoClasse;
-import br.com.rhiemer.api.util.annotations.RestClientPoxyMetodoInterceptor;
+import br.com.rhiemer.api.util.annotations.rest.RestClientMetodoClasse;
+import br.com.rhiemer.api.util.annotations.rest.RestClientPoxyMetodoInterceptor;
 
 @RestClientPoxyMetodoInterceptor(RestFullMetodoInterceptor.class)
 public interface RestFull {

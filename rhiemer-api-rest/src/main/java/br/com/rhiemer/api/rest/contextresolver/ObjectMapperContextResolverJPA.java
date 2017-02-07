@@ -9,15 +9,16 @@ import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 @Provider
 public class ObjectMapperContextResolverJPA implements ContextResolver<ObjectMapper> {
 
-	 final ObjectMapper mapper = new ObjectMapper();
+	final ObjectMapper mapper = new ObjectMapper();
 
-	    public ObjectMapperContextResolverJPA() {
-	        mapper.registerModule(new Hibernate4Module());
-	    }
+	public ObjectMapperContextResolverJPA() {
+		Hibernate4Module hbm = new Hibernate4Module();
+		mapper.registerModule(hbm);
+	}
 
-	    @Override
-	    public ObjectMapper getContext(Class<?> type) {
-	        return mapper;
-	    }  
+	@Override
+	public ObjectMapper getContext(Class<?> type) {
+		return mapper;
+	}
 
 }

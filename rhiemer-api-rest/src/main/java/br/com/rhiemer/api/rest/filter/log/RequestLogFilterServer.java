@@ -20,7 +20,7 @@ import javax.ws.rs.ext.Provider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.rhiemer.api.util.annotations.LogApp;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 

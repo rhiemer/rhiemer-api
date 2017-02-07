@@ -15,9 +15,9 @@ import javax.inject.Inject;
 
 import org.reflections.Reflections;
 
-import br.com.rhiemer.api.util.annotations.LoadClasses;
-import br.com.rhiemer.api.util.annotations.PropriedadeAplicacao;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.LoadClasses;
+import br.com.rhiemer.api.util.annotations.app.PropriedadeAplicacao;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.cdi.CDIUtil;
 import br.com.rhiemer.api.util.helper.Helper;
 

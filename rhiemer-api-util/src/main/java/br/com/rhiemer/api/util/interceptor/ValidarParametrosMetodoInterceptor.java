@@ -12,13 +12,13 @@ import javax.interceptor.InvocationContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import br.com.rhiemer.api.util.annotations.ValidaParametro;
-import br.com.rhiemer.api.util.annotations.ValidaParametrosDoMetodo;
+import br.com.rhiemer.api.util.annotations.interceptor.ValidaParametro;
+import br.com.rhiemer.api.util.annotations.interceptor.ValidaParametrosDoMetodo;
 import br.com.rhiemer.api.util.exception.AbstractValidacaoException;
 import br.com.rhiemer.api.util.exception.ValidacaoException;
 
 @Interceptor
-@Priority(Interceptor.Priority.LIBRARY_BEFORE)
+@Priority(Interceptor.Priority.LIBRARY_BEFORE + 1)
 @ValidaParametrosDoMetodo
 public class ValidarParametrosMetodoInterceptor {
 

@@ -3,7 +3,7 @@ package br.com.rhiemer.api.util.producer;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
-import br.com.rhiemer.api.util.annotations.ProxyBuilderAplicacao;
+import br.com.rhiemer.api.util.annotations.app.ProxyBuilderAplicacao;
 import br.com.rhiemer.api.util.proxy.ProxyCallMetodoJavassist;
 import br.com.rhiemer.api.util.proxy.ProxyMetodoBuilder;
 

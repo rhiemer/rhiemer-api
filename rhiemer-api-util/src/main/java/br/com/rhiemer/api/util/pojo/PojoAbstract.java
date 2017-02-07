@@ -1,10 +1,17 @@
 package br.com.rhiemer.api.util.pojo;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.rhiemer.api.util.annotations.ToString;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+import br.com.rhiemer.api.util.annotations.entity.ToString;
 import br.com.rhiemer.api.util.helper.Helper;
 
+@XmlRootElement
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, getterVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
 public class PojoAbstract implements Pojo {
 
 	/**
@@ -22,6 +29,7 @@ public class PojoAbstract implements Pojo {
 
 	}
 
+
 	protected String prefixoToString() {
 		return null;
 	}
@@ -32,8 +40,7 @@ public class PojoAbstract implements Pojo {
 		String nomClasse = super.toString();
 		String toString = prefixoToString();
 
-		String[] fields = Helper.allStrFromFields(this.getClass(),
-				new Class[] { ToString.class }, true);
+		String[] fields = Helper.allStrFromFields(this.getClass(), new Class[] { ToString.class }, true);
 		if (fields != null) {
 			for (String field : fields) {
 
@@ -44,13 +51,11 @@ public class PojoAbstract implements Pojo {
 				else
 					strValor = "null";
 
-				String titulo = (String) Helper.valueAnnotationOfField(this,
-						field, ToString.class, "value");
+				String titulo = (String) Helper.valueAnnotationOfField(this, field, ToString.class, "value");
 				if (titulo == null || "".equals(titulo))
 					titulo = field;
 
-				toString += (toString.equals("") ? "" : ",")
-						+ String.format("%s=%s", titulo, strValor);
+				toString += (toString.equals("") ? "" : ",") + String.format("%s=%s", titulo, strValor);
 
 			}
 
