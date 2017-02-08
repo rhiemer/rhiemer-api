@@ -75,6 +75,14 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 		}
 	}
 
+	@JsonIgnore
+	@XmlTransient
+	public void setPrimaryKeyArray(Object... keys) {
+		for (int i = 0; i < keys.length; i++) {
+			Helper.setValueMethodOrField(this, getPrimaryKeyList().get(i), keys[i]);
+		}
+	}
+
 	@Override
 	public int hashCode() {
 
@@ -124,7 +132,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 				if (resultMethodFrom == null && resultMethodTo != null)
 					return -1;
 				else
-					result = ((Comparable) resultMethodFrom).compareTo(resultMethodTo);
+					result = Helper.compareToObj(resultMethodFrom, resultMethodTo);
 
 			if (result != 0)
 				return result;
@@ -132,6 +140,38 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 		}
 
 		return 0;
+	}
+
+	public Object[] arrayPrimaryKey() {
+		if (!getPrimaryKey().getClass().isArray()) {
+			return new Object[] { getPrimaryKey() };
+		} else {
+			return (Object[]) getPrimaryKey();
+		}
+	}
+
+	public int compareToKey(Object... keys) {
+		if (getPrimaryKeyList() == null || getPrimaryKeyList().size() == 0)
+			throw new IllegalArgumentException(
+					String.format("Sem primaryKey definida para a classe %s", this.getClass().toString()));
+
+		if (keys.length != getPrimaryKeyList().size())
+			throw new IllegalArgumentException(
+					String.format("Tamanho da chave [%s] dferente da quantidade de parametros [%s]", keys.length,
+							getPrimaryKeyList().size()));
+
+		for (int i = 0; i < arrayPrimaryKey().length; i++) {
+			int compara = Helper.compareToObj(arrayPrimaryKey()[i], keys[i]);
+			if (compara != 0)
+				return compara;
+		}
+
+		return 0;
+
+	}
+
+	public boolean equalsToKey(Object... keys) {
+		return compareToKey(keys) == 0;
 	}
 
 }

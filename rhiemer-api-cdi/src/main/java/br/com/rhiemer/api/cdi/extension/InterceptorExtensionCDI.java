@@ -9,7 +9,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import br.com.rhiemer.api.cdi.annotation.InterceptorDiscoveryExtension;
 import br.com.rhiemer.api.cdi.wrapper.AnnotatedTypeWrapper;
-import br.com.rhiemer.api.util.annotations.InterceptorDiscovery;
+import br.com.rhiemer.api.util.annotations.cdi.InterceptorDiscovery;
 
 public class InterceptorExtensionCDI implements Extension {
 

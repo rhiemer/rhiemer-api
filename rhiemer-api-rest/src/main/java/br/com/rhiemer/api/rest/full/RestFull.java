@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.rest.full;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.MEDIA_REST_JSON;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.MEDIA_REST_JSON;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -11,8 +11,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import br.com.rhiemer.api.util.annotations.RestClientMetodoClasse;
-import br.com.rhiemer.api.util.annotations.RestClientPoxyMetodoInterceptor;
+import br.com.rhiemer.api.util.annotations.rest.RestClientMetodoClasse;
+import br.com.rhiemer.api.util.annotations.rest.RestClientPoxyMetodoInterceptor;
 
 @RestClientPoxyMetodoInterceptor(RestFullMetodoInterceptor.class)
 public interface RestFull {

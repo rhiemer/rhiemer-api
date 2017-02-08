@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.util.producer;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.PASTAS_PROPRIEDADE_APLICACOES;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.PASTAS_PROPRIEDADE_APLICACOES;
 
 import java.io.File;
 
@@ -19,9 +19,10 @@ import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.rhiemer.api.util.annotations.API;
-import br.com.rhiemer.api.util.annotations.PastaPropriedadesRootServidor;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.PastaPropriedadesRootServidor;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.cdi.API;
+import br.com.rhiemer.api.util.helper.ReflectionHelper;
 
 /**
  * Producer default das APIs rhiemer.
@@ -42,9 +43,7 @@ public class Producer {
 	
 	public static Reflections reflectionsAplicacao()
 	{
-		return new Reflections(
-				new ConfigurationBuilder().setUrls(ClasspathHelper.forPackage(BASE_PACKAGE))
-				.setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
+		return ReflectionHelper.reflections();
 	}
 	
 	@PostConstruct

@@ -1,14 +1,14 @@
 package br.com.rhiemer.api.util.producer;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BOOLEAN_NAO;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BOOLEAN_SIM;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BOOLEAN_NAO;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BOOLEAN_SIM;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
-import br.com.rhiemer.api.util.annotations.PropriedadeAplicacao;
+import br.com.rhiemer.api.util.annotations.app.PropriedadeAplicacao;
 import br.com.rhiemer.api.util.propriedades.ConfigurationFilesAplicacao;
 
 public class PropriedadeAplicacaoProducer {

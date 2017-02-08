@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.util.thread;
 
-import br.com.rhiemer.api.util.annotations.ThreadScoped;
+import br.com.rhiemer.api.util.annotations.cdi.ThreadScoped;
 import br.com.rhiemer.api.util.trace.TransactionContext;
 
 @ThreadScoped

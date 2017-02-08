@@ -12,7 +12,7 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import br.com.rhiemer.api.util.annotations.LogApp;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 
 /***

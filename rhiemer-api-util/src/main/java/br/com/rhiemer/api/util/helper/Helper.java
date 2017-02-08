@@ -1,8 +1,8 @@
 package br.com.rhiemer.api.util.helper;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.ANNOTATIOSID;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.DOT_FIELD;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.ENCONDING_PADRAO;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ANNOTATIOSID;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,11 +40,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.rhiemer.api.util.annotations.Chave;
-import br.com.rhiemer.api.util.annotations.ToString;
+import com.google.common.collect.ComputationException;
+
+import br.com.rhiemer.api.util.annotations.entity.Chave;
+import br.com.rhiemer.api.util.annotations.entity.ToString;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class Helper {
@@ -170,7 +176,7 @@ public final class Helper {
 
 	public static <T> Object getValueProperty(T objeto, String property) {
 
-		for (Method method : objeto.getClass().getMethods())
+		for (Method method : objeto.getClass().getMethods()) {
 			if (method.getName().equalsIgnoreCase("get" + property)) {
 				try {
 					return method.invoke(objeto, (Object[]) null);
@@ -179,6 +185,15 @@ public final class Helper {
 					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
 				}
 			}
+			if (method.getName().equalsIgnoreCase(property)) {
+				try {
+					return method.invoke(objeto, (Object[]) null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				}
+			}
+		}
 
 		List<Field> fields = allFields(objeto.getClass());
 		for (Field field : fields)
@@ -828,9 +843,9 @@ public final class Helper {
 		List<AccessibleObject> aAllMethodsFields = allMethodsFields(classe, null);
 		for (AccessibleObject field : aAllMethodsFields) {
 			boolean _include = false;
-			
-			if (field instanceof Field &&  Modifier.isStatic(((Field) field).getModifiers()))
-				continue;	
+
+			if (field instanceof Field && Modifier.isStatic(((Field) field).getModifiers()))
+				continue;
 
 			if (field instanceof Method && Modifier.isStatic(((Method) field).getModifiers()))
 				continue;
@@ -1308,6 +1323,102 @@ public final class Helper {
 		}
 
 		return null;
+	}
+
+	public static <T> T getListByKey(List<T> lista, T key) {
+		int index = lista.indexOf(key);
+		if (index >= 0)
+			return lista.get(index);
+		else
+			return null;
+	}
+
+	public static <T> T addListByKey(List<T> lista, T key) {
+		T t = getListByKey(lista, key);
+		if (t != null)
+			return t;
+		else {
+			lista.add(key);
+			return key;
+		}
+	}
+
+	public static <T> T addListByKey(List<T> lista, T key, int pos) {
+		T t = getListByKey(lista, key);
+		if (t != null)
+			return t;
+		else {
+			lista.add(pos, key);
+			return key;
+		}
+	}
+
+	public static int compareToArrays(Object[] array1, Object[] array2) {
+		boolean equals = Arrays.deepEquals(array1, array2);
+		if (equals)
+			return 0;
+
+		List a = Arrays.asList(array1);
+		List b = Arrays.asList(array1);
+
+		Collections.sort(a, (o1, o2) -> compareToObj(o1, o2));
+		Collections.sort(b, (o1, o2) -> compareToObj(o1, o2));
+
+		for (Object obj1 : a) {
+			for (Object obj2 : b) {
+				int compare = compareToObj(obj1, obj2);
+				if (compare != 0)
+					return compare;
+			}
+		}
+
+		return -1;
+
+	}
+
+	public static <T, K> T putMapToKey(Map map, K key, T value) {
+		Object result = map.get(key);
+		if (result == null) {
+			map.put(key, value);
+			return value;
+		} else
+			return (T) result;
+	}
+
+	public static Map.Entry<Object, Object> getMapToKeyValue(Map<Object, Object> map, Object chave, Object valor) {
+		return map.entrySet().stream().filter(entry -> entry.getKey().equals(chave))
+				.filter(entry -> entry.getValue().equals(valor)).findFirst().get();
+	}
+
+	public static boolean mapTemChaveValor(Map<Object, Object> map, Object chave, Object valor) {
+		return getMapToKeyValue(map, chave, valor) != null;
+	}
+
+	public static Map.Entry<Object, Object> getMapToKeyValue(Map<Object, Object> map1, Map<Object, Object> map2) {
+		return map1.entrySet().stream().filter(entry -> mapTemChaveValor(map2, entry.getKey(), entry.getValue()))
+				.findFirst().get();
+	}
+
+	public static boolean mapTemChaveValor(Map<Object, Object> map1, Map<Object, Object> map2) {
+		return getMapToKeyValue(map1, map2) != null;
+	}
+
+	public static int compareToObj(Object obj1, Object obj2) {
+		if (obj1 == obj2)
+			return 0;
+		if (obj1 == null)
+			return -1;
+		if (obj1 instanceof Comparable)
+			return ((Comparable) obj1).compareTo(obj1);
+		if (obj1.getClass().isArray() && obj2.getClass().isArray())
+			return compareToArrays((Object[]) obj1, (Object[]) obj2);
+		else {
+			boolean equals = obj1.equals(obj2);
+			if (equals)
+				return 0;
+		}
+
+		return -1;
 	}
 
 }

@@ -2,7 +2,7 @@ package br.com.rhiemer.api.rest.client.factory;
 
 import javax.inject.Inject;
 
-import br.com.rhiemer.api.util.annotations.ConfigurationFilesAplicacaoApi;
+import br.com.rhiemer.api.util.annotations.app.ConfigurationFilesAplicacaoApi;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.propriedades.ConfigurationFilesAplicacao;
 

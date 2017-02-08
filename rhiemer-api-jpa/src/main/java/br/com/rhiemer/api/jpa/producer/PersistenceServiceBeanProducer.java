@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.jpa.producer;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE_API;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE_API;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import org.reflections.util.ConfigurationBuilder;
 
 import br.com.rhiemer.api.jpa.annotations.PersistenceServiceBeanEntities;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 import br.com.rhiemer.api.util.service.PersistenceServiceBean;
 
 @ApplicationScoped

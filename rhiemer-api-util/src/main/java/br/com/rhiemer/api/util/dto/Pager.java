@@ -2,7 +2,7 @@ package br.com.rhiemer.api.util.dto;
 
 import javax.persistence.Query;
 
-import br.com.rhiemer.api.util.annotations.ToString;
+import br.com.rhiemer.api.util.annotations.entity.ToString;
 import br.com.rhiemer.api.util.pojo.PojoAbstract;
 
 /**

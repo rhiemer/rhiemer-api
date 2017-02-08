@@ -16,7 +16,7 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.rhiemer.api.util.annotations.LogApp;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 import br.com.rhiemer.api.util.rest.LogarResultadoFilter;
 

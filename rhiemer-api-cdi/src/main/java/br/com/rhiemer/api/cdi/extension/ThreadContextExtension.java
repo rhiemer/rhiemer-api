@@ -13,7 +13,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessBean;
 
 import br.com.rhiemer.api.cdi.context.thread.ThreadContext;
-import br.com.rhiemer.api.util.annotations.ThreadScoped;
+import br.com.rhiemer.api.util.annotations.cdi.ThreadScoped;
 
 /**
  * @author Arne Limburg - open knowledge GmbH (arne.limburg@openknowledge.de)

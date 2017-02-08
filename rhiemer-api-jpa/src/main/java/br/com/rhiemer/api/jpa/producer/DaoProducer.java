@@ -10,8 +10,8 @@ import javax.inject.Inject;
 
 import br.com.rhiemer.api.jpa.dao.DaoJPA;
 import br.com.rhiemer.api.jpa.dao.factory.DaoFactory;
-import br.com.rhiemer.api.util.annotations.Crud;
-import br.com.rhiemer.api.util.annotations.DaoEntity;
+import br.com.rhiemer.api.util.annotations.dao.DaoEntity;
+import br.com.rhiemer.api.util.annotations.service.Crud;
 
 public class DaoProducer {
 

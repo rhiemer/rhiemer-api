@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.rest.helper;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.MEDIA_REST_JSON;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.MEDIA_REST_JSON;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;

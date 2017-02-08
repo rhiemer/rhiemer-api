@@ -8,7 +8,7 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 
 import br.com.rhiemer.api.cdi.context.AbstractContext;
-import br.com.rhiemer.api.util.annotations.ThreadScoped;
+import br.com.rhiemer.api.util.annotations.cdi.ThreadScoped;
 
 public class ThreadContext extends AbstractContext {
 

@@ -10,9 +10,9 @@ import javax.persistence.EntityManager;
 import br.com.rhiemer.api.jpa.builder.BuildJPA;
 import br.com.rhiemer.api.jpa.dao.DaoJPA;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.util.annotations.SemTrace;
-import br.com.rhiemer.api.util.annotations.ServiceAplicacao;
-import br.com.rhiemer.api.util.annotations.Trace;
+import br.com.rhiemer.api.util.annotations.app.ServiceAplicacao;
+import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
+import br.com.rhiemer.api.util.annotations.interceptor.Trace;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 @Trace
@@ -238,14 +238,14 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public <T> List<T> excutarTypeQueryList(BuildJPA query) {
 		if (query.getResultClass() == null)
 			query.setResultClass(classeObjeto);
-		return excutarQueryList(query);
+		return this.getDao().excutarQueryList(query);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public <T> T excutarTypeQueryUniqueResult(BuildJPA query) {
 		if (query.getResultClass() == null)
 			query.setResultClass(classeObjeto);
-		return excutarQueryUniqueResult(query);
+		return this.getDao().excutarQueryUniqueResult(query);
 	}
 
 	public int excutarUpdateQuery(BuildJPA query) {

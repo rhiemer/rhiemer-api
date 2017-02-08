@@ -17,7 +17,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
 
-import br.com.rhiemer.api.util.annotations.ThreadScoped;
+import br.com.rhiemer.api.util.annotations.cdi.ThreadScoped;
 import br.com.rhiemer.api.util.cdi.CDIUtil;
 import br.com.rhiemer.api.util.cdi.qualifier.ProxyBuilderAplicacaoQualifier;
 import br.com.rhiemer.api.util.proxy.ProxyMetodoBuilder;

@@ -7,7 +7,7 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
-import br.com.rhiemer.api.util.annotations.DadosRequestAPI;
+import br.com.rhiemer.api.util.annotations.app.DadosRequestAPI;
 import br.com.rhiemer.api.util.dto.DadosRequest;
 
 @WebListener

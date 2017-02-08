@@ -1,15 +1,15 @@
 package br.com.rhiemer.api.rest.exception.mapper;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import br.com.rhiemer.api.rest.helper.JsonResponse;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
+import br.com.rhiemer.api.util.annotations.app.LogApp;
+import br.com.rhiemer.api.util.log.LogAplicacao;
 
 
 
@@ -22,8 +22,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 public class JsonMappingExceptionMapper implements
 		ExceptionMapper<JsonMappingException> {
 
-	private static Logger logger = LoggerFactory
-			.getLogger(JsonMappingExceptionMapper.class);
+	@Inject
+	@LogApp
+	private LogAplicacao logger;
 
 	@Override
 	public Response toResponse(JsonMappingException exception) {

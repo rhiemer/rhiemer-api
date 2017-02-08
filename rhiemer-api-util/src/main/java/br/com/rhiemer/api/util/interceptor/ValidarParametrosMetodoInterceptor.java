@@ -1,5 +1,6 @@
 package br.com.rhiemer.api.util.interceptor;
 
+import static br.com.rhiemer.api.util.constantes.SequencialInterceptor.VALIDA_PARAMETROS;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Set;
@@ -12,13 +13,13 @@ import javax.interceptor.InvocationContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import br.com.rhiemer.api.util.annotations.ValidaParametro;
-import br.com.rhiemer.api.util.annotations.ValidaParametrosDoMetodo;
+import br.com.rhiemer.api.util.annotations.interceptor.ValidaParametro;
+import br.com.rhiemer.api.util.annotations.interceptor.ValidaParametrosDoMetodo;
 import br.com.rhiemer.api.util.exception.AbstractValidacaoException;
 import br.com.rhiemer.api.util.exception.ValidacaoException;
 
 @Interceptor
-@Priority(Interceptor.Priority.LIBRARY_BEFORE)
+@Priority(VALIDA_PARAMETROS)
 @ValidaParametrosDoMetodo
 public class ValidarParametrosMetodoInterceptor {
 
@@ -26,15 +27,12 @@ public class ValidarParametrosMetodoInterceptor {
 	private Validator validator;
 
 	@SuppressWarnings("unchecked")
-	private void validar(Object parameter,
-			Class<? extends AbstractValidacaoException> clazz) throws Throwable {
-		Set<ConstraintViolation<Object>> violations = validator
-				.validate(parameter);
+	private void validar(Object parameter, Class<? extends AbstractValidacaoException> clazz) throws Throwable {
+		Set<ConstraintViolation<Object>> violations = validator.validate(parameter);
 		if (violations.isEmpty() == false) {
 			Constructor<AbstractValidacaoException> constructor = (Constructor<AbstractValidacaoException>) clazz
 					.getConstructor(Set.class);
-			AbstractValidacaoException validacaoException = constructor
-					.newInstance(violations);
+			AbstractValidacaoException validacaoException = constructor.newInstance(violations);
 			throw validacaoException;
 		}
 	}
@@ -53,7 +51,7 @@ public class ValidarParametrosMetodoInterceptor {
 					Class<? extends AbstractValidacaoException> clazz = ((ValidaParametro) annotation)
 							.validacaoException();
 					if (clazz == null)
-					 clazz = ValidacaoException.class;	
+						clazz = ValidacaoException.class;
 					validar(parameter, clazz);
 
 				}

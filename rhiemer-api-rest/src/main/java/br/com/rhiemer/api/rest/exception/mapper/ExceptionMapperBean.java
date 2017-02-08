@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.rest.exception.mapper;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.LinkedHashMap;
@@ -16,7 +16,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import org.reflections.Reflections;
 
-import br.com.rhiemer.api.util.annotations.ReflectionBasePackage;
+import br.com.rhiemer.api.util.annotations.app.ReflectionBasePackage;
 
 /**
  * Devido a ser mapear no JAX-RS o provider Exception foi desenvolvida uma
