@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.jpa.service.factory;
 
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAPIJPA.SERVICE_APLICACAO;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE_API;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE_API;
 
 import java.util.HashMap;
 import java.util.Map;

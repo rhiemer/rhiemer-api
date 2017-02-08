@@ -1,5 +1,7 @@
 package br.com.rhiemer.api.util.interceptor;
 
+import static br.com.rhiemer.api.util.constantes.SequencialInterceptor.TRACE;
+
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -29,7 +31,7 @@ import br.com.rhiemer.api.util.trace.TransactionContext;
 
 @Interceptor
 @Trace
-@Priority(Interceptor.Priority.LIBRARY_BEFORE + 10)
+@Priority(TRACE)
 public class TraceInterceptor {
 
 	private static final String SUCESSO = "SUCESSO";
@@ -69,7 +71,6 @@ public class TraceInterceptor {
 		TransactionContext transactionContext = null;
 		boolean localThread = false;
 
-		
 		SessionThreadContextAPI sessionThreadContextAPI = null;
 
 		try {

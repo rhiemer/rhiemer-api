@@ -1,4 +1,4 @@
-package br.com.rhiemer.api.util.helper;
+package br.com.rhiemer.api.util.constantes;
 
 import javax.ws.rs.core.MediaType;
 

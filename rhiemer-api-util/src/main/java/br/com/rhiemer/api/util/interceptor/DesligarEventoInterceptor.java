@@ -1,5 +1,7 @@
 package br.com.rhiemer.api.util.interceptor;
 
+import static br.com.rhiemer.api.util.constantes.SequencialInterceptor.DESLIGAR_EVENTO;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,19 +15,26 @@ import javax.interceptor.InvocationContext;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
 import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoContext;
 import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoDto;
 import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.PojoHelper;
+import br.com.rhiemer.api.util.log.LogAplicacao;
 
 @Interceptor
 @DesligaEventoInterceptorDiscovery
-@Priority(Interceptor.Priority.LIBRARY_BEFORE + 11)
+@Priority(DESLIGAR_EVENTO)
 public class DesligarEventoInterceptor {
 
 	@Inject
 	private Instance<Object> creator;
+
+	@Inject
+	@LogApp
+	private LogAplicacao logger;
 
 	private List<DesligamentoEventoDto> relacionarDesligamentoEvento(String chaveMetodo,
 			InvocationContext invocationContext) {
@@ -47,18 +56,14 @@ public class DesligarEventoInterceptor {
 			DesligaEvento[] desligaEventoListParametro = invocationContext.getMethod().getAnnotatedParameterTypes()[i]
 					.getAnnotationsByType(DesligaEvento.class);
 			for (DesligaEvento desligaEvento : desligaEventoListParametro) {
-				DesligamentoEventoDto desligamentoEventoDto = new DesligamentoEventoDto();
-				desligamentoEventoDto.setChaveMetodo(chaveMetodo);
-				desligamentoEventoDto.setChaveEvento(desligaEvento.chaveEvento());
-				if (lista.indexOf(desligamentoEventoDto) >= 0)
-					continue;
-				desligamentoEventoDto.setNomeChaveParametro(desligaEvento.nomeChaveParametro());
-				if (!StringUtils.isBlank(desligaEvento.atributoChaveParametro()))
-					desligamentoEventoDto.setValorChaveParametro(parameter);
-				else
-					desligamentoEventoDto.setValorChaveParametro(
-							Helper.getValueProperty(parameter, desligaEvento.atributoChaveParametro()));
-				lista.add(desligamentoEventoDto);
+				DesligamentoEventoDto dto = PojoHelper.addCollectionPojoKey(DesligamentoEventoDto.class, lista,
+						chaveMetodo, desligaEvento.chaveEvento());
+				dto.getValores()
+						.put(StringUtils.isBlank(desligaEvento.nomeChaveParametro()) ? "parametro"
+								: desligaEvento.nomeChaveParametro(),
+								StringUtils.isBlank(desligaEvento.atributoChaveParametro()) ? parameter
+										: Helper.getValueProperty(parameter, desligaEvento.atributoChaveParametro()));
+
 			}
 
 		}
@@ -74,6 +79,7 @@ public class DesligarEventoInterceptor {
 		try {
 			desligamentoEventoContext = creator.select(DesligamentoEventoContext.class).get();
 		} catch (Exception e) {
+			logger.errorDebug(e.getMessage(), e);
 		}
 
 		String chaveMetodo = UUID.randomUUID().toString();
@@ -85,7 +91,7 @@ public class DesligarEventoInterceptor {
 					final DesligamentoEventoContext desligamentoEventoContext2 = desligamentoEventoContext;
 					lista.forEach(t -> desligamentoEventoContext2.addDesligamentoEventoDto(t));
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.errorDebug(e.getMessage(), e);
 				}
 			}
 
@@ -98,6 +104,7 @@ public class DesligarEventoInterceptor {
 				try {
 					desligamentoEventoContext.removeDesligamentoEventoDto(chaveMetodo);
 				} catch (Exception e) {
+					logger.errorDebug(e.getMessage(), e);
 				}
 			}
 		}

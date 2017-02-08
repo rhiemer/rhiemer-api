@@ -1,12 +1,13 @@
 package br.com.rhiemer.api.util.cdi.evento.desligar;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
+import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
-public class ParametrosBuscaDesligamentoEventoDto implements Serializable {
+public class ParametrosBuscaDesligamentoEventoDto extends PojoKeyAbstract {
 
 	/**
 	 * 
@@ -15,27 +16,37 @@ public class ParametrosBuscaDesligamentoEventoDto implements Serializable {
 
 	@Chave
 	private String chaveEvento;
-	private Map<String,Object> chavesParametro=new HashMap<>();
-	
+	private Map<Object, Object> valores = new HashMap<>();
+
 	public ParametrosBuscaDesligamentoEventoDto() {
 		super();
 	}
-	
-	public ParametrosBuscaDesligamentoEventoDto(String chaveEvento) {
+
+	public ParametrosBuscaDesligamentoEventoDto(DesligamentoEventoDto dto) {
 		super();
-		this.chaveEvento = chaveEvento;
+		setChaveEvento(dto.getChaveEvento());
+		valores.putAll(dto.getValores());
 	}
+
 	public String getChaveEvento() {
 		return chaveEvento;
 	}
+
+	public Map<Object, Object> getValores() {
+		return valores;
+	}
+
+	public void setValores(Map<Object, Object> valores) {
+		this.valores = valores;
+	}
+
 	public void setChaveEvento(String chaveEvento) {
 		this.chaveEvento = chaveEvento;
 	}
-	public Map<String, Object> getChavesParametro() {
-		return chavesParametro;
+
+	public boolean comparaChave(String chave, Object valor) {
+		return Helper.mapTemChaveValor(valores, chave, valor);
+
 	}
-	
-
-
 
 }

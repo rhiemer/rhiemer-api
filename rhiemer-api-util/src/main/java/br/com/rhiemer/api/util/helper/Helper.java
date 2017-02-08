@@ -1,8 +1,8 @@
 package br.com.rhiemer.api.util.helper;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.ANNOTATIOSID;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.DOT_FIELD;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.ENCONDING_PADRAO;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ANNOTATIOSID;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -1333,11 +1334,21 @@ public final class Helper {
 	}
 
 	public static <T> T addListByKey(List<T> lista, T key) {
-		int index = lista.indexOf(key);
-		if (index >= 0)
-			return lista.get(index);
+		T t = getListByKey(lista, key);
+		if (t != null)
+			return t;
 		else {
 			lista.add(key);
+			return key;
+		}
+	}
+
+	public static <T> T addListByKey(List<T> lista, T key, int pos) {
+		T t = getListByKey(lista, key);
+		if (t != null)
+			return t;
+		else {
+			lista.add(pos, key);
 			return key;
 		}
 	}
@@ -1363,6 +1374,33 @@ public final class Helper {
 
 		return -1;
 
+	}
+
+	public static <T, K> T putMapToKey(Map map, K key, T value) {
+		Object result = map.get(key);
+		if (result == null) {
+			map.put(key, value);
+			return value;
+		} else
+			return (T) result;
+	}
+
+	public static Map.Entry<Object, Object> getMapToKeyValue(Map<Object, Object> map, Object chave, Object valor) {
+		return map.entrySet().stream().filter(entry -> entry.getKey().equals(chave))
+				.filter(entry -> entry.getValue().equals(valor)).findFirst().get();
+	}
+
+	public static boolean mapTemChaveValor(Map<Object, Object> map, Object chave, Object valor) {
+		return getMapToKeyValue(map, chave, valor) != null;
+	}
+
+	public static Map.Entry<Object, Object> getMapToKeyValue(Map<Object, Object> map1, Map<Object, Object> map2) {
+		return map1.entrySet().stream().filter(entry -> mapTemChaveValor(map2, entry.getKey(), entry.getValue()))
+				.findFirst().get();
+	}
+
+	public static boolean mapTemChaveValor(Map<Object, Object> map1, Map<Object, Object> map2) {
+		return getMapToKeyValue(map1, map2) != null;
 	}
 
 	public static int compareToObj(Object obj1, Object obj2) {

@@ -1,6 +1,8 @@
 package br.com.rhiemer.api.util.cdi.evento.desligar;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
@@ -16,8 +18,7 @@ public class DesligamentoEventoDto extends PojoKeyAbstract implements Serializab
 	private String chaveMetodo;
 	@Chave
 	private String chaveEvento;
-	private String nomeChaveParametro;
-	private Object valorChaveParametro;
+	private Map<String,Object> valores=new HashMap<>();
 	
 	public String getChaveMetodo() {
 		return chaveMetodo;
@@ -31,17 +32,11 @@ public class DesligamentoEventoDto extends PojoKeyAbstract implements Serializab
 	public void setChaveEvento(String chaveEvento) {
 		this.chaveEvento = chaveEvento;
 	}
-	public String getNomeChaveParametro() {
-		return nomeChaveParametro;
+	public Map<String,Object> getValores() {
+		return valores;
 	}
-	public void setNomeChaveParametro(String nomeChaveParametro) {
-		this.nomeChaveParametro = nomeChaveParametro;
-	}
-	public Object getValorChaveParametro() {
-		return valorChaveParametro;
-	}
-	public void setValorChaveParametro(Object valorChaveParametro) {
-		this.valorChaveParametro = valorChaveParametro;
+	public void setValores(Map<String,Object> valores) {
+		this.valores = valores;
 	}
 
 	

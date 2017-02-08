@@ -1,7 +1,5 @@
 package br.com.rhiemer.api.jpa.listener;
 
-import static br.com.rhiemer.api.jpa.constantes.ConstantesDesligarEvenetosJPA.PRE_UPDATE;
-
 import javax.enterprise.inject.spi.CDI;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
@@ -10,9 +8,6 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
-
-import br.com.rhiemer.api.util.annotations.evento.DesligaEventoDestino;
-import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDestinoDiscovery;
 
 public class ListenerEntity {
 
@@ -23,11 +18,9 @@ public class ListenerEntity {
 	}
 
 	@PreUpdate
-	@DesligaEventoInterceptorDestinoDiscovery
-	@DesligaEventoDestino(chaveEvento = PRE_UPDATE)
 	public void onPreUpdate(Object data) {
 		ListenerEntityFire listenerEntityFire = CDI.current().select(ListenerEntityFire.class).get();
-		listenerEntityFire.fire(ListenerEnum.PreUpdate, data);
+		listenerEntityFire.fireUpdate(ListenerEnum.PreUpdate, data);
 	}
 
 	@PreRemove

@@ -1,14 +1,9 @@
 package br.com.rhiemer.api.ejb.desligar.evento;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 
-import org.apache.commons.lang3.StringUtils;
-
+import br.com.rhiemer.api.util.cdi.evento.desligar.DesligaEventoRepositorio;
 import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoContext;
 import br.com.rhiemer.api.util.cdi.evento.desligar.DesligamentoEventoDto;
 import br.com.rhiemer.api.util.cdi.evento.desligar.ParametrosBuscaDesligamentoEventoDto;
@@ -17,51 +12,28 @@ import br.com.rhiemer.api.util.cdi.evento.desligar.ParametrosBuscaDesligamentoEv
 @Remote(DesligamentoEventoContext.class)
 public class DesligarEventoContextManager implements DesligamentoEventoContext {
 
-	private final ThreadLocal<Map<String, Map<String, Map<String, Object>>>> threadLocal = new ThreadLocal<>();
-
-	@PostConstruct
-	private void postConstruct() {
-		threadLocal.set(new HashMap<>());
-	}
+	private final ThreadLocal<DesligaEventoRepositorio> threadLocal = new ThreadLocal<>();
 
 	@Override
 	public Boolean temDesligamentoEvento(ParametrosBuscaDesligamentoEventoDto parametro) {
-		for (Map.Entry<String, Map<String, Map<String, Object>>> entryParametro : threadLocal.get().entrySet()) {
-			for (Map.Entry<String, Map<String, Object>> entryEvento : entryParametro.getValue().entrySet()) {
-
-				if (parametro.getChaveEvento().equalsIgnoreCase(entryEvento.getKey())) {
-					if (entryEvento.getValue() == null || entryEvento.getValue().size() == 0)
-						return true;
-					if (parametro.getChavesParametro().equals(entryEvento.getValue())) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
+		if (threadLocal.get() == null)
+			return false;
+		else
+			return threadLocal.get().temDesligamentoEvento(parametro);
 
 	}
 
 	@Override
 	public void addDesligamentoEventoDto(DesligamentoEventoDto dto) {
-		Map<String, Map<String, Object>> mapaMetodo = threadLocal.get().get(dto.getChaveMetodo());
-		if (mapaMetodo == null) {
-			mapaMetodo = new HashMap<>();
-			mapaMetodo.put(dto.getChaveMetodo(), new HashMap<>());
-		}
-		Map<String, Object> mapChavesEvento = mapaMetodo.get(dto.getChaveEvento());
-		if (mapChavesEvento == null) {
-			mapChavesEvento = new HashMap<>();
-			mapChavesEvento.put(dto.getChaveEvento(), new HashMap<>());
-		}
-		if (!StringUtils.isBlank(dto.getNomeChaveParametro()))
-			mapChavesEvento.put(dto.getNomeChaveParametro(), dto.getValorChaveParametro());
+		if (threadLocal.get() == null)
+			threadLocal.set(new DesligaEventoRepositorio());
+		threadLocal.get().addDesligamentoEventoDto(dto);
 	}
 
 	@Override
 	public void removeDesligamentoEventoDto(String chave) {
-		threadLocal.get().remove(chave);
+		if (threadLocal.get() != null)
+			threadLocal.get().removeDesligamentoEventoDto(chave);
 	}
 
 }

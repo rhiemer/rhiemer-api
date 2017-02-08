@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.rest.filter.log;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.ENCONDING_PADRAO;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

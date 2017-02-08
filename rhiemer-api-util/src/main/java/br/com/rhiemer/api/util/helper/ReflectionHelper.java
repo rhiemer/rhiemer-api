@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.util.helper;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE;
 
 import java.net.URL;
 import java.util.ArrayList;

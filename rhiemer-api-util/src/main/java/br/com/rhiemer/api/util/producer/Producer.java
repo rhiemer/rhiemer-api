@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.util.producer;
 
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.BASE_PACKAGE;
-import static br.com.rhiemer.api.util.helper.ConstantesAPI.PASTAS_PROPRIEDADE_APLICACOES;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.BASE_PACKAGE;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.PASTAS_PROPRIEDADE_APLICACOES;
 
 import java.io.File;
 
