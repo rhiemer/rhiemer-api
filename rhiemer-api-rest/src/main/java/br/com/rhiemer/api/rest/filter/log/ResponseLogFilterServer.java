@@ -1,9 +1,15 @@
 package br.com.rhiemer.api.rest.filter.log;
 
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_TIME_FORMAT_MLS;
+
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -17,6 +23,7 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.app.LogApp;
+import br.com.rhiemer.api.util.helper.DatetimeUtils;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 import br.com.rhiemer.api.util.rest.LogarResultadoFilter;
 
@@ -70,6 +77,15 @@ public class ResponseLogFilterServer implements ContainerResponseFilter, WriterI
 	protected void logar(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 			throws IOException {
 
+		Date dateRequestFim = new Date();
+		String dateRequestFimStr = new SimpleDateFormat(HUMAN_DATE_TIME_FORMAT_MLS).format(dateRequestFim);
+		responseContext.getHeaders().put("dataLoggingServerResponse",
+				Arrays.asList(new String[] { dateRequestFimStr }));
+		Optional.ofNullable(requestContext.getHeaderString("dataLoggingClientRequest")).ifPresent(
+				t -> responseContext.getHeaders().put("dataLoggingClientRequest", Arrays.asList(new String[] { t })));
+		Optional.ofNullable(requestContext.getHeaderString("dataLoggingServerRequest")).ifPresent(
+				t -> responseContext.getHeaders().put("dataLoggingServerRequest", Arrays.asList(new String[] { t })));
+
 		sb = new StringBuilder();
 
 		sb.append("\n------------------------------------\n");
@@ -101,6 +117,17 @@ public class ResponseLogFilterServer implements ContainerResponseFilter, WriterI
 
 		} catch (Throwable e) {
 		}
+
+		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingServerRequest")))
+			sb.append("perfomance_server: "
+					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
+							requestContext.getHeaderString("dataLoggingServerRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
+					+ "\n");
+		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
+			sb.append("perfomance_client: "
+					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
+							requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
+					+ "\n");
 
 	}
 

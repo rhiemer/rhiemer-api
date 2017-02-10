@@ -38,7 +38,7 @@ public class WebApplicationExceptionMapper implements ExceptionMapper<Exception>
 
 		logger.error("Erro de processamento interno " + exception.getMessage(), exception);
 
-		return JsonResponse.respondeHTTPStatusServerError(exception.getMessage());
+		return JsonResponse.respondeHTTPStatusServerError(exception);
 
 	}
 

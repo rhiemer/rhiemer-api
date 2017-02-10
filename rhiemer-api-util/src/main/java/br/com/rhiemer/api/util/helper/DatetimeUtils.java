@@ -1,8 +1,13 @@
 package br.com.rhiemer.api.util.helper;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Reúne funções utilitárias relacionadas a data e hora
@@ -10,7 +15,7 @@ import java.util.Date;
  * @author rodrigo.hiemer
  * 
  */
-public final class  DatetimeUtils {
+public final class DatetimeUtils {
 
 	public static class OrdinalDiaSemana {
 		public static int PRIMEIRO = 1;
@@ -32,12 +37,13 @@ public final class  DatetimeUtils {
 	 * (leitura humana)
 	 */
 	public static final String HUMAN_DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm";
+	public static final String HUMAN_DATE_TIME_FORMAT_MLS = "dd/MM/yyyy HH:mm:ss.SSS";
+	public static final String HUMAN_TIME_FORMAT_MLS = "dd/MM/yyyy HH:mm:ss.SSS";
 
 	public static final String TIME_ZONE_BRASIL = "America/Sao_Paulo";
-	
-	
-	private DatetimeUtils()
-	{}
+
+	private DatetimeUtils() {
+	}
 
 	/**
 	 * Recebe um Calendar, remove seus campos referentes a horas (hora, minuto,
@@ -49,12 +55,46 @@ public final class  DatetimeUtils {
 	public static void limparHoras(Calendar cal) {
 		if (cal != null) {
 			cal.set(Calendar.HOUR, cal.getActualMinimum(Calendar.HOUR));
-			cal.set(Calendar.HOUR_OF_DAY,
-					cal.getActualMinimum(Calendar.HOUR_OF_DAY));
+			cal.set(Calendar.HOUR_OF_DAY, cal.getActualMinimum(Calendar.HOUR_OF_DAY));
 			cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
 			cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
-			cal.set(Calendar.MILLISECOND,
-					cal.getActualMinimum(Calendar.MILLISECOND));
+			cal.set(Calendar.MILLISECOND, cal.getActualMinimum(Calendar.MILLISECOND));
+		}
+	}
+
+	public static Date diffDates(Date dateFim, Date dateIni) {
+		Instant instantFim = Instant.ofEpochMilli(dateFim.getTime());
+		Instant instantIni = Instant.ofEpochMilli(dateIni.getTime());
+		return new Date(ChronoUnit.MILLIS.between(instantIni, instantFim));
+	}
+
+	public static String diffDatesFormat(Date dateFim, Date dateIni) {
+		Instant instantFim = Instant.ofEpochMilli(dateFim.getTime());
+		Instant instantIni = Instant.ofEpochMilli(dateIni.getTime());
+		String timeString = String.format("%02d:%02d:%02d,%03d", ChronoUnit.HOURS.between(instantIni, instantFim),
+				ChronoUnit.MINUTES.between(instantIni, instantFim), ChronoUnit.SECONDS.between(instantIni, instantFim),
+				ChronoUnit.MILLIS.between(instantIni, instantFim));
+		return timeString;
+	}
+
+	public static Date diffDatesStr(String dateFim, String dateIni, String format) {
+		if (!StringUtils.isBlank(dateFim) && !StringUtils.isBlank(dateIni)) {
+			try {
+				return diffDates(new SimpleDateFormat(format).parse(dateFim),
+						new SimpleDateFormat(format).parse(dateIni));
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
+			}
+		} else
+			return null;
+	}
+
+	public static String diffDatesStrFormat(String dateFim, String dateIni, String format) {
+		try {
+			return diffDatesFormat(new SimpleDateFormat(format).parse(dateFim),
+					new SimpleDateFormat(format).parse(dateIni));
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -95,8 +135,7 @@ public final class  DatetimeUtils {
 		final int diaMudancaSemanaCinematografica = 7;
 		Calendar dtUltimaSemCinematograficaComecaSexta = Calendar.getInstance();
 
-		dtUltimaSemCinematograficaComecaSexta.set(
-				anoMudancaSemanaCinematografica, Calendar.MARCH,
+		dtUltimaSemCinematograficaComecaSexta.set(anoMudancaSemanaCinematografica, Calendar.MARCH,
 				diaMudancaSemanaCinematografica);
 		DatetimeUtils.limparHoras(dtUltimaSemCinematograficaComecaSexta);
 		return dtUltimaSemCinematograficaComecaSexta;
@@ -184,8 +223,7 @@ public final class  DatetimeUtils {
 	 * @return A data que corresponde ao {@code ordinal} dia da semana
 	 *         {@code diaSemana} no mês de {@code mes} do ano de {@code ano}
 	 */
-	public static Calendar getDiaSemanaOrdinal(int ano, int mes, int ordinal,
-			int diaSemana) {
+	public static Calendar getDiaSemanaOrdinal(int ano, int mes, int ordinal, int diaSemana) {
 
 		Calendar ini = null;
 		// Se não foi solicitado o último [diaSemana]

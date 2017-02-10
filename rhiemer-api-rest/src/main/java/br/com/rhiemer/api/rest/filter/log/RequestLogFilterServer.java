@@ -1,11 +1,15 @@
 package br.com.rhiemer.api.rest.filter.log;
 
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_TIME_FORMAT_MLS;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -22,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
+import br.com.rhiemer.api.util.helper.DatetimeUtils;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 
 @Provider
@@ -42,8 +47,10 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 		if (logAplicacao.isTraceEnabled()) {
 			logar(requestContext);
 		} else {
-			logAplicacao.debug(String.format("Request Serviço: %s codigoLoggingRequestServer=%s codigoLoggingRequestClient=%s",
-					requestContext.getUriInfo().getRequestUri().toURL().toExternalForm(), codigo,codigoLoggingRequestCliente(requestContext)));
+			logAplicacao.debug(
+					String.format("Request Serviço: %s codigoLoggingRequestServer=%s codigoLoggingRequestClient=%s",
+							requestContext.getUriInfo().getRequestUri().toURL().toExternalForm(), codigo,
+							codigoLoggingRequestCliente(requestContext)));
 		}
 
 	}
@@ -55,14 +62,22 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 	protected void headerCodigoLoggingRequestServer(ContainerRequestContext requestContext, String codigo) {
 		requestContext.getHeaders().put("codigoLoggingRequestServer", Arrays.asList(new String[] { codigo }));
 	}
-	
+
 	protected String codigoLoggingRequestCliente(ContainerRequestContext requestContext) {
-		return requestContext.getHeaderString("codigoLoggingRequestClient"); 
+		return requestContext.getHeaderString("codigoLoggingRequestClient");
 	}
+
+	
 
 	protected void logar(ContainerRequestContext requestContext) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		String contentType = null;
+		Date dateRequestIni = new Date();
+		String dateRequestIniStr = new SimpleDateFormat(HUMAN_DATE_TIME_FORMAT_MLS).format(dateRequestIni);
+
+		requestContext.getHeaders().put("dataLoggingServerRequest",
+				Arrays.asList(new String[] { dateRequestIniStr }));
+		
 
 		sb.append("\n------------------------------------\n");
 		sb.append("RequestLogFilterServer....\n");
@@ -84,6 +99,10 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 
 		if (requestContext.getMediaType() != null)
 			sb.append("media-type: " + requestContext.getMediaType().getType() + "\n");
+
+		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
+			sb.append("perfomance_client: " + DatetimeUtils.diffDatesStrFormat(dateRequestIniStr,
+					requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS) + "\n");
 
 		InputStream stream = null;
 		if (!requestContext.getEntityStream().markSupported()) {
@@ -108,9 +127,5 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 		logAplicacao.trace(sb.toString());
 
 	}
-
-	
-
-	
 
 }

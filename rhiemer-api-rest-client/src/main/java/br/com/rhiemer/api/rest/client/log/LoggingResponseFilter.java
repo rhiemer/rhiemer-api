@@ -1,11 +1,17 @@
 package br.com.rhiemer.api.rest.client.log;
 
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_TIME_FORMAT_MLS;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import javax.ws.rs.client.ClientRequestContext;
@@ -19,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
+import br.com.rhiemer.api.util.helper.DatetimeUtils;
 
 /**
  * Classe para logar informações de response de envios de RESTWebServices
@@ -59,11 +66,15 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 		StringBuilder sb = new StringBuilder();
 		String codigo = codigoLoggingRequestCliente(requestContext, responseContext);
 		String contentType = null;
+		Date dateRequestFim = new Date();
+		String dateRequestFimStr = new SimpleDateFormat(HUMAN_DATE_TIME_FORMAT_MLS).format(dateRequestFim);
 
 		sb.append("\n------------------------------------\n");
 		sb.append("LoggingResponseFilterClient....\n");
 		sb.append("------------------------------------\n");
 		sb.append("codigoLoggingRequestClient: " + codigo + "\n");
+		sb.append("dataLoggingClientRequest: " + responseContext.getHeaderString("dataLoggingClientRequest") + "\n");
+
 		sb.append("status: " + responseContext.getStatus() + "\n");
 		sb.append("date: " + responseContext.getDate() + "\n");
 
@@ -87,6 +98,19 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 
 		} catch (Throwable e) {
 		}
+		sb.append("dataLoggingClientResponse: " + dateRequestFimStr + "\n");
+
+		if (!StringUtils.isBlank(responseContext.getHeaderString("dataLoggingServerRequest"))
+				&& !StringUtils.isBlank(responseContext.getHeaderString("dataLoggingServerResponse")))
+			sb.append("perfomance_server: "
+					+ DatetimeUtils.diffDatesStrFormat(responseContext.getHeaderString("dataLoggingServerResponse"),
+							responseContext.getHeaderString("dataLoggingServerRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
+					+ "\n");
+		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
+			sb.append("perfomance_client: "
+					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
+							requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
+					+ "\n");
 
 		if (responseContext.getMediaType() != null)
 			sb.append("media-type: " + responseContext.getMediaType().getType() + "\n");
@@ -104,7 +128,7 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 
 			stream.mark(Integer.MAX_VALUE);
 
-			String strObj = IOUtils.toString(stream,ENCONDING_PADRAO);
+			String strObj = IOUtils.toString(stream, ENCONDING_PADRAO);
 			String strObjFormatado = "";
 
 			if (!StringUtils.isBlank(strObj)) {
@@ -119,9 +143,6 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 
 		}
 
-	
-
 	}
-
 
 }
