@@ -82,6 +82,7 @@ public class TraceInterceptor {
 				transactionContext = sessionThreadContextAPI.getTransactionContext();
 				localThread = true;
 			} catch (Exception e) {
+				logger.errorDebug(e.getMessage(), e);
 				sessionThreadContextAPI = null;
 			}
 		}
