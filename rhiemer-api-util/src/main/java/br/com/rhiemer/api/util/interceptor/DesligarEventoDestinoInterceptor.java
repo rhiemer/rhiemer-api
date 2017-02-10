@@ -80,9 +80,8 @@ public class DesligarEventoDestinoInterceptor {
 		}
 		List<ParametrosBuscaDesligamentoEventoDto> lista = relacionarDesligamentoEventoDestino(invocationContext);
 		try {
-			final DesligamentoEventoContext desligamentoEventoContext2 = desligamentoEventoContext;
 			for (ParametrosBuscaDesligamentoEventoDto dtoLista : lista) {
-				boolean temDesligamentoEvento = desligamentoEventoContext2.temDesligamentoEvento(dtoLista);
+				boolean temDesligamentoEvento = desligamentoEventoContext.temDesligamentoEvento(dtoLista);
 				if (temDesligamentoEvento)
 					return null;
 

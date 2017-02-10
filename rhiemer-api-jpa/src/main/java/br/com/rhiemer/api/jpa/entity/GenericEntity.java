@@ -2,6 +2,8 @@ package br.com.rhiemer.api.jpa.entity;
 
 import java.util.Date;
 
+import javax.persistence.AccessType;
+import javax.persistence.Access;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.EntityListeners;
@@ -26,6 +28,7 @@ import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 @MappedSuperclass
 @EntityListeners({ ListenerEntity.class })
+@Access(AccessType.FIELD)
 public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 
 	/**
@@ -107,7 +110,7 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 		if (ativo == null)
 			ativo = true;
 	}
-	
+
 	@PostPersist
 	protected void postPersist() {
 	}
@@ -118,7 +121,7 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 		if (ativo == null)
 			ativo = true;
 	}
-	
+
 	@PostUpdate
 	protected void postUpdate() {
 	}
@@ -127,15 +130,14 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 	protected void preRemove() {
 		exclusao = new Date();
 	}
-	
+
 	@PostRemove
 	protected void postRemove() {
 	}
-	
+
 	@PostLoad
 	protected void postLoad() {
 	}
-	
 
 	@Override
 	protected void posCopia(Object copia) {
