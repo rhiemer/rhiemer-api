@@ -14,6 +14,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.LoggerFactory;
 
 import br.com.rhiemer.api.util.annotations.app.ProxyBuilderAplicacao;
@@ -38,6 +39,7 @@ public class TraceInterceptor {
 	private static final String FALHA = "FALHA";
 	private static final String FORMAT_METHOD = "%s%s";
 	private static final String FORMAT_LOG = "%s|Requisição %s|Execução %s";
+	private static final String FORMAT_DEBUG_FALHA = "ERRO_MEIO-> %s|Exceção %s|Causa %s";
 	private static final String CALLING = "EXECUTANDO -> %s";
 	private static final String SUCESS_FORMAT = "SUCESSO -> %s|%s";
 	private static final String FAIL_FORMAT = "FALHA -> %s|%s";
@@ -165,8 +167,11 @@ public class TraceInterceptor {
 					else
 						logger.debug(logarSucesso(transactionContext, invocationContext, watch));
 				} else if (isMetodoInicio) {
-					logger.error(logarFalha(transactionContext, invocationContext, watch), _t);
+					logger.error(logarFalha(transactionContext, invocationContext, watch).concat("\n"), _t);
 
+				} else {
+					logger.error(logarFalha(transactionContext, invocationContext, watch));
+					logger.error(logarFalhaDebug(transactionContext, invocationContext, watch, _t));
 				}
 
 				eventoSessaoDto = criarEventoSessao(transactionContext, invocationContext);
@@ -213,7 +218,14 @@ public class TraceInterceptor {
 	private String logarFalha(TransactionContext transactionContext, InvocationContext invocationContext,
 			AdvancedStopWatch watch) {
 		return new StringBuilder(String.format(FAIL_FORMAT, gerarCabecalhoMetodo(transactionContext, invocationContext),
-				watch.escreverTempoDeExecucao())).append("\n").toString();
+				watch.escreverTempoDeExecucao())).toString();
+	}
+
+	private String logarFalhaDebug(TransactionContext transactionContext, InvocationContext invocationContext,
+			AdvancedStopWatch watch, Throwable t) {
+		Throwable rootCause = ExceptionUtils.getRootCause(t);
+		return String.format(FORMAT_DEBUG_FALHA, transactionContext.getServiceUUID(), t.getMessage(),
+				rootCause == null ? "" : rootCause.getMessage());
 	}
 
 	private String gerarValoresParametros(InvocationContext invocationContext) {
