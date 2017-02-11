@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -28,6 +29,7 @@ import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
 import br.com.rhiemer.api.util.helper.DatetimeUtils;
 import br.com.rhiemer.api.util.log.LogAplicacao;
+import br.com.rhiemer.api.util.rest.LogarResultadoFilter;
 
 @Provider
 @PreMatching
@@ -67,17 +69,13 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 		return requestContext.getHeaderString("codigoLoggingRequestClient");
 	}
 
-	
-
 	protected void logar(ContainerRequestContext requestContext) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		String contentType = null;
 		Date dateRequestIni = new Date();
 		String dateRequestIniStr = new SimpleDateFormat(HUMAN_DATE_TIME_FORMAT_MLS).format(dateRequestIni);
 
-		requestContext.getHeaders().put("dataLoggingServerRequest",
-				Arrays.asList(new String[] { dateRequestIniStr }));
-		
+		requestContext.getHeaders().put("dataLoggingServerRequest", Arrays.asList(new String[] { dateRequestIniStr }));
 
 		sb.append("\n------------------------------------\n");
 		sb.append("RequestLogFilterServer....\n");
@@ -100,9 +98,8 @@ public class RequestLogFilterServer implements ContainerRequestFilter {
 		if (requestContext.getMediaType() != null)
 			sb.append("media-type: " + requestContext.getMediaType().getType() + "\n");
 
-		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
-			sb.append("perfomance_client: " + DatetimeUtils.diffDatesStrFormat(dateRequestIniStr,
-					requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS) + "\n");
+		Optional.ofNullable(LogarResultadoFilter.logPerfomanceRest(requestContext))
+				.ifPresent(t -> sb.append(t));
 
 		InputStream stream = null;
 		if (!requestContext.getEntityStream().markSupported()) {

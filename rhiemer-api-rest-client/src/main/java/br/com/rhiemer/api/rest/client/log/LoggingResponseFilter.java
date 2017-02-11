@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
 import br.com.rhiemer.api.util.helper.DatetimeUtils;
+import br.com.rhiemer.api.util.rest.LogarResultadoFilter;
 
 /**
  * Classe para logar informações de response de envios de RESTWebServices
@@ -68,6 +70,8 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 		String contentType = null;
 		Date dateRequestFim = new Date();
 		String dateRequestFimStr = new SimpleDateFormat(HUMAN_DATE_TIME_FORMAT_MLS).format(dateRequestFim);
+		responseContext.getHeaders().put("dataLoggingClientResponse",
+				Arrays.asList(new String[] { dateRequestFimStr }));
 
 		sb.append("\n------------------------------------\n");
 		sb.append("LoggingResponseFilterClient....\n");
@@ -98,20 +102,9 @@ public class LoggingResponseFilter implements ClientResponseFilter {
 
 		} catch (Throwable e) {
 		}
-		sb.append("dataLoggingClientResponse: " + dateRequestFimStr + "\n");
 
-		if (!StringUtils.isBlank(responseContext.getHeaderString("dataLoggingServerRequest"))
-				&& !StringUtils.isBlank(responseContext.getHeaderString("dataLoggingServerResponse")))
-			sb.append("perfomance_server: "
-					+ DatetimeUtils.diffDatesStrFormat(responseContext.getHeaderString("dataLoggingServerResponse"),
-							responseContext.getHeaderString("dataLoggingServerRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
-					+ "\n");
-		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
-			sb.append("perfomance_client: "
-					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
-							requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
-					+ "\n");
-
+		Optional.ofNullable(LogarResultadoFilter.logPerfomanceRest(requestContext, responseContext))
+				.ifPresent(t -> sb.append(t));
 		if (responseContext.getMediaType() != null)
 			sb.append("media-type: " + responseContext.getMediaType().getType() + "\n");
 

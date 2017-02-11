@@ -118,16 +118,8 @@ public class ResponseLogFilterServer implements ContainerResponseFilter, WriterI
 		} catch (Throwable e) {
 		}
 
-		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingServerRequest")))
-			sb.append("perfomance_server: "
-					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
-							requestContext.getHeaderString("dataLoggingServerRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
-					+ "\n");
-		if (!StringUtils.isBlank(requestContext.getHeaderString("dataLoggingClientRequest")))
-			sb.append("perfomance_client: "
-					+ DatetimeUtils.diffDatesStrFormat(dateRequestFimStr,
-							requestContext.getHeaderString("dataLoggingClientRequest"), HUMAN_DATE_TIME_FORMAT_MLS)
-					+ "\n");
+		Optional.ofNullable(LogarResultadoFilter.logPerfomanceRest(requestContext, responseContext))
+				.ifPresent(t -> sb.append(t));
 
 	}
 
