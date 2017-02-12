@@ -19,6 +19,10 @@ public interface Dao {
 	<K, T> T procurarPeloIdLazy(Class<T> classe, K k);
 	
 	<T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe);
+	
+	<T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k);
+	
+	<T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t,String nome,Object... k);
 
 	<T> List<T> listarTodos(Class<T> t);
 

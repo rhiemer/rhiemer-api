@@ -10,8 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
@@ -19,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
 import br.com.rhiemer.api.util.helper.DatetimeUtils;
-import br.com.rhiemer.api.util.lambda.optinal.OptionalConsumer;
 
 public final class LogarResultadoFilter {
 

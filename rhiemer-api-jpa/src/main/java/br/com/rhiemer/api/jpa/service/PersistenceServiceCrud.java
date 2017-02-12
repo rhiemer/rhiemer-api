@@ -111,6 +111,18 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public <K, T> T procurarPeloIdLazy(K k) {
 		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, k);
 	}
+	
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Object... k) {
+		return this.getDao().procurarPorUniqueKey((Class<T>) classeObjeto,k);
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(String nome, Object... k) {
+		return this.getDao().procurarPorUniqueKeyByNome((Class<T>) classeObjeto,nome,k);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -251,5 +263,7 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public int excutarUpdateQuery(BuildJPA query) {
 		return this.getDao().excutarUpdateQuery(query);
 	}
+
+	
 
 }

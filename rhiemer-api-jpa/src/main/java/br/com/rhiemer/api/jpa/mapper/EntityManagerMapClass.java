@@ -78,15 +78,6 @@ public class EntityManagerMapClass {
 		}
 		return em;
 
-		/*
-		 * while (instance.iterator().hasNext()) { EntityManager em =
-		 * instance.iterator().next(); String puNameEm =
-		 * em.getEntityManagerFactory().getProperties().get(
-		 * PROPERTY_PERSISTENCE_UNIT_NAME) .toString(); if
-		 * (puNameEm.equalsIgnoreCase(puName)) return em;
-		 * 
-		 * }
-		 */
 
 	}
 

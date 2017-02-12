@@ -4,7 +4,7 @@ import java.util.List;
 
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
-public interface PersistenceServiceBean<T,K> extends PersistenceService {
+public interface PersistenceServiceBean<T, K> extends PersistenceService {
 
 	<T extends PojoKeyAbstract> T adicionarOuAtualizar(T t);
 
@@ -17,8 +17,12 @@ public interface PersistenceServiceBean<T,K> extends PersistenceService {
 	<K, T> T procurarPeloId(K k);
 
 	<K, T> T procurarPeloIdLazy(K k);
-	
+
 	<T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe);
+
+	<T extends PojoKeyAbstract> T procurarPorUniqueKey(Object... k);
+
+	<T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(String nome, Object... k);
 
 	<T> List<T> listarTodos();
 

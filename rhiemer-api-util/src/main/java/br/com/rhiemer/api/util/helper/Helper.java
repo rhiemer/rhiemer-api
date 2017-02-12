@@ -123,23 +123,26 @@ public final class Helper {
 	public static Class getPropertyType(Object objeto, String property) {
 		return getTypePropertyComplex(objeto, property, DOT_FIELD);
 	}
-
-	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
+	
+	public static Class getPropertyType(Class classe, String property) {
+		return getTypePropertyComplex(classe, property, DOT_FIELD);
+	}
+	
+	public static Class getTypePropertyComplex(Class classe, String property, String separetor) {
 
 		String[] s = property.split(separetor);
-		Object _objeto = objeto;
-		Class propertie = null;
-		for (int i = 0; _objeto != null && i < s.length; i++) {
-			_objeto = getValueProperty(_objeto, s[i]);
-			if (_objeto == null)
-				break;
-
-			if (i == s.length - 1)
-				propertie = getTypeProperty(_objeto, property);
+		Class propertie = classe;
+		
+		for (int i = 0;  propertie != null && i < s.length; i++) {
+			propertie = getPropertyTypeClass(propertie,s[i]);			
 		}
 
 		return propertie;
 
+	}
+
+	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
+		return getTypePropertyComplex(objeto.getClass(),property,separetor);
 	}
 
 	public static <T> Class<?> getTypeProperty(T objeto, String property) {

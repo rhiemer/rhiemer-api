@@ -5,7 +5,6 @@ import static br.com.rhiemer.api.jpa.constantes.ConstantesDesligarEvenetosJPA.PR
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -14,9 +13,8 @@ import org.apache.commons.beanutils.BeanUtils;
 
 import br.com.rhiemer.api.jpa.builder.BuildJPA;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.helper.HelperJPA;
+import br.com.rhiemer.api.jpa.helper.HelperUniqueKeyJPA;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
-import br.com.rhiemer.api.util.annotations.bean.BeanDiscovery;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
 import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
@@ -81,7 +79,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 */
 	@Override
 	public <T extends PojoKeyAbstract> T adicionarOuatualizar(T t) {
-		T value = HelperJPA.listaEntityByUniqueKey(em, t, false);
+		T value = HelperUniqueKeyJPA.listaEntityByUniqueKeyAtualiza(em, t);
 		if (value == null) {
 			em.persist(t);
 			return t;
@@ -141,6 +139,21 @@ public class DaoJPAImpl implements DaoJPA {
 
 		return result;
 
+	}
+
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k) {
+		return HelperUniqueKeyJPA.listaEntityByUniqueKeyByParams(em, t, k);
+
+	}
+
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t, String nome, Object... k) {
+		return HelperUniqueKeyJPA.listaEntityByUniqueKeyByNome(em, t, nome, k);
 	}
 
 	/*
