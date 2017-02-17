@@ -163,8 +163,7 @@ public class RestWSUtils {
 		response = target.request(formato).post(Entity.entity(body, formato));
 		return response;
 	}
-	
-	
+
 	public static Response requestPUT(String url, Serializable body, String formato) {
 		Response response = null;
 		ResteasyClient client = new ResteasyClientBuilder().build();
@@ -188,17 +187,9 @@ public class RestWSUtils {
 	 */
 	public static Response requestPOSTVerificandoStatus(String url, Serializable body, String formato, int status) {
 		Response response = requestPOST(url, body, formato);
-		assertNotNull("Verificando se o response retornado é nulo", response);
-		String mensagem = "Verificando o codigo de retorno da requisição.";
-		if (response.getStatus() != status) {
-			String resposta = response.readEntity(String.class);
-			mensagem = String.format(mensagem.concat(" Resposta=[%s]"), resposta);
-		}
-		assertEquals(mensagem, response.getStatus(), status);
+		verificarStatus(response, status);
 		return response;
 	}
-	
-	
 
 	/**
 	 * Faz um request com método HTTP POST no formato JSON verificando status
@@ -219,30 +210,36 @@ public class RestWSUtils {
 		assertNotNull("Resultado da resposta é nulo", obj);
 		return obj;
 	}
-	
-	
-	public static <T,K extends Collection<?>> K resultadoPOSTVerificandoStatus(String url, Serializable body, String formato, int status,
-			Class<T> classeResponse,Class<K> classeCollection) {
+
+	public static <T, K extends Collection<?>> K resultadoPOSTVerificandoStatus(String url, Serializable body,
+			String formato, int status, Class<T> classeResponse, Class<K> classeCollection) {
 		Response response = requestPOSTVerificandoStatus(url, body, formato, status);
-		GenericType<?> type = getCollectionType(classeResponse,classeCollection);
-		K lista = (K)response.readEntity(type);
+		GenericType<?> type = getCollectionType(classeResponse, classeCollection);
+		K lista = (K) response.readEntity(type);
 		assertNotNull("Resultado da resposta é nulo", lista);
 		return lista;
 	}
-	
-	
+
 	public static Response requestPUTVerificandoStatus(String url, Serializable body, String formato, int status) {
 		Response response = requestPUT(url, body, formato);
-		assertNotNull("Verificando se o response retornado é nulo", response);
-		String mensagem = "Verificando o codigo de retorno da requisição.";
-		if (response.getStatus() != status) {
-			String resposta = response.readEntity(String.class);
-			mensagem = String.format(mensagem.concat(" Resposta=[%s]"), resposta);
-		}
-		assertEquals(mensagem, response.getStatus(), status);
+		verificarStatus(response, status);
 		return response;
 	}
-	
+
+	public static void verificarStatus(Response response, int status) {
+		assertNotNull("Verificando se o response retornado é nulo", response);
+		if (status != 0) {
+			String mensagem = "Verificando o codigo de retorno da requisição.";
+			if (response.getStatus() != status) {
+				String resposta = response.readEntity(String.class);
+				mensagem = String.format(
+						mensagem.concat("\nCodigo da Resposta=[%s]\nCodigo Esperado=[%s]\nResposta=[%s]"),
+						response.getStatus(), status, resposta);
+			}
+			assertEquals(mensagem, response.getStatus(), status);
+		}
+	}
+
 	public static <T> T resultadoPUTVerificandoStatus(String url, Serializable body, String formato, int status,
 			Class<T> classeResponse) {
 		Response response = requestPUTVerificandoStatus(url, body, formato, status);
@@ -250,12 +247,6 @@ public class RestWSUtils {
 		assertNotNull("Resultado da resposta é nulo", obj);
 		return obj;
 	}
-	
-	
-	
-	
-	
-	
 
 	/**
 	 * Faz um request com método HTTP POST no formato JSON
@@ -295,18 +286,15 @@ public class RestWSUtils {
 		Response response = null;
 		ResteasyClient client = new ResteasyClientBuilder().build();
 		ResteasyWebTarget target = client.target(url);
-		verificaLog(target);		
-		response = target.request(formato).get();		
-		assertNotNull("Verificando se o response retornado é nulo", response);
-
-		String mensagem = "Verificando o codigo de retorno da requisição.";
-		if (response.getStatus() != status) {
-			String resposta = response.readEntity(String.class);
-			mensagem = String.format(mensagem.concat(" Resposta=[%s]"), resposta);
-		}
-
-		assertEquals(mensagem, response.getStatus(), status);
+		verificaLog(target);
+		response = target.request(formato).get();
+		verificarStatus(response, status);
 		return response;
+	}
+
+	public static Response requestGET(String url) {
+
+		return requestGET(url, MediaType.APPLICATION_JSON, Response.Status.OK.getStatusCode());
 	}
 
 	/**
@@ -320,26 +308,25 @@ public class RestWSUtils {
 	 *            Formato JSON ou XML
 	 * 
 	 * @return Instância da resposta HTTP
-	 */	
+	 */
 	public static <T> T resultadoGETVerificandoStatus(String url, String formato, int status, Class<T> classeResponse) {
 		Response response = requestGET(url, formato, status);
 		T obj = response.readEntity(classeResponse);
 		assertNotNull("Resultado da resposta é nulo", obj);
 		return obj;
 	}
-	
-	
-	public static <T,K extends Collection<?>> K resultadoGETVerificandoStatus(String url, String formato, int status, Class<T> classeResponse,
-			Class<K> classeCollection) {
+
+	public static <T, K extends Collection<?>> K resultadoGETVerificandoStatus(String url, String formato, int status,
+			Class<T> classeResponse, Class<K> classeCollection) {
 		Response response = requestGET(url, formato, status);
-		GenericType<?> type = getCollectionType(classeResponse,classeCollection);
-		K lista = (K)response.readEntity(type);
+		GenericType<?> type = getCollectionType(classeResponse, classeCollection);
+		K lista = (K) response.readEntity(type);
 		assertNotNull("Resultado da resposta é nulo", lista);
 		return lista;
 	}
 
-
-	public static <T,K extends Collection<?>> GenericType<?> getCollectionType(Class<T> clazz, Class<K> clazzCollection) {
+	public static <T, K extends Collection<?>> GenericType<?> getCollectionType(Class<T> clazz,
+			Class<K> clazzCollection) {
 
 		ParameterizedType genericType = new ParameterizedType() {
 			public Type[] getActualTypeArguments() {

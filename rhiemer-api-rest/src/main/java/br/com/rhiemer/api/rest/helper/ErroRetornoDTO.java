@@ -30,8 +30,8 @@ public class ErroRetornoDTO implements Serializable {
 		this.tipo = tipo;
 		this.descricao = descricao;
 		this.complemento = exception.getMessage();
-		this.rootCause = Optional.ofNullable(ExceptionUtils.getRootCause(exception))
-				.map(t -> t.getClass().getName().concat(": ").concat(t.getMessage())).get();
+		Optional.ofNullable(ExceptionUtils.getRootCause(exception))
+				.ifPresent(t -> this.setRootCause(t.getClass().getName().concat(": ").concat(t.getMessage())));
 	}
 
 	public ErroRetornoDTO() {

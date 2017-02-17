@@ -29,7 +29,7 @@
 				<type>pom</type>
 			</dependency>
 
-			
+
 
 		</dependencies>
 	</dependencyManagement>
@@ -48,7 +48,13 @@
 			<version>${project.version}</version>
 		</dependency>
 		
-		
+		<dependency>
+			<groupId>br.com.rhiemer</groupId>
+			<artifactId>rhiemer-api-jpa</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+
 
 		<!-- Arquillian -->
 		<dependency>
@@ -61,6 +67,8 @@
 			<artifactId>arquillian-junit-container</artifactId>
 		</dependency>
 
+
+
 		<dependency>
 			<groupId>org.jboss.arquillian.extension</groupId>
 			<artifactId>arquillian-transaction-jta</artifactId>
@@ -72,6 +80,7 @@
 			<artifactId>jboss-transaction-api_1.2_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 
 		<!-- Versão mais recente do shrinkwrap -->
 		<dependency>
@@ -107,7 +116,7 @@
 			<version>${version.shrinkwrap}</version>
 		</dependency>
 
-		
+
 		
 
 	</dependencies>

@@ -223,5 +223,7 @@
 		<module>rhiemer-api-web</module>
 		<module>rhiemer-api-cdi</module>
 		<module>rhiemer-api-ejb</module>
+		<module>rhiemer-api-dbunit</module>
+		<module>rhiemer-api-rest-resources</module>
 	</modules>
 </project>

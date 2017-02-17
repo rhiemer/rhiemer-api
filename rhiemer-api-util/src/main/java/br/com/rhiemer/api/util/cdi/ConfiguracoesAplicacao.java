@@ -22,9 +22,11 @@ import br.com.rhiemer.api.util.producer.Producer;
 public class ConfiguracoesAplicacao {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfiguracoesAplicacao.class);
+	public static final String VERSAO_APLICACAO = "VERSAO.ALICACAO";
+
 	@Inject
 	private BeanManager beanManager;
-	
+
 	private Properties configuracoes = new Properties();
 	protected List<String> listaArquivosConfiguracoes = new ArrayList<>();
 
@@ -32,6 +34,10 @@ public class ConfiguracoesAplicacao {
 		if (listaArquivosConfiguracoes == null || listaArquivosConfiguracoes.size() == 0)
 			carregarArquivos();
 		return configuracoes.getProperty(key);
+	}
+
+	public String getVersaoAplicacao() {
+		return getConfiguracao(VERSAO_APLICACAO);
 	}
 
 	protected void configuracoesProperties(String arquivo) {
@@ -88,6 +94,5 @@ public class ConfiguracoesAplicacao {
 		logarConfiguracoesAplicacao();
 		logger.info("BeanManager: {}.", beanManager.toString());
 	}
-
 
 }

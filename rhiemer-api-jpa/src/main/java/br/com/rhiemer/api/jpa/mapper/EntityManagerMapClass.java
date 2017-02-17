@@ -36,6 +36,7 @@ public class EntityManagerMapClass {
 	private ConfiguracoesAplicacao configuracoesAplicacao;
 
 	protected Map<Class<? extends Entity>, EntityManager> mapEntityManager = new HashMap<>();
+	protected Map<String, EntityManager> mapEntityManagerStr = new HashMap<>();
 
 	@Inject
 	@ReflectionBasePackage
@@ -43,7 +44,7 @@ public class EntityManagerMapClass {
 
 	@PostConstruct
 	public void init() {
-		configuracoesAplicacao =  instance.select(ConfiguracoesAplicacao.class).get();
+		configuracoesAplicacao = instance.select(ConfiguracoesAplicacao.class).get();
 		puNameAplicacao = configuracoesAplicacao.getConfiguracao(PERSITENCE_UNIT_NAME_APLICACAO);
 		entityManagerAplicacao = getEntityManagerByName(puNameAplicacao());
 
@@ -53,8 +54,10 @@ public class EntityManagerMapClass {
 			if (puName == null)
 				continue;
 			EntityManager em = getEntityManagerByName(puName.value());
-			if (em != null)
+			if (em != null) {
 				mapEntityManager.put(classeEntity, em);
+				mapEntityManagerStr.put(classeEntity.getName(), em);
+			}
 
 		}
 
@@ -78,7 +81,6 @@ public class EntityManagerMapClass {
 		}
 		return em;
 
-
 	}
 
 	public EntityManager getEntityManagerAplicacao() {
@@ -100,6 +102,23 @@ public class EntityManagerMapClass {
 
 		EntityManager em = mapEntityManager.get(classe);
 		return em;
+
+	}
+	
+	public EntityManager getEntityManagerByEntity(String classe) {
+
+		EntityManager em = mapEntityManagerStr.get(classe);
+		return em;
+
+	}
+	
+	public EntityManager getEntityManagerByEntityPadrao(String classe) {
+
+		EntityManager em = getEntityManagerByEntity(classe);
+		if (em == null)
+			return getEntityManagerAplicacao();
+		else
+			return em;
 
 	}
 

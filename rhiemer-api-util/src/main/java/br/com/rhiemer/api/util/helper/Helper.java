@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -26,6 +28,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,13 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.ComputationException;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
@@ -54,7 +52,40 @@ import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class Helper {
 
+	private static final String VIRGULA = ",";
+
 	private Helper() {
+	}
+
+	public static <T> boolean isBlank(T value) {
+		if (value == null)
+			return true;
+		else if (value instanceof String)
+			return StringUtils.isBlank((String) value);
+		else
+			return false;
+	}
+
+	public static <T> boolean isNotBlank(T value) {
+		return !(isBlank(value));
+	}
+
+	public static <T> String collectionToString(Collection<T> collection, String separator) {
+		if (collection == null || collection.size() == 0)
+			return null;
+
+		final StringBuilder sb = new StringBuilder();
+		collection.forEach(t -> {
+			if (!StringUtils.isBlank(sb)) {
+				sb.append(separator);
+			}
+			sb.append(t.toString());
+		});
+		return sb.toString();
+	}
+
+	public static <T> String collectionToString(Collection<T> collection) {
+		return collectionToString(collection, VIRGULA);
 	}
 
 	public static <T> String[] toArrayString(T[] arrayObj) {
@@ -123,18 +154,18 @@ public final class Helper {
 	public static Class getPropertyType(Object objeto, String property) {
 		return getTypePropertyComplex(objeto, property, DOT_FIELD);
 	}
-	
+
 	public static Class getPropertyType(Class classe, String property) {
 		return getTypePropertyComplex(classe, property, DOT_FIELD);
 	}
-	
+
 	public static Class getTypePropertyComplex(Class classe, String property, String separetor) {
 
 		String[] s = property.split(separetor);
 		Class propertie = classe;
-		
-		for (int i = 0;  propertie != null && i < s.length; i++) {
-			propertie = getPropertyTypeClass(propertie,s[i]);			
+
+		for (int i = 0; propertie != null && i < s.length; i++) {
+			propertie = getPropertyTypeClass(propertie, s[i]);
 		}
 
 		return propertie;
@@ -142,7 +173,7 @@ public final class Helper {
 	}
 
 	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
-		return getTypePropertyComplex(objeto.getClass(),property,separetor);
+		return getTypePropertyComplex(objeto.getClass(), property, separetor);
 	}
 
 	public static <T> Class<?> getTypeProperty(T objeto, String property) {
@@ -1124,7 +1155,7 @@ public final class Helper {
 				if (titulo == null || "".equals(titulo))
 					titulo = field;
 
-				result += (result.equals("") ? "" : ",") + String.format("%s=%s", titulo, strValor);
+				result += (result.equals("") ? "" : VIRGULA) + String.format("%s=%s", titulo, strValor);
 
 			}
 
@@ -1422,6 +1453,55 @@ public final class Helper {
 		}
 
 		return -1;
+	}
+
+	public static String enconder(String str) {
+
+		return enconder(str, ENCONDING_PADRAO);
+	}
+
+	public static String enconder(String str, String enconding) {
+		String strEnconder = null;
+		try {
+			strEnconder = URLEncoder.encode(str, enconding);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException(e);
+		}
+		return strEnconder;
+	}
+
+	public static <T> List<T> convertArgs(T... args) {
+		List<T> result = new ArrayList<>();
+		if (args == null)
+			return result;
+		for (T t : args) {
+			if (t.getClass().isArray())
+				result.addAll((List<T>) Arrays.asList((Object[]) t));
+			else if (Collection.class.isInstance(t))
+				result.addAll((Collection<T>) t);
+			else
+				result.add(t);
+		}
+		return result;
+	}
+
+	public static <T> T newInstance(Class<T> classe) {
+		try {
+			return classe.newInstance();
+		} catch (InstantiationException | IllegalAccessException e1) {
+			throw new RuntimeException(e1);
+		}
+	}
+
+	public static <T> T newInstanceByStream(OutputStream stream, Class<T> classe) {
+		T data = newInstance(classe);
+		try {
+			new ObjectOutputStream(stream).writeObject(data);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return data;
 	}
 
 }
