@@ -13,13 +13,31 @@ import org.hibernate.jdbc.Work;
 
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.mapper.EntityManagerMapClass;
+import br.com.rhiemer.api.jpa.work.WorkEntityManager;
 
-public class EntityManagerHelper {
+public class HelperEntityManager {
 
 	public static Session getSession(EntityManager entityManager) {
 		Session session = entityManager.unwrap(Session.class);
 		return session;
 
+	}
+	
+	public static void workConnectionBySession(EntityManager entityManager,Work work) {
+		Session session = getSession(entityManager);
+		session.doWork(work);
+	}
+	
+	public static void workEntityManage(EntityManager entityManager,WorkEntityManager work) {
+		work.run(entityManager);
+		Session session = getSession(entityManager);		
+		Work workHibernate = new Work() {
+			@Override
+			public void execute(Connection connection) throws SQLException {
+				work.execute(entityManager,connection);
+			}
+		};
+		session.doWork(workHibernate);
 	}
 
 	public static Connection getConnectionBySession(Session session) {

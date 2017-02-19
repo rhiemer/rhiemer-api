@@ -17,7 +17,8 @@ import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 @Trace
 @ServiceAplicacao
-public class PersistenceServiceCrud<T extends Entity,K extends Serializable> implements PersistenceServiceBeanJPA<T, K> {
+public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
+		implements PersistenceServiceBeanJPA<T, K> {
 
 	private DaoJPA dao;
 	private Class<T> classeObjeto;
@@ -111,17 +112,17 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public <K, T> T procurarPeloIdLazy(K k) {
 		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, k);
 	}
-	
+
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Object... k) {
-		return this.getDao().procurarPorUniqueKey((Class<T>) classeObjeto,k);
+		return this.getDao().procurarPorUniqueKey((Class<T>) classeObjeto, k);
 	}
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(String nome, Object... k) {
-		return this.getDao().procurarPorUniqueKeyByNome((Class<T>) classeObjeto,nome,k);
+		return this.getDao().procurarPorUniqueKeyByNome((Class<T>) classeObjeto, nome, k);
 	}
 
 	/*
@@ -169,10 +170,10 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public <T> T buscarObjetoSalvo(T t) {
 		return this.getDao().buscarObjetoSalvo(t, (Class<T>) classeObjeto);
 	}
-	
+
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public<T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe) {
+	public <T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe) {
 		return this.getDao().buscarObjetoSalvoLazy(t, (Class<T>) classeObjeto);
 	}
 
@@ -198,6 +199,17 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	@Override
 	public <T, K> T removerPeloId(K id) {
 		return this.getDao().removerPeloId(id, (Class<T>) classeObjeto);
+	}
+
+	@Override
+	public <T> void deletar(T t) {
+		this.getDao().deletar(t);
+
+	}
+
+	@Override
+	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id) {
+		return this.getDao().deletarPeloId(id, (Class<T>) classeObjeto);
 	}
 
 	/*
@@ -263,7 +275,5 @@ public class PersistenceServiceCrud<T extends Entity,K extends Serializable> imp
 	public int excutarUpdateQuery(BuildJPA query) {
 		return this.getDao().excutarUpdateQuery(query);
 	}
-
-	
 
 }

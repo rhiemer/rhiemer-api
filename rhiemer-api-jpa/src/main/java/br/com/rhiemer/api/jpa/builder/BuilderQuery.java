@@ -1,11 +1,11 @@
 package br.com.rhiemer.api.jpa.builder;
 
-
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.arquivo;
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.nativeQuery;
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.query;
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.resource;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -19,6 +19,7 @@ import br.com.rhiemer.api.jpa.helper.JPAUtils;
 import br.com.rhiemer.api.util.dto.Arquivo;
 import br.com.rhiemer.api.util.dto.Pager;
 import br.com.rhiemer.api.util.helper.FileUtils;
+import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public class BuilderQuery implements BuildJPA {
 
@@ -231,6 +232,20 @@ public class BuilderQuery implements BuildJPA {
 
 		public Builder parameters(Map<Object, Object> parameters) {
 			this.parameters = parameters;
+			return this;
+		}
+
+		public Builder addParameter(Object key, Object value) {
+			if (this.parameters == null)
+				this.parameters = new HashMap<>();
+			this.parameters.put(key, value);
+			return this;
+		}
+
+		public <T extends PojoKeyAbstract> Builder addParameterPrimaryKey(T entidade) {
+			if (this.parameters == null)
+				this.parameters = new HashMap<>();
+			this.parameters.putAll(entidade.primaryKeyValueMap());
 			return this;
 		}
 

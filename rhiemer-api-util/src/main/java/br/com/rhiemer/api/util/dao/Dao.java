@@ -13,6 +13,8 @@ public interface Dao {
 	<T extends PojoKeyAbstract> T adicionarOuatualizar(T t);
 
 	<T> void remover(T t);
+	
+	<T> void deletar(T t);
 
 	<K, T> T procurarPeloId(Class<T> t, K k);
 
@@ -35,6 +37,8 @@ public interface Dao {
 	<T> void atualizarComCopia(T t, Class<T> classe);
 
 	<T, K> T removerPeloId(K id, Class<T> classe);
+	
+	<T extends PojoKeyAbstract, K> T deletarPeloId(K id, Class<T> classe);
 
 	<T> int contarTodos(Class<T> classe);
 

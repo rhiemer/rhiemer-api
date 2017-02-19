@@ -1,7 +1,8 @@
-package br.com.rhiemer.api.jpa.dbunit;
+package br.com.rhiemer.api.dbunit.operation;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -14,17 +15,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.xml.XmlDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
 
+import br.com.rhiemer.api.dbunit.helper.HelperDbUnit;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.helper.EntityManagerHelper;
+import br.com.rhiemer.api.jpa.helper.HelperEntityManager;
+import br.com.rhiemer.api.util.exception.APPSystemException;
+import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperClassLoader;
 
 public class DBUnitOperations {
 
+	public static final DatabaseOperation DELETE_INSERT = new CompositeOperation(DatabaseOperation.DELETE,
+			DatabaseOperation.INSERT);
+
+	private static final String BUILDER_METHOD_DATASET = "build";
 	private DatabaseConnection databaseConnection;
 	private Connection connection;
 	private boolean isClose;
+	private WorkDbUnitOperation workDbUnitOperation;
 
 	public DBUnitOperations() {
 		super();
@@ -54,7 +65,7 @@ public class DBUnitOperations {
 		this.databaseConnection = databaseConnection;
 	}
 
-	public void cleanInsertDataset(Class<? extends IDataSet> dataSetClass, String... datasets) {
+	public void cleanInsertDataset(Class<?> dataSetClass, String... datasets) {
 		operationExecute(DatabaseOperation.CLEAN_INSERT, dataSetClass, datasets);
 	}
 
@@ -66,7 +77,31 @@ public class DBUnitOperations {
 		operationExecute(DatabaseOperation.CLEAN_INSERT, iDataSet);
 	}
 
-	public void deleteAllDataset(Class<? extends IDataSet> dataSetClass, String... datasets) {
+	public void deleteInsertDataset(Class<?> dataSetClass, String... datasets) {
+		operationExecute(DELETE_INSERT, dataSetClass, datasets);
+	}
+
+	public void deleteInsertDataset(String... dataset) {
+		operationExecute(DELETE_INSERT, dataset);
+	}
+
+	public void deleteInsertDataset(IDataSet iDataSet) {
+		operationExecute(DELETE_INSERT, iDataSet);
+	}
+
+	public void deleteDataset(Class<?> dataSetClass, String... datasets) {
+		operationExecute(DatabaseOperation.DELETE, dataSetClass, datasets);
+	}
+
+	public void deleteDataset(String... dataset) {
+		operationExecute(DatabaseOperation.DELETE, dataset);
+	}
+
+	public void deleteDataset(IDataSet iDataSet) {
+		operationExecute(DatabaseOperation.DELETE, iDataSet);
+	}
+
+	public void deleteAllDataset(Class<?> dataSetClass, String... datasets) {
 		operationExecute(DatabaseOperation.DELETE_ALL, dataSetClass, datasets);
 	}
 
@@ -81,20 +116,50 @@ public class DBUnitOperations {
 	public void operationExecute(DatabaseOperation dataBaseOperation, IDataSet iDataSet) {
 
 		try {
-			dataBaseOperation.execute(databaseConnection, iDataSet);
+			WorkDbUnitOperation workDbUnitOperationLocal = getWorkDbUnitOperation();
+			if (workDbUnitOperationLocal != null) {
+				workDbUnitOperationLocal.execute(dataBaseOperation, iDataSet);
+			} else {
+				dataBaseOperation.execute(databaseConnection, iDataSet);
+			}
 		} catch (DatabaseUnitException | SQLException e) {
-			throw new RuntimeException(e);
+			throw new APPSystemException(e);
 		} finally {
 			closeConn();
 		}
 	}
 
 	public void operationExecute(DatabaseOperation dataBaseOperation, String... dataset) {
-		operationExecute(dataBaseOperation, XmlDataSet.class, dataset);
+		operationExecute(dataBaseOperation, FlatXmlDataSetBuilder.class, dataset);
 	}
 
-	public void operationExecute(DatabaseOperation dataBaseOperation, Class<? extends IDataSet> dataSetClass,
-			String... datasets) {
+	public IDataSet builderDataSet(Class<?> dataSetClass, String dataSet) {
+		if (!dataSet.startsWith("/")) {
+			dataSet = "/" + dataSet;
+		}
+
+		InputStream is = HelperClassLoader.getResourceAsStream(dataSet, this.getClass());
+		IDataSet iDataSet = null;
+		Method method = null;
+		try {
+			method = dataSetClass.getMethod(BUILDER_METHOD_DATASET, InputStream.class);
+		} catch (NoSuchMethodException | SecurityException e1) {
+		}
+
+		if (method != null) {
+			Object builder = Helper.newInstance(dataSetClass);
+			try {
+				iDataSet = (IDataSet) method.invoke(builder, is);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new APPSystemException(e);
+			}
+		} else {
+			iDataSet = (IDataSet) Helper.newInstance(dataSetClass, is);
+		}
+		return iDataSet;
+	}
+
+	public void operationExecute(DatabaseOperation dataBaseOperation, Class<?> dataSetClass, String... datasets) {
 		boolean _isClose = this.isClose;
 		try {
 			for (String dataset : datasets) {
@@ -105,18 +170,7 @@ public class DBUnitOperations {
 					}
 					return;
 				}
-				if (!dataset.startsWith("/")) {
-					dataset = "/" + dataset;
-				}
-				InputStream is = this.getClass().getResourceAsStream(dataset);
-				IDataSet iDataSet;
-				try {
-
-					iDataSet = dataSetClass.getConstructor(IDataSet.class).newInstance(is);
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					throw new RuntimeException(e);
-				}
+				IDataSet iDataSet = builderDataSet(dataSetClass, dataset);
 				try {
 					_isClose = false;
 					operationExecute(dataBaseOperation, iDataSet);
@@ -134,7 +188,7 @@ public class DBUnitOperations {
 			try {
 				connection.close();
 			} catch (SQLException e) {
-				throw new RuntimeException(e);
+				throw new APPSystemException(e);
 			}
 		}
 	}
@@ -143,13 +197,23 @@ public class DBUnitOperations {
 		return new Builder();
 	}
 
+	public WorkDbUnitOperation getWorkDbUnitOperation() {
+		return workDbUnitOperation;
+	}
+
+	public void setWorkDbUnitOperation(WorkDbUnitOperation workDbUnitOperation) {
+		this.workDbUnitOperation = workDbUnitOperation;
+	}
+
 	public static class Builder {
+		private boolean habilitaHQL;
 		private boolean isClose;
 		private DatabaseConnection databaseConnection;
 		private Connection connection;
 		private DataSource dataSource;
 		private String dataSourceName;
 		private EntityManager entityManager;
+		private WorkDbUnitOperation workDbUnitOperation;
 		private Class<? extends Entity> classe;
 		private String className;
 
@@ -188,8 +252,18 @@ public class DBUnitOperations {
 			return this;
 		}
 
+		public Builder setWorkDbUnitOperation(WorkDbUnitOperation workDbUnitOperation) {
+			this.workDbUnitOperation = workDbUnitOperation;
+			return this;
+		}
+
 		public Builder setClose(boolean isClose) {
 			this.isClose = isClose;
+			return this;
+		}
+
+		public Builder setHabilitaHQL(boolean habilitaHQL) {
+			this.habilitaHQL = habilitaHQL;
 			return this;
 		}
 
@@ -197,21 +271,22 @@ public class DBUnitOperations {
 			if (this.dataSource == null && this.connection == null && this.databaseConnection == null) {
 				if (this.entityManager == null && StringUtils.isBlank(dataSourceName)) {
 					if (this.classe != null) {
-						this.entityManager = EntityManagerHelper.getEntityManagerByClass(this.classe);
+						this.entityManager = HelperEntityManager.getEntityManagerByClass(this.classe);
 					} else if (!StringUtils.isBlank(this.className)) {
-						this.entityManager = EntityManagerHelper.getEntityManagerByClass(this.className);
+						this.entityManager = HelperEntityManager.getEntityManagerByClass(this.className);
 					} else {
-						this.entityManager = EntityManagerHelper.getEntityManagerAplicacao();
+						this.entityManager = HelperEntityManager.getEntityManagerAplicacao();
 					}
 				}
 				if (this.entityManager != null) {
-					this.connection = EntityManagerHelper.getConnectionByEntityManager(this.entityManager);
+					this.workDbUnitOperation = new WorkDbUnitOperationEntityManager(this.entityManager,
+							this.habilitaHQL);
 				} else if (!StringUtils.isBlank(dataSourceName)) {
 					try {
 						this.isClose = true;
 						dataSource = (DataSource) new InitialContext().lookup(dataSourceName);
 					} catch (NamingException e) {
-						throw new RuntimeException(e);
+						throw new APPSystemException(e);
 					}
 				}
 			}
@@ -221,16 +296,12 @@ public class DBUnitOperations {
 					try {
 						this.connection = dataSource.getConnection();
 					} catch (SQLException e) {
-						throw new RuntimeException(e);
+						throw new APPSystemException(e);
 					}
 				}
 
 				if (this.connection != null) {
-					try {
-						databaseConnection = new DatabaseConnection(this.connection);
-					} catch (DatabaseUnitException e) {
-						throw new RuntimeException(e);
-					}
+					this.databaseConnection = HelperDbUnit.createDatabaseConnection(this.connection, this.habilitaHQL);
 				}
 			}
 
@@ -238,6 +309,7 @@ public class DBUnitOperations {
 			dbUnitOperations.setDatabaseConnection(this.databaseConnection);
 			dbUnitOperations.setConnection(this.connection);
 			dbUnitOperations.setClose(this.isClose);
+			dbUnitOperations.setWorkDbUnitOperation(this.workDbUnitOperation);
 			return dbUnitOperations;
 		}
 

@@ -41,5 +41,9 @@ public interface PersistenceServiceBean<T, K> extends PersistenceService {
 	<T> List<T> listaTodosPaginada(int firstResult, int maxResults);
 
 	void flush();
+	
+	<T> void deletar(T t);
+	
+	<T extends PojoKeyAbstract, K> T deletarPeloId(K id);
 
 }

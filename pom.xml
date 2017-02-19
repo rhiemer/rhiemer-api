@@ -225,5 +225,6 @@
 		<module>rhiemer-api-ejb</module>
 		<module>rhiemer-api-dbunit</module>
 		<module>rhiemer-api-rest-resources</module>
+		<module>rhiemer-api-test-integration-dbunit</module>
 	</modules>
 </project>

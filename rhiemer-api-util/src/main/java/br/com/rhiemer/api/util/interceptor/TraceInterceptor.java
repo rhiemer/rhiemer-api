@@ -171,7 +171,7 @@ public class TraceInterceptor {
 
 				} else {
 					logger.error(logarFalha(transactionContext, invocationContext, watch));
-					logger.error(logarFalhaDebug(transactionContext, invocationContext, watch, _t));
+					logger.debug(logarFalhaDebug(transactionContext, invocationContext, watch, _t));
 				}
 
 				eventoSessaoDto = criarEventoSessao(transactionContext, invocationContext);

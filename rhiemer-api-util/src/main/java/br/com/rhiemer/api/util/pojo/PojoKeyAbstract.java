@@ -51,6 +51,13 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 		}
 		return this.primaryKeyTypes;
 	}
+	
+	
+	public Map<Object,Object> primaryKeyValueMap() {		
+		Map<Object,Object> map = new HashMap<>();
+		this.primaryKey.forEach(t->map.put(t,Helper.getValueMethodOrField(this,t)));
+		return map;		
+	}
 
 	@Transient
 	@JsonIgnore
