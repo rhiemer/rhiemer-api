@@ -27,8 +27,8 @@ public class LogResourceList {
 			try {
 				String listResources = HelperListResorce.listResourceRestEasy();
 				HelperOptional.ofIsBlank(listResources)
-						.ifPresent(t -> logger.debug("EndPoitns da aplicação:\nVersão:{}\n{}\n",
-								configuracaAplicacao.getVersaoAplicacao(), t));
+						.ifPresent(t -> logger.debug("EndPoitns da aplicação:\nIdentificação:{}\nVersão:{}\n{}\n",
+								configuracaAplicacao.getNomeAplicacao(), configuracaAplicacao.getVersaoAplicacao(), t));
 			} catch (Exception e) {
 				logger.error(String.format("Erro ao carregar endpoints da aplicação:%s", e.getMessage()), e);
 			}

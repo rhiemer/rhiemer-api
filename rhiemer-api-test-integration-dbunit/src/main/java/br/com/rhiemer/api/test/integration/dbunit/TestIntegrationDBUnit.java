@@ -41,7 +41,7 @@ public abstract class TestIntegrationDBUnit extends ClientTest {
 	}
 
 	protected String pathDomainDbUnit() {
-		return Helper.concat(getPath(), "/");
+		return Helper.concatSplashStarEndWith(getPath());
 	}
 
 	protected void inserirArquivosDbUnitAnnotation() {
@@ -60,7 +60,7 @@ public abstract class TestIntegrationDBUnit extends ClientTest {
 	}
 
 	protected boolean addArquivoDbUnit(String arquivo) {
-		return arquivosDbUnit.add(folderDataSetsDbUnit().concat(arquivo));
+		return arquivosDbUnit.add(Helper.concatSplash(folderDataSetsDbUnit(), arquivo));
 	}
 
 	protected void insertDBUnit() {

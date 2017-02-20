@@ -28,7 +28,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -52,22 +51,106 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
-import br.com.rhiemer.api.util.exception.APPIllegalArgumentException;
 import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class Helper {
 
-	private static final String VIRGULA = ",";
+	public static final String SPLASH = "/";
+	public static final String VIRGULA = ",";
 
 	private Helper() {
 	}
 
 	public static String concat(String str, String value) {
-		if (isBlank(value) && !isBlank(str))
+		if (isBlank(value) && isNotBlank(str))
+			return str;
+		else if (isNotBlank(str) && isNotBlank(value))
+			return str.concat(value);
+		else
+			return StringUtils.EMPTY;
+	}
+
+	public static String subStringEndWith(String str, String value) {
+		if (str.endsWith(value))
+			return str.substring(0, str.length() - value.length());
+		else
+			return str;
+	}
+
+	public static String subStringStartWith(String str, String value) {
+		if (str.startsWith(value))
+			return str.substring(value.length() + 1);
+		else
+			return str;
+	}
+
+	public static String subStringStartEndWith(String str, String value) {
+		return subStringEndWith(subStringStartWith(str, value), value);
+	}
+
+	public static String concatArray(String str, String value, String... params) {
+		List<String> listValue = convertArgs(params);
+		if (listValue.size() == 0)
+			return str;
+
+		String result = subStringEndWith(str, value);
+
+		for (int i = 0; i < listValue.size(); i++) {
+			String newValue = null;
+			if (i == listValue.size() - 1)
+				newValue = subStringStartWith(listValue.get(i), value);
+			else
+				newValue = subStringStartEndWith(listValue.get(i), value);
+			result = result.concat(value).concat(newValue);
+
+		}
+
+		return result;
+
+	}
+
+	public static String concaNotRepeatPrefixSufix(String str, String suffix) {
+		if (isNotBlank(str) && isNotBlank(suffix) && (str.startsWith(suffix) || str.endsWith(suffix)))
 			return str;
 		else
-			return isBlank(str) ? value : str.concat(value);
+			return concat(str, suffix);
+	}
+
+	public static String concaNotRepeatSufix(String str, String suffix) {
+		if (isNotBlank(str) && isNotBlank(suffix) && str.endsWith(suffix))
+			return str;
+		else
+			return concat(str, suffix);
+	}
+
+	public static String concaNotRepeatPrefix(String str, String prefix) {
+		if (isNotBlank(str) && isNotBlank(prefix) && str.startsWith(prefix))
+			return str;
+		else
+			return concat(prefix, str);
+	}
+
+	public static String concatSplash(String str, String... values) {
+
+		return concatArray(str, SPLASH, values);
+
+	}
+
+	public static String concatSplashStarWith(String str, String... values) {
+		String result = concatSplash(str, values);
+		return concaNotRepeatPrefix(result,SPLASH);
+	}
+
+	public static String concatSplashStarEndWith(String str, String... values) {
+		String result = concatSplash(str, values);
+		return concaNotRepeatSufix(result,SPLASH);
+	}
+
+	public static String concatSplashStarStartEndWith(String str, String... values) {
+		String result = concatSplashStarWith(str, values);
+		result = concatSplashStarStartEndWith(str, values);
+		return result;
 	}
 
 	public static <T> boolean isBlank(T value) {
@@ -1593,8 +1676,5 @@ public final class Helper {
 		}
 		return data;
 	}
-		
-
-	
 
 }

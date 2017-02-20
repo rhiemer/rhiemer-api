@@ -2,7 +2,9 @@ package br.com.rhiemer.api.test.integration.helper;
 
 import java.io.File;
 
-import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.api.container.ResourceContainer;
+
+import br.com.rhiemer.api.util.exception.APPIllegalArgumentException;
 
 public class HelperArquillian {
 
@@ -10,25 +12,25 @@ public class HelperArquillian {
 
 	}
 
-	public static void addWebFiles(WebArchive war, File dir, String pathApp) {
+	public static void addResourcesFiles(ResourceContainer<?> deploy, File dir, String pathApp) {
 		if (!dir.exists()) {
-			throw new IllegalArgumentException(String.format("Diretorio %s não existe.", dir));
+			throw new APPIllegalArgumentException("Diretorio {} não existe.", dir);
 		}
 		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException(String.format("Arquivo %s não é um diretorio.", dir));
+			throw new APPIllegalArgumentException("Arquivo {} não é um diretorio.", dir);
 		}
 
 		for (File f : dir.listFiles()) {
 			if (f.isFile()) {
-				war.addAsWebInfResource(f.getPath().substring(pathApp.length()));
+				deploy.addAsResource(f, f.getPath().replace("\\", "/").substring(pathApp.length()));
 			} else {
-				addWebFiles(war, f, pathApp);
+				addResourcesFiles(deploy, f, pathApp);
 			}
 		}
 	}
 
-	public static void addWebFiles(WebArchive war, File dir) {
-		addWebFiles(war, dir, "src/test/resources");
+	public static void addResourcesFiles(ResourceContainer<?> deploy, File dir) {
+		addResourcesFiles(deploy, dir, "src/test/resources");
 	}
 
 }

@@ -16,6 +16,7 @@ public class HelperClassLoader {
 	}
 
 	public static InputStream getResourceAsStream(String path, Class<?> classe) {
+		path = Helper.concatSplashStarWith(path);
 		InputStream is = null;
 
 		try {

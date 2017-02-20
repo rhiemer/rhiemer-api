@@ -23,6 +23,7 @@ public class ConfiguracoesAplicacao {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfiguracoesAplicacao.class);
 	public static final String VERSAO_APLICACAO = "VERSAO.ALICACAO";
+	public static final String NOME_APLICACAO = "APP.NAME";
 
 	@Inject
 	private BeanManager beanManager;
@@ -38,6 +39,10 @@ public class ConfiguracoesAplicacao {
 
 	public String getVersaoAplicacao() {
 		return getConfiguracao(VERSAO_APLICACAO);
+	}
+	
+	public String getNomeAplicacao() {
+		return getConfiguracao(NOME_APLICACAO);
 	}
 
 	protected void configuracoesProperties(String arquivo) {

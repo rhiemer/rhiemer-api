@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -16,7 +19,6 @@ import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
 
 import br.com.rhiemer.api.dbunit.helper.HelperDbUnit;
@@ -28,7 +30,7 @@ import br.com.rhiemer.api.util.helper.HelperClassLoader;
 
 public class DBUnitOperations {
 
-	public static final DatabaseOperation DELETE_INSERT = new CompositeOperation(DatabaseOperation.DELETE,
+	public static final DatabaseOperation DELETE_INSERT = new CompositeOperationAPP(DatabaseOperation.DELETE,
 			DatabaseOperation.INSERT);
 
 	private static final String BUILDER_METHOD_DATASET = "build";
@@ -113,14 +115,17 @@ public class DBUnitOperations {
 		operationExecute(DatabaseOperation.DELETE_ALL, iDataSet);
 	}
 
-	public void operationExecute(DatabaseOperation dataBaseOperation, IDataSet iDataSet) {
+	public void operationExecute(DatabaseOperation dataBaseOperation, IDataSet... iDataSets) {
 
 		try {
 			WorkDbUnitOperation workDbUnitOperationLocal = getWorkDbUnitOperation();
 			if (workDbUnitOperationLocal != null) {
-				workDbUnitOperationLocal.execute(dataBaseOperation, iDataSet);
+				workDbUnitOperationLocal.execute(dataBaseOperation, iDataSets);
 			} else {
-				dataBaseOperation.execute(databaseConnection, iDataSet);
+				List<IDataSet> listDataSets = Helper.convertArgs(iDataSets);
+				for (IDataSet iDataSet : listDataSets) {
+					dataBaseOperation.execute(databaseConnection, iDataSet);
+				}
 			}
 		} catch (DatabaseUnitException | SQLException e) {
 			throw new APPSystemException(e);
@@ -134,9 +139,6 @@ public class DBUnitOperations {
 	}
 
 	public IDataSet builderDataSet(Class<?> dataSetClass, String dataSet) {
-		if (!dataSet.startsWith("/")) {
-			dataSet = "/" + dataSet;
-		}
 
 		InputStream is = HelperClassLoader.getResourceAsStream(dataSet, this.getClass());
 		IDataSet iDataSet = null;
@@ -159,24 +161,38 @@ public class DBUnitOperations {
 		return iDataSet;
 	}
 
+	public void addListDataSets(Class<?> dataSetClass, Set<IDataSet> listDataSets, String... datasets) {
+		List<String> listStringDataSets = Helper.convertArgs(datasets);
+		for (String dataset : listStringDataSets) {
+			if (dataset.indexOf(",") > 0) {
+				String[] split = dataset.trim().split(",");
+				for (String dataSet2 : split) {
+					addListDataSets(dataSetClass, listDataSets, dataSet2);
+				}
+				return;
+			}
+			IDataSet iDataSet = builderDataSet(dataSetClass, dataset);
+			listDataSets.add(iDataSet);
+		}
+
+	}
+
+	public Set<IDataSet> addListDataSets(Class<?> dataSetClass, String... datasets) {
+		Set<IDataSet> listDataSets = new HashSet<>();
+		addListDataSets(dataSetClass, listDataSets, datasets);
+		return listDataSets;
+
+	}
+
 	public void operationExecute(DatabaseOperation dataBaseOperation, Class<?> dataSetClass, String... datasets) {
 		boolean _isClose = this.isClose;
 		try {
-			for (String dataset : datasets) {
-				if (dataset.indexOf(",") > 0) {
-					String[] split = dataset.trim().split(",");
-					for (String dataSet2 : split) {
-						operationExecute(dataBaseOperation, dataSetClass, dataSet2.trim());
-					}
-					return;
-				}
-				IDataSet iDataSet = builderDataSet(dataSetClass, dataset);
-				try {
-					_isClose = false;
-					operationExecute(dataBaseOperation, iDataSet);
-				} finally {
-					isClose = _isClose;
-				}
+			Set<IDataSet> dataSets = addListDataSets(dataSetClass, datasets);
+			try {
+				_isClose = false;
+				operationExecute(dataBaseOperation, dataSets.toArray(new IDataSet[] {}));
+			} finally {
+				isClose = _isClose;
 			}
 		} finally {
 			closeConn();
