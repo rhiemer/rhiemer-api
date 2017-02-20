@@ -17,6 +17,7 @@ import br.com.rhiemer.api.util.annotations.rest.RestClientPoxyMetodoInterceptor;
 @RestClientPoxyMetodoInterceptor(RestFullMetodoInterceptor.class)
 public interface RestFull {
 
+	
 	@GET
 	@Produces(MEDIA_REST_JSON)
 	@Consumes(MEDIA_REST_JSON)

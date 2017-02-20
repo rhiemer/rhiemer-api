@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public class PojoHelper {
@@ -15,13 +16,15 @@ public class PojoHelper {
 	};
 
 	public static <T extends PojoKeyAbstract> T newInstacePrimaryKey(Class<T> classe, Object... keys) {
-		T resultado;
-		try {
-			resultado = classe.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
+		T resultado = Helper.newInstance(classe, keys);
+		if (resultado == null) {
+			try {
+				resultado = classe.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new APPSystemException(e);
+			}
+			resultado.setPrimaryKeyArray(keys);
 		}
-		resultado.setPrimaryKeyArray(keys);
 		return resultado;
 	}
 

@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -26,6 +28,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -38,23 +41,147 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.IntStream;
 
-import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.ComputationException;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
+import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class Helper {
 
+	public static final String SPLASH = "/";
+	public static final String VIRGULA = ",";
+
 	private Helper() {
+	}
+
+	public static String concat(String str, String value) {
+		if (isBlank(value) && isNotBlank(str))
+			return str;
+		else if (isNotBlank(str) && isNotBlank(value))
+			return str.concat(value);
+		else
+			return StringUtils.EMPTY;
+	}
+
+	public static String subStringEndWith(String str, String value) {
+		if (str.endsWith(value))
+			return str.substring(0, str.length() - value.length());
+		else
+			return str;
+	}
+
+	public static String subStringStartWith(String str, String value) {
+		if (str.startsWith(value))
+			return str.substring(value.length() + 1);
+		else
+			return str;
+	}
+
+	public static String subStringStartEndWith(String str, String value) {
+		return subStringEndWith(subStringStartWith(str, value), value);
+	}
+
+	public static String concatArray(String str, String value, String... params) {
+		List<String> listValue = convertArgs(params);
+		if (listValue.size() == 0)
+			return str;
+
+		String result = subStringEndWith(str, value);
+
+		for (int i = 0; i < listValue.size(); i++) {
+			String newValue = null;
+			if (i == listValue.size() - 1)
+				newValue = subStringStartWith(listValue.get(i), value);
+			else
+				newValue = subStringStartEndWith(listValue.get(i), value);
+			result = result.concat(value).concat(newValue);
+
+		}
+
+		return result;
+
+	}
+
+	public static String concaNotRepeatPrefixSufix(String str, String suffix) {
+		if (isNotBlank(str) && isNotBlank(suffix) && (str.startsWith(suffix) || str.endsWith(suffix)))
+			return str;
+		else
+			return concat(str, suffix);
+	}
+
+	public static String concaNotRepeatSufix(String str, String suffix) {
+		if (isNotBlank(str) && isNotBlank(suffix) && str.endsWith(suffix))
+			return str;
+		else
+			return concat(str, suffix);
+	}
+
+	public static String concaNotRepeatPrefix(String str, String prefix) {
+		if (isNotBlank(str) && isNotBlank(prefix) && str.startsWith(prefix))
+			return str;
+		else
+			return concat(prefix, str);
+	}
+
+	public static String concatSplash(String str, String... values) {
+
+		return concatArray(str, SPLASH, values);
+
+	}
+
+	public static String concatSplashStarWith(String str, String... values) {
+		String result = concatSplash(str, values);
+		return concaNotRepeatPrefix(result,SPLASH);
+	}
+
+	public static String concatSplashStarEndWith(String str, String... values) {
+		String result = concatSplash(str, values);
+		return concaNotRepeatSufix(result,SPLASH);
+	}
+
+	public static String concatSplashStarStartEndWith(String str, String... values) {
+		String result = concatSplashStarWith(str, values);
+		result = concatSplashStarStartEndWith(str, values);
+		return result;
+	}
+
+	public static <T> boolean isBlank(T value) {
+		if (value == null)
+			return true;
+		else if (value instanceof String)
+			return StringUtils.isBlank((String) value);
+		else
+			return false;
+	}
+
+	public static <T> boolean isNotBlank(T value) {
+		return !(isBlank(value));
+	}
+
+	public static <T> String collectionToString(Collection<T> collection, String separator) {
+		if (collection == null || collection.size() == 0)
+			return null;
+
+		final StringBuilder sb = new StringBuilder();
+		collection.forEach(t -> {
+			if (!StringUtils.isBlank(sb)) {
+				sb.append(separator);
+			}
+			sb.append(t.toString());
+		});
+		return sb.toString();
+	}
+
+	public static <T> String collectionToString(Collection<T> collection) {
+		return collectionToString(collection, VIRGULA);
 	}
 
 	public static <T> String[] toArrayString(T[] arrayObj) {
@@ -98,7 +225,7 @@ public final class Helper {
 			}
 			return result;
 		} catch (final Throwable t) {
-			throw new RuntimeException(t);
+			throw new APPSystemException(t);
 		}
 	}
 
@@ -124,22 +251,25 @@ public final class Helper {
 		return getTypePropertyComplex(objeto, property, DOT_FIELD);
 	}
 
-	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
+	public static Class getPropertyType(Class classe, String property) {
+		return getTypePropertyComplex(classe, property, DOT_FIELD);
+	}
+
+	public static Class getTypePropertyComplex(Class classe, String property, String separetor) {
 
 		String[] s = property.split(separetor);
-		Object _objeto = objeto;
-		Class propertie = null;
-		for (int i = 0; _objeto != null && i < s.length; i++) {
-			_objeto = getValueProperty(_objeto, s[i]);
-			if (_objeto == null)
-				break;
+		Class propertie = classe;
 
-			if (i == s.length - 1)
-				propertie = getTypeProperty(_objeto, property);
+		for (int i = 0; propertie != null && i < s.length; i++) {
+			propertie = getPropertyTypeClass(propertie, s[i]);
 		}
 
 		return propertie;
 
+	}
+
+	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
+		return getTypePropertyComplex(objeto.getClass(), property, separetor);
 	}
 
 	public static <T> Class<?> getTypeProperty(T objeto, String property) {
@@ -181,16 +311,14 @@ public final class Helper {
 				try {
 					return method.invoke(objeto, (Object[]) null);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					throw new APPSystemException(e);
 				}
 			}
 			if (method.getName().equalsIgnoreCase(property)) {
 				try {
 					return method.invoke(objeto, (Object[]) null);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					throw new APPSystemException(e);
 				}
 			}
 		}
@@ -208,7 +336,7 @@ public final class Helper {
 				try {
 					return field.get(objeto);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new RuntimeException(e);
+					throw new APPSystemException(e);
 				} finally {
 					if (_setacessible)
 						field.setAccessible(false);
@@ -226,7 +354,7 @@ public final class Helper {
 						return c.newInstance();
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException e) {
-						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+						throw new APPSystemException(e);
 					}
 				else
 					continue;
@@ -237,7 +365,7 @@ public final class Helper {
 					return c.newInstance(t);
 				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 						| InvocationTargetException e) {
-					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					throw new APPSystemException(e);
 				}
 		}
 
@@ -249,7 +377,7 @@ public final class Helper {
 						return c.newInstance(t.toString());
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException e) {
-						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+						throw new APPSystemException(e);
 					}
 
 			}
@@ -433,13 +561,13 @@ public final class Helper {
 						try {
 							result = (Object) field.getType().newInstance();
 						} catch (InstantiationException | IllegalAccessException e) {
-							throw new RuntimeException(e);
+							throw new APPSystemException(e);
 						}
 					}
 					try {
 						field.set(objeto, result);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
-						throw new RuntimeException(e);
+						throw new APPSystemException(e);
 					}
 					return result;
 				} finally {
@@ -496,7 +624,7 @@ public final class Helper {
 			return classe.getConstructor(String.class).newInstance(s);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+			throw new APPSystemException(e);
 		}
 
 	}
@@ -514,7 +642,7 @@ public final class Helper {
 					method.invoke(objeto,
 							new Object[] { convertObjectReflextion(value, method.getParameterTypes()[0]) });
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+					throw new APPSystemException(e);
 				}
 				return;
 			}
@@ -532,7 +660,7 @@ public final class Helper {
 					field.set(objeto, convertObjectReflextion(value, field.getType()));
 					return;
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new RuntimeException(e);
+					throw new APPSystemException(e);
 				} finally {
 					if (_setacessible)
 						field.setAccessible(false);
@@ -570,7 +698,7 @@ public final class Helper {
 			try {
 				aObject = ((Class) object).newInstance();
 			} catch (InstantiationException | IllegalAccessException e1) {
-				throw new RuntimeException(e1);
+				throw new APPSystemException(e1);
 			}
 		else
 			aObject = object;
@@ -660,7 +788,7 @@ public final class Helper {
 							try {
 								aObject = classObject.newInstance();
 							} catch (InstantiationException | IllegalAccessException e1) {
-								throw new RuntimeException(e1);
+								throw new APPSystemException(e1);
 							}
 						setValueMethodOrField(aObject, newKey, e.getValue());
 					} else if (aObject == null)
@@ -799,7 +927,7 @@ public final class Helper {
 						return annotationClass.getMethod(property).invoke(_annotation, (Object[]) null);
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 							| NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+						throw new APPSystemException(e);
 					}
 
 			}
@@ -820,7 +948,7 @@ public final class Helper {
 						try {
 							return method.invoke(annotation, (Object[]) null);
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+							throw new APPSystemException(e);
 						}
 					}
 			}
@@ -870,7 +998,7 @@ public final class Helper {
 						if (classe.getDeclaredField(vName) != null)
 							_name = vName;
 					} catch (NoSuchFieldException | SecurityException e) {
-						throw new RuntimeException(e);
+						throw new APPSystemException(e);
 					}
 				}
 
@@ -908,7 +1036,7 @@ public final class Helper {
 		try {
 			copia = objTarget.getClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
+			throw new APPSystemException(e);
 		}
 		copyObject(objTarget, copia, isNotNull);
 		return copia;
@@ -967,7 +1095,7 @@ public final class Helper {
 					try {
 						return method.invoke(obj, (Object[]) paramsMethod);
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-						throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+						throw new APPSystemException(e);
 					}
 			}
 		}
@@ -993,13 +1121,13 @@ public final class Helper {
 			try {
 				resultMethodFrom = method.invoke(fromObject, (Object[]) null);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				throw new APPSystemException(e);
 			}
 			Object resultMethodTo;
 			try {
 				resultMethodTo = method.invoke(toObject, (Object[]) null);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+				throw new APPSystemException(e);
 			}
 
 			int result = 0;
@@ -1029,7 +1157,7 @@ public final class Helper {
 		try {
 			IOUtils.copy(inputStream, writer, Charset.forName(enconding));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new APPSystemException(e);
 		}
 		result = writer.toString();
 
@@ -1047,7 +1175,7 @@ public final class Helper {
 				input.close();
 			}
 		} catch (Throwable e) {
-			new RuntimeException(e);
+			throw new APPSystemException(e);
 		}
 		return result;
 	}
@@ -1063,7 +1191,7 @@ public final class Helper {
 				is.close();
 			}
 		} catch (Throwable e) {
-			new RuntimeException(e);
+			throw new APPSystemException(e);
 		}
 		return result;
 	}
@@ -1092,7 +1220,7 @@ public final class Helper {
 					destinationChannel.close();
 			}
 		} catch (Throwable t) {
-			new RuntimeException(t);
+			throw new APPSystemException(t);
 		}
 	}
 
@@ -1121,17 +1249,16 @@ public final class Helper {
 				if (titulo == null || "".equals(titulo))
 					titulo = field;
 
-				result += (result.equals("") ? "" : ",") + String.format("%s=%s", titulo, strValor);
+				result += (result.equals("") ? "" : VIRGULA) + String.format("%s=%s", titulo, strValor);
 
 			}
 
 			return ("".equals(result) ? null : result);
 
 		} catch (Throwable t) {
-			new RuntimeException(t);
+			throw new APPSystemException(t);
 		}
 
-		return result;
 	}
 
 	public static String pojoToStringClass(Object object) {
@@ -1193,7 +1320,7 @@ public final class Helper {
 			}
 		} catch (Throwable e) {
 
-			throw new RuntimeException(e);
+			throw new APPSystemException(e);
 		}
 		return result;
 
@@ -1419,6 +1546,135 @@ public final class Helper {
 		}
 
 		return -1;
+	}
+
+	public static String enconder(String str) {
+
+		return enconder(str, ENCONDING_PADRAO);
+	}
+
+	public static String enconder(String str, String enconding) {
+		String strEnconder = null;
+		try {
+			strEnconder = URLEncoder.encode(str, enconding);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			throw new APPSystemException(e);
+		}
+		return strEnconder;
+	}
+
+	public static <T> List<T> convertArgs(T... args) {
+		List<T> result = new ArrayList<>();
+		if (args == null)
+			return result;
+		for (T t : args) {
+			if (t == null)
+				result.add(null);
+			else if (t.getClass().isArray())
+				result.addAll((List<T>) Arrays.asList((Object[]) t));
+			else if (Collection.class.isInstance(t))
+				result.addAll((Collection<T>) t);
+			else
+				result.add(t);
+		}
+		return result;
+	}
+
+	public static <T> T[] convertArgsArray(Class<?> classe, T... args) {
+		List<T> listClasseParams = convertArgs(args);
+		T[] array = (T[]) Array.newInstance(classe, 1);
+		T[] arrayClasseParams = listClasseParams.toArray(array);
+		return arrayClasseParams;
+	}
+
+	public static boolean compareClassArray(Class[] arrayClass1, Class[] arrayClass2) {
+
+		if (arrayClass1 == null || arrayClass2 == null || arrayClass1.length != arrayClass2.length)
+			return false;
+
+		OptionalInt optinal = IntStream.range(0, arrayClass1.length).filter(idx -> arrayClass1[idx] == null
+				|| arrayClass2[idx] == null || !arrayClass1[idx].isAssignableFrom(arrayClass2[idx])).findFirst();
+		return !optinal.isPresent();
+	}
+
+	public static <T> Constructor<T> getConstructor(Class<?> classe, Class<?>... classeParams) {
+		Class[] arrayClasseParams = convertArgsArray(Class.class, classeParams);
+
+		return (Constructor<T>) Arrays.asList(classe.getConstructors()).stream()
+				.filter(x -> ((x.getParameterTypes() == null || x.getParameterTypes().length == 0)
+						&& arrayClasseParams.length == 0)
+						|| compareClassArray(x.getParameterTypes(), arrayClasseParams))
+				.findFirst().get();
+
+	}
+
+	public static List<Class<?>> convertObjectToClass(Object... classeParams) {
+		List<Class<?>> arrayClasseParams = new ArrayList<>();
+		Optional.ofNullable(classeParams).ifPresent(t -> Arrays.asList(convertArgsArray(Object.class, classeParams))
+				.forEach(x -> arrayClasseParams.add(x.getClass())));
+		return arrayClasseParams;
+	}
+
+	public static Class<?>[] convertObjectToClassArray(Object... classeParams) {
+		List<Class<?>> arrayClasseParams = convertObjectToClass(classeParams);
+		return arrayClasseParams.toArray(new Class<?>[] {});
+	}
+
+	public static <T> Constructor<T> getConstructorObject(Class<?> classe, Object... params) {
+		Class<?>[] arrayClasseParams = convertObjectToClassArray(params);
+		return getConstructor(classe, arrayClasseParams);
+	}
+
+	public static <T> Constructor<T> getConstructorObject(Object obj, Object... params) {
+		Class<?>[] arrayClasseParams = convertObjectToClassArray(params);
+		return getConstructor(obj.getClass(), arrayClasseParams);
+	}
+
+	public static <T> T newInstance(Class<T> classe, Object... params) {
+		List<?> listParams = convertArgs(params);
+		if (listParams == null || listParams.size() == 0) {
+			try {
+				return classe.newInstance();
+			} catch (InstantiationException | IllegalAccessException e1) {
+				throw new APPSystemException(e1);
+			}
+		} else {
+
+			Constructor<T> constructor = getConstructorObject(classe, params);
+			if (constructor == null)
+				return null;
+			try {
+				return constructor.newInstance(params);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new APPSystemException(e);
+			}
+
+		}
+	}
+
+	public static <T> T newInstanceClass(Class<T> classe, Class<?>... params) {
+		List<?> listParams = convertArgs(params);
+		if (listParams == null || listParams.size() == 0) {
+			return newInstance(classe);
+		} else {
+
+			List<Object> listObject = new ArrayList<>();
+			listParams.forEach(x -> listObject.add(newInstance((Class) x)));
+			return newInstance(classe, listParams.toArray(new Object[] {}));
+
+		}
+	}
+
+	public static <T> T newInstanceByStream(OutputStream stream, Class<T> classe) {
+		T data = newInstance(classe);
+		try {
+			new ObjectOutputStream(stream).writeObject(data);
+		} catch (IOException e) {
+			throw new APPSystemException(e);
+		}
+		return data;
 	}
 
 }

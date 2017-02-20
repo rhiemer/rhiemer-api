@@ -14,7 +14,7 @@
 		<!-- Versões das API's utilizadas -->
 		<version.jboss.pom>10.1.0.Final</version.jboss.pom>
 		<wildfly.maven.plugin.version>1.0.2.Final</wildfly.maven.plugin.version>
-
+		<compilerArgument>-proc:none</compilerArgument>
 
 	</properties>
 
@@ -163,6 +163,7 @@
 				<configuration>
 					<source>${project.compile.java.version}</source>
 					<target>${project.compile.java.version}</target>
+					<compilerArgument>${compilerArgument}</compilerArgument>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -222,5 +223,8 @@
 		<module>rhiemer-api-web</module>
 		<module>rhiemer-api-cdi</module>
 		<module>rhiemer-api-ejb</module>
+		<module>rhiemer-api-dbunit</module>
+		<module>rhiemer-api-rest-resources</module>
+		<module>rhiemer-api-test-integration-dbunit</module>
 	</modules>
 </project>

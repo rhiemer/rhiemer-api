@@ -16,6 +16,20 @@ public abstract class GenericEntityComIdIncrementalDeleteLogico extends
 	 */
 	private static final long serialVersionUID = 6141238085821720956L;
 
+	public GenericEntityComIdIncrementalDeleteLogico() {
+		super();
+	}
+
+	public GenericEntityComIdIncrementalDeleteLogico(int chave) {
+		super(chave);
+	}
+
+	public GenericEntityComIdIncrementalDeleteLogico(Integer chave) {
+		super(chave);
+	}
+	
+	
+	
 	
 
 	

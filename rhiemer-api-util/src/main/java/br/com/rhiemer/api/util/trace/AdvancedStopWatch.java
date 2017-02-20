@@ -3,9 +3,13 @@ package br.com.rhiemer.api.util.trace;
 import java.io.Serializable;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
@@ -171,19 +175,24 @@ public class AdvancedStopWatch implements Serializable {
 			pf.setMinimumIntegerDigits(3);
 			pf.setGroupingUsed(false);
 
+			List<String> stringsList = new ArrayList<>();
 			while (!taskList.isEmpty()) {
 				AdvancedTaskInfo task = taskList.poll();
-				sb.append(formatarTempo(task.getTimeMillis())).append("\t");
-				sb.append(
+				StringBuilder sbLista = new StringBuilder();
+				sbLista.append(formatarTempo(task.getTimeMillis())).append("\t");
+				sbLista.append(
 						pf.format(task.getTimeSeconds() / getTotalTimeSeconds()))
 						.append("\t");
-				sb.append(task.getStatus()).append("\t");
-				sb.append(task.getTaskName()).append("\t|");
-				sb.append(task.getStartDate()).append(" - ");
-				sb.append(task.getEndDate());
-				sb.append("\n");
+				sbLista.append(task.getStatus()).append("\t");
+				sbLista.append(task.getTaskName()).append("\t|");
+				sbLista.append(task.getStartDate()).append(" - ");
+				sbLista.append(task.getEndDate());
+				sbLista.append("\n");
+				stringsList.add(0,sbLista.toString());
 			}
-
+			
+			stringsList.forEach(t->sb.append(t));
+			
 			return sb.toString();
 		}
 		return "";

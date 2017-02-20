@@ -20,49 +20,9 @@ import br.com.rhiemer.api.util.service.PersistenceServiceBean;
  *
  */
 @Trace
-public class RESTFullResource implements RestFull {
+public class RESTFullResource extends RESTFullPerisitenceService implements RestFull {
 
-	@Inject
-	protected RestFullEntities restfullEntities;
-
-	@Inject
-	protected PersistenceServiceBeanFacroty persistenceServiceBeanFacroty;
-
-	protected PersistenceServiceBean persistenceService;
-
-	@SemTrace
-	protected Class<? extends PersistenceServiceBean> getClassePersistenceService() {
-		return PersistenceServiceBean.class;
-	}
-
-	@SemTrace
-	protected <K extends PersistenceServiceBean> K buscarPersitenceService(Class<?> classe, Class<K> classeProxy) {
-
-		PersistenceServiceBean beanClass = getPersitenceService();
-		if (beanClass == null) {
-			Object o = persistenceServiceBeanFacroty.buscarPersistenceServiceBean(classe, classeProxy);
-			return (K) o;
-		} else
-			return (K) beanClass;
-
-	}
-
-	@SemTrace
-	protected PersistenceServiceBean buscarPersitenceService(Class<?> classe) {
-		return buscarPersitenceService(classe, getClassePersistenceService());
-
-	}
-
-	@SemTrace
-	protected PersistenceServiceBean getPersitenceService() {
-		return this.persistenceService;
-	}
-
-	@SemTrace
-	protected void setPersistenceService(PersistenceServiceBean persistenceService) {
-		this.persistenceService = persistenceService;
-	}
-
+	
 	@Override
 	public Object find(String entity) {
 
@@ -86,17 +46,15 @@ public class RESTFullResource implements RestFull {
 
 	@Override
 	public Object add(String entity, Object json) {
-		Class<?> clazz = restfullEntities.getNotFound(entity);
-		Object entityObject = JsonHelper.toObject(json, clazz);
-		Object result = buscarPersitenceService(clazz).adicionar(entityObject);
+		Object entityObject = toEntidade(entity,json);
+		Object result = buscarPersitenceService(entity.getClass()).adicionar(entityObject);
 		return result;
 	}
 
 	@Override
 	public Object update(String entity, Object json) {
-		Class<?> clazz = restfullEntities.getNotFound(entity);
-		Object entityObject = JsonHelper.toObject(json, clazz);
-		Object result = buscarPersitenceService(clazz).atualizar(entityObject);
+		Object entityObject = toEntidade(entity,json);
+		Object result = buscarPersitenceService(entity.getClass()).atualizar(entityObject);
 		return result;
 	}
 

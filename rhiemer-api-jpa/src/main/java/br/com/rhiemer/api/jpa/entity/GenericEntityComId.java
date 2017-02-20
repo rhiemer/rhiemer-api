@@ -3,14 +3,21 @@ package br.com.rhiemer.api.jpa.entity;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class GenericEntityComId<Chave> extends GenericEntity implements EntityComId<Chave>
-{
+public abstract class GenericEntityComId<Chave> extends GenericEntity implements EntityComId<Chave> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6141238085821720956L;
 
+	public GenericEntityComId() {
+		super();
+	}
+
+	public GenericEntityComId(Chave chave) {
+		super();
+		setId(chave);
+	}
 
 	@Override
 	protected void posCopia(Object copia) {
@@ -24,7 +31,5 @@ public abstract class GenericEntityComId<Chave> extends GenericEntity implements
 		((GenericEntityComId) clone).setId(null);
 		return clone;
 	}
-
-	
 
 }

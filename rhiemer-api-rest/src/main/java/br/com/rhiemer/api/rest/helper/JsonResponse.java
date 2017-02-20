@@ -124,6 +124,19 @@ public class JsonResponse {
 				.header(HttpHeaders.CONTENT_TYPE, MEDIA_REST_JSON)
 				.entity(erroRetornoDTO).build();
 	}
+	
+	/***
+	 * Constrói uma resposta com um HTTP Status Server Error: Server Error
+	 * 
+	 * @return Response 404
+	 */
+	public static Response respondeHTTPStatusServerError(Exception exception) {
+		ErroRetornoDTO erroRetornoDTO = new ErroRetornoDTO("ServerError",
+				"Erro de processamento interno.", exception);
+		return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+				.header(HttpHeaders.CONTENT_TYPE, MEDIA_REST_JSON)
+				.entity(erroRetornoDTO).build();
+	}
 
 	/***
 	 * Constrói uma resposta com um HTTP Status 401: Unauthorized

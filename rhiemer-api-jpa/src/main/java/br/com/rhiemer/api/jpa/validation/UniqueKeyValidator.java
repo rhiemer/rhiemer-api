@@ -1,6 +1,5 @@
 package br.com.rhiemer.api.jpa.validation;
 
-
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.validation.ConstraintValidator;
@@ -8,12 +7,11 @@ import javax.validation.ConstraintValidatorContext;
 
 import br.com.rhiemer.api.jpa.annotations.UniqueKey;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.helper.HelperJPA;
+import br.com.rhiemer.api.jpa.helper.HelperUniqueKeyJPA;
 import br.com.rhiemer.api.jpa.mapper.EntityManagerMapClass;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
-public class UniqueKeyValidator implements
-		ConstraintValidator<UniqueKey, PojoKeyAbstract> {
+public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKeyAbstract> {
 
 	@Inject
 	private EntityManagerMapClass entityManagerMapClass;
@@ -27,17 +25,15 @@ public class UniqueKeyValidator implements
 	}
 
 	@Override
-	public boolean isValid(PojoKeyAbstract target,
-			ConstraintValidatorContext context) {
+	public boolean isValid(PojoKeyAbstract target, ConstraintValidatorContext context) {
 
 		EntityManager entityManager = entityManagerMapClass
-				.getEntityManagerByEntity((Class<? extends Entity>)target.getClass());
+				.getEntityManagerByEntity((Class<? extends Entity>) target.getClass());
 		if (entityManager == null) {
 			return true;
 		}
 
-		PojoKeyAbstract result = HelperJPA.listaEntityByUniqueKey(
-				entityManager, target, true);
+		PojoKeyAbstract result = HelperUniqueKeyJPA.listaEntityByUniqueKeyValida(entityManager, target);
 		return (result == null);
 	}
 

@@ -14,8 +14,8 @@ public abstract class GenericEntityComIdString extends GenericEntityComId<String
 	@Id
 	private String id;
 
-	public String getId() {
-		return id;
+	public String getId() {		
+		return id;		
 	}
 
 	public void setId(String id) {

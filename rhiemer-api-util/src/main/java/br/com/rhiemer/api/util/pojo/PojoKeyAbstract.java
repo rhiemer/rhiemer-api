@@ -23,7 +23,11 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 	@JsonIgnore
 	@XmlTransient
 	private transient List<String> primaryKey;
-	private final transient Map<String, Class<?>> primaryKeyTypes = new HashMap<>();
+
+	@Transient
+	@JsonIgnore
+	@XmlTransient
+	private transient Map<String, Class<?>> primaryKeyTypes;
 
 	@JsonIgnore
 	@XmlTransient
@@ -32,8 +36,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 
 			primaryKey = new ArrayList<>();
 
-			primaryKeyTypes.putAll(Helper.getPrimaryKeyList(this.getClass()));
-			for (Map.Entry<String, Class<?>> entry : primaryKeyTypes.entrySet()) {
+			for (Map.Entry<String, Class<?>> entry : primaryKeyTypes().entrySet()) {
 				primaryKey.add(entry.getKey());
 			}
 
@@ -42,7 +45,18 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 	}
 
 	public Map<String, Class<?>> primaryKeyTypes() {
+		if (this.primaryKeyTypes == null) {
+			primaryKeyTypes = new HashMap<>();
+			primaryKeyTypes.putAll(Helper.getPrimaryKeyList(this.getClass()));
+		}
 		return this.primaryKeyTypes;
+	}
+	
+	
+	public Map<Object,Object> primaryKeyValueMap() {		
+		Map<Object,Object> map = new HashMap<>();
+		this.primaryKey.forEach(t->map.put(t,Helper.getValueMethodOrField(this,t)));
+		return map;		
 	}
 
 	@Transient

@@ -6,9 +6,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import br.com.rhiemer.api.rest.helper.ErroRetornoDTO;
+import br.com.rhiemer.api.rest.helper.ErroRetornoListaDTO;
+import br.com.rhiemer.api.rest.helper.ErroRetornoListaMapDTO;
 import br.com.rhiemer.api.rest.helper.JsonResponse;
 import br.com.rhiemer.api.util.annotations.app.LogApp;
+import br.com.rhiemer.api.util.exception.AbstractValidacaoException;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 
 /**
@@ -18,8 +20,7 @@ import br.com.rhiemer.api.util.log.LogAplicacao;
  *
  */
 @Provider
-public class ConstraintViolationExceptionMapper implements
-		ExceptionMapper<ConstraintViolationException> {
+public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
 	@Inject
 	@LogApp
@@ -30,13 +31,11 @@ public class ConstraintViolationExceptionMapper implements
 
 		logger.error("ConstraintViolationException: " + exception.getMessage(), exception);
 
-		ErroRetornoDTO erroRetornoDTO = new ErroRetornoDTO(
-				"ConstraintViolationException",
-				"Problemas de validação na entidade enviada.",
-				exception.getMessage());
+		ErroRetornoListaDTO erroRetornoDTO = new ErroRetornoListaDTO("ConstraintViolationException",
+				"Problemas de validação na entidade enviada.", "Atributos inválidos",
+				AbstractValidacaoException.listaDto(exception.getConstraintViolations()));
 
-		return JsonResponse.respondeUTF8(Response.Status.BAD_REQUEST,
-				erroRetornoDTO);
+		return JsonResponse.respondeUTF8(Response.Status.BAD_REQUEST, erroRetornoDTO);
 
 	}
 

@@ -3,9 +3,9 @@ package br.com.rhiemer.api.jpa.dao;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesDesligarEvenetosJPA.PRE_UPDATE;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -13,14 +13,18 @@ import javax.persistence.TypedQuery;
 import org.apache.commons.beanutils.BeanUtils;
 
 import br.com.rhiemer.api.jpa.builder.BuildJPA;
+import br.com.rhiemer.api.jpa.builder.BuilderQuery;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.helper.HelperJPA;
+import br.com.rhiemer.api.jpa.helper.HelperHQL;
+import br.com.rhiemer.api.jpa.helper.HelperUniqueKeyJPA;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
-import br.com.rhiemer.api.util.annotations.bean.BeanDiscovery;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
 import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
 import br.com.rhiemer.api.util.annotations.interceptor.Trace;
+import br.com.rhiemer.api.util.exception.APPSystemException;
+import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.PojoHelper;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 /**
@@ -81,7 +85,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 */
 	@Override
 	public <T extends PojoKeyAbstract> T adicionarOuatualizar(T t) {
-		T value = HelperJPA.listaEntityByUniqueKey(em, t, false);
+		T value = HelperUniqueKeyJPA.listaEntityByUniqueKeyAtualiza(em, t);
 		if (value == null) {
 			em.persist(t);
 			return t;
@@ -143,6 +147,21 @@ public class DaoJPAImpl implements DaoJPA {
 
 	}
 
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k) {
+		return HelperUniqueKeyJPA.listaEntityByUniqueKeyByParams(em, t, k);
+
+	}
+
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t, String nome, Object... k) {
+		return HelperUniqueKeyJPA.listaEntityByUniqueKeyByNome(em, t, nome, k);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -166,7 +185,7 @@ public class DaoJPAImpl implements DaoJPA {
 		try {
 			BeanUtils.copyProperties(obj, t2);
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new RuntimeException(e instanceof InvocationTargetException ? e.getCause() : e);
+			throw new APPSystemException(e);
 		}
 
 	}
@@ -318,6 +337,24 @@ public class DaoJPAImpl implements DaoJPA {
 	@Override
 	public int excutarUpdateQuery(BuildJPA query) {
 		return query.buildQuery(em).executeUpdate();
+	}
+
+	@Override
+	public <T> void deletar(T t) {
+		String strDelete = HelperHQL.sqlDelete((PojoKeyAbstract) t);
+		if (!Helper.isBlank(strDelete)) {
+			BuildJPA query = BuilderQuery.builder().sql(strDelete).addParameterPrimaryKey((PojoKeyAbstract) t).build();
+			excutarUpdateQuery(query);
+		}
+	}
+
+	@Override
+	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id, Class<T> classe) {
+		if (id == null)
+			return null;
+		T instancia = PojoHelper.newInstacePrimaryKey(classe, id);
+		deletar(instancia);
+		return instancia;
 	}
 
 }

@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import br.com.rhiemer.api.rest.helper.ErroRetornoDTO;
+import br.com.rhiemer.api.rest.helper.ErroRetornoListaDTO;
 import br.com.rhiemer.api.rest.helper.JsonResponse;
 import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.exception.AbstractValidacaoException;
@@ -18,8 +18,7 @@ import br.com.rhiemer.api.util.log.LogAplicacao;
  *
  */
 @Provider
-public class ValidationBeanExceptionMapper implements
-		ExceptionMapper<AbstractValidacaoException> {
+public class ValidationBeanExceptionMapper implements ExceptionMapper<AbstractValidacaoException> {
 
 	@Inject
 	@LogApp
@@ -30,13 +29,10 @@ public class ValidationBeanExceptionMapper implements
 
 		logger.error("ValidacaoException: " + exception.getMessage(), exception);
 
-		ErroRetornoDTO erroRetornoDTO = new ErroRetornoDTO(
-				"ValidacaoException",
-				"Problemas de validação na entidade enviada.",
-				exception.getMessage());
+		ErroRetornoListaDTO erroRetornoDTO = new ErroRetornoListaDTO("ValidacaoException",
+				"Problemas de validação na entidade enviada.", "Atributos inválidos", exception.getLista());
 
-		return JsonResponse.respondeUTF8(Response.Status.BAD_REQUEST,
-				erroRetornoDTO);
+		return JsonResponse.respondeUTF8(Response.Status.BAD_REQUEST, erroRetornoDTO);
 
 	}
 
