@@ -1,8 +1,5 @@
 package br.com.rhiemer.api.dbunit.operation;
 
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -18,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 
 import br.com.rhiemer.api.dbunit.helper.HelperDbUnit;
@@ -26,14 +22,12 @@ import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.HelperEntityManager;
 import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.helper.Helper;
-import br.com.rhiemer.api.util.helper.HelperClassLoader;
 
 public class DBUnitOperations {
 
 	public static final DatabaseOperation DELETE_INSERT = new CompositeOperationAPP(DatabaseOperation.DELETE,
 			DatabaseOperation.INSERT);
 
-	private static final String BUILDER_METHOD_DATASET = "build";
 	private DatabaseConnection databaseConnection;
 	private Connection connection;
 	private boolean isClose;
@@ -135,30 +129,12 @@ public class DBUnitOperations {
 	}
 
 	public void operationExecute(DatabaseOperation dataBaseOperation, String... dataset) {
-		operationExecute(dataBaseOperation, FlatXmlDataSetBuilder.class, dataset);
+		operationExecute(dataBaseOperation, FlatDataSetBuilderFileExtFactory.class, dataset);
 	}
 
 	public IDataSet builderDataSet(Class<?> dataSetClass, String dataSet) {
 
-		InputStream is = HelperClassLoader.getResourceAsStream(dataSet, this.getClass());
-		IDataSet iDataSet = null;
-		Method method = null;
-		try {
-			method = dataSetClass.getMethod(BUILDER_METHOD_DATASET, InputStream.class);
-		} catch (NoSuchMethodException | SecurityException e1) {
-		}
-
-		if (method != null) {
-			Object builder = Helper.newInstance(dataSetClass);
-			try {
-				iDataSet = (IDataSet) method.invoke(builder, is);
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				throw new APPSystemException(e);
-			}
-		} else {
-			iDataSet = (IDataSet) Helper.newInstance(dataSetClass, is);
-		}
-		return iDataSet;
+		return HelperDbUnit.builderDataSet(dataSetClass, dataSet);
 	}
 
 	public void addListDataSets(Class<?> dataSetClass, Set<IDataSet> listDataSets, String... datasets) {

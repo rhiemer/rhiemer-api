@@ -1,16 +1,25 @@
 package br.com.rhiemer.api.util.helper;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
 import org.jboss.vfs.VirtualFile;
 
 import br.com.rhiemer.api.util.dto.Arquivo;
+import br.com.rhiemer.api.util.exception.APPSystemException;
 
 /**
  * 
@@ -86,6 +95,68 @@ public final class FileUtils {
 		String arquivoCaminho = System.getProperty("os.name").contains("indow") ? file.substring(1) : file;
 		Path path = Paths.get(arquivoCaminho);
 		return pathToArquivo(path);
+	}
+
+	public static String contentTypePeloArquivo(InputStream is) {
+		return contentTypePeloArquivo(is, null);
+	}
+
+	public static String contentTypePeloArquivo(byte[] arquivo) {
+		return contentTypePeloArquivo(arquivo, null);
+	}
+
+	public static String contentTypePeloArquivo(InputStream is, String docName) {
+		String contentType = null;
+		if (is == null) {
+			return contentType;
+		}
+
+		try {
+			contentType = URLConnection.guessContentTypeFromStream(is);
+		} catch (IOException e) {
+			throw new APPSystemException(e);
+		}
+
+		if (contentType == null) {
+			TikaConfig config = TikaConfig.getDefaultConfig();
+			Detector detector = config.getDetector();
+			TikaInputStream stream = TikaInputStream.get(is);
+
+			Metadata metadata = new Metadata();
+			if (Helper.isNotBlank(docName)) {
+				metadata.add(Metadata.RESOURCE_NAME_KEY, docName);
+			}
+			MediaType mediaType;
+			try {
+				mediaType = detector.detect(stream, metadata);
+			} catch (IOException e) {
+				throw new APPSystemException(e);
+			}
+			contentType = mediaType.toString();
+		}
+
+		return contentType;
+
+	}
+
+	public static String contentTypePeloArquivo(byte[] arquivo, String docName) {
+		String contentType = null;
+		if (arquivo == null) {
+			return contentType;
+		}
+
+		ByteArrayInputStream bis = null;
+		try {
+			bis = new ByteArrayInputStream(arquivo);
+			return contentTypePeloArquivo(bis, docName);
+		} finally {
+			try {
+				bis.close();
+			} catch (IOException e) {
+				throw new APPSystemException(e);
+			}
+		}
+
 	}
 
 }

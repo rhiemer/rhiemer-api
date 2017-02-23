@@ -47,7 +47,11 @@
 			<version>2.1.7.Final</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>1.13</version>
+		</dependency>
 
 	</dependencies>
 

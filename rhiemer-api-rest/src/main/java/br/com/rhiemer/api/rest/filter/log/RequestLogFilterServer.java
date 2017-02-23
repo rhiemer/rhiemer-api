@@ -1,8 +1,8 @@
 package br.com.rhiemer.api.rest.filter.log;
 
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
-import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
-import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DateTimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DateTimeUtils.HUMAN_TIME_FORMAT_MLS;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.app.LogApp;
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
-import br.com.rhiemer.api.util.helper.DatetimeUtils;
+import br.com.rhiemer.api.util.helper.DateTimeUtils;
 import br.com.rhiemer.api.util.log.LogAplicacao;
 import br.com.rhiemer.api.util.rest.LogarResultadoFilter;
 

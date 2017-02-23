@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.rest.helper;
 
 
-import static br.com.rhiemer.api.util.helper.DatetimeUtils.MACHINE_DATE_FORMAT;
+import static br.com.rhiemer.api.util.helper.DateTimeUtils.MACHINE_DATE_FORMAT;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

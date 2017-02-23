@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.util.rest;
 
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
-import static br.com.rhiemer.api.util.helper.DatetimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
+import static br.com.rhiemer.api.util.helper.DateTimeUtils.HUMAN_DATE_TIME_FORMAT_MLS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.format.json.FormatFacotry;
-import br.com.rhiemer.api.util.helper.DatetimeUtils;
+import br.com.rhiemer.api.util.helper.DateTimeUtils;
 
 public final class LogarResultadoFilter {
 
@@ -79,7 +79,7 @@ public final class LogarResultadoFilter {
 
 		if (!StringUtils.isBlank(value1) && !StringUtils.isBlank(value2))
 			return String.format("%s: %s\n", titulo,
-					DatetimeUtils.diffDatesStrFormat(value2, value1, HUMAN_DATE_TIME_FORMAT_MLS));
+					DateTimeUtils.diffDatesStrFormat(value2, value1, HUMAN_DATE_TIME_FORMAT_MLS));
 		else
 			return null;
 

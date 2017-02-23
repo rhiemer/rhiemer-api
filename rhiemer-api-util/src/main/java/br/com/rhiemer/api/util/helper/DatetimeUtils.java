@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author rodrigo.hiemer
  * 
  */
-public final class DatetimeUtils {
+public final class DateTimeUtils {
 
 	public static class OrdinalDiaSemana {
 		public static int PRIMEIRO = 1;
@@ -25,6 +25,9 @@ public final class DatetimeUtils {
 		public static int ULTIMO = 5;
 	}
 
+	public static final String REST_DATE_FORMAT = "dd-MM-yyyy";
+	public static final String REST_DATE_TIME_FORMAT = "dd-MM-yyyyHH:mm:ss";	
+	
 	public static final String MACHINE_DATE_FORMAT = "yyyy-MM-dd";
 	public static final String MACHINE_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	/**
@@ -42,7 +45,7 @@ public final class DatetimeUtils {
 
 	public static final String TIME_ZONE_BRASIL = "America/Sao_Paulo";
 
-	private DatetimeUtils() {
+	private DateTimeUtils() {
 	}
 
 	/**
@@ -137,7 +140,7 @@ public final class DatetimeUtils {
 
 		dtUltimaSemCinematograficaComecaSexta.set(anoMudancaSemanaCinematografica, Calendar.MARCH,
 				diaMudancaSemanaCinematografica);
-		DatetimeUtils.limparHoras(dtUltimaSemCinematograficaComecaSexta);
+		DateTimeUtils.limparHoras(dtUltimaSemCinematograficaComecaSexta);
 		return dtUltimaSemCinematograficaComecaSexta;
 	}
 
@@ -229,7 +232,7 @@ public final class DatetimeUtils {
 		// Se não foi solicitado o último [diaSemana]
 		if (ordinal != OrdinalDiaSemana.ULTIMO) {
 			// Inicia a variável com o primeiro dia do mês/ano
-			ini = DatetimeUtils.getCalendar(ano, mes, 1);
+			ini = DateTimeUtils.getCalendar(ano, mes, 1);
 			// Seta o Calendar para o primeiro [diaSemana] passado
 			while (ini.get(Calendar.DAY_OF_WEEK) != diaSemana) {
 				ini.add(Calendar.DAY_OF_MONTH, 1);
@@ -240,7 +243,7 @@ public final class DatetimeUtils {
 		// ligeiramente
 		else {
 			// Inicia a variável com o primeiro dia do mês/ano
-			ini = DatetimeUtils.getCalendar(ano, mes, 1);
+			ini = DateTimeUtils.getCalendar(ano, mes, 1);
 			// adiciona um mês e volta um dia
 			ini.add(Calendar.MONTH, 1);
 			ini.add(Calendar.DAY_OF_MONTH, -1);
@@ -283,7 +286,7 @@ public final class DatetimeUtils {
 		int mes = (h + l - 7 * m + 114) / 31;
 		int dia = ((h + l - 7 * m + 114) % 31) + 1;
 
-		return DatetimeUtils.getCalendar(ano, mes, dia);
+		return DateTimeUtils.getCalendar(ano, mes, dia);
 	}
 
 	/***
@@ -297,7 +300,7 @@ public final class DatetimeUtils {
 	 *         informado
 	 */
 	public static Calendar getTercaCarnaval(int ano) {
-		Calendar carnaval = DatetimeUtils.getDomingoPascoa(ano);
+		Calendar carnaval = DateTimeUtils.getDomingoPascoa(ano);
 		carnaval.add(Calendar.DAY_OF_MONTH, -47);
 		return carnaval;
 	}
