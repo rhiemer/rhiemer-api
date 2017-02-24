@@ -4,6 +4,6 @@ import br.com.rhiemer.api.jpa.criteria.create.CreateCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.interfaces.IMetodoCriteriaJPA;
 import br.com.rhiemer.api.util.criteria.MetodoCriteria;
 
-public abstract class MetodoCriteriaJPAFilter<T extends CreateCriteriaJPA> extends MetodoCriteria<T> implements IMetodoCriteriaJPA<T> {
+public abstract class JuncaoJPA<T extends CreateCriteriaJPA> extends MetodoCriteria<T> implements IMetodoCriteriaJPA<T> {
 	
 }

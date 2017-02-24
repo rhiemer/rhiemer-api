@@ -1,8 +1,8 @@
 package br.com.rhiemer.api.util.criteria;
 
-public abstract class MetodoCriteria implements IMetodoCriteria {
+public abstract class MetodoCriteria<T extends ICreateCriteria> implements IMetodoCriteria<T> {
 
-	private MetodoCriteria metodoNext;
+	private MetodoCriteria<T> metodoNext;
 
 	abstract protected void builderInternal();
 
@@ -23,11 +23,11 @@ public abstract class MetodoCriteria implements IMetodoCriteria {
 		this.getMetodoNext().builder(createCriteria);
 	}
 
-	public MetodoCriteria getMetodoNext() {
+	public MetodoCriteria<T> getMetodoNext() {
 		return metodoNext;
 	}
 
-	public void setMetodoNext(MetodoCriteria metodoNext) {
+	public void setMetodoNext(MetodoCriteria<T> metodoNext) {
 		this.metodoNext = metodoNext;
 	}
 

@@ -1,7 +1,7 @@
 package br.com.rhiemer.api.util.criteria;
 
-public interface IMetodoCriteria  {
+public interface IMetodoCriteria<T extends ICreateCriteria>  {
 	
-	void builder();
+	void builder(T createCriteria);
 
 }

@@ -6,7 +6,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import br.com.rhiemer.api.jpa.helper.HelperCriteria;
+import br.com.rhiemer.api.jpa.helper.HelperPredicateCriteria;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public class BuilderCriteriaPredicate {
@@ -27,7 +27,7 @@ public class BuilderCriteriaPredicate {
 			CriteriaBuilder builder, Expression exp, Object valor) {
 
 		if (!Helper.valueIsEmpty(valor)) {
-			predicates.add(HelperCriteria.equalsCaseInsensitive(builder, exp,
+			predicates.add(HelperPredicateCriteria.equalsCaseInsensitive(builder, exp,
 					valor));
 		}
 		return this;
@@ -44,7 +44,7 @@ public class BuilderCriteriaPredicate {
 	public BuilderCriteriaPredicate iLikeCaseInsensitive(
 			CriteriaBuilder builder, Expression<String> exp, String valor) {
 		if (!Helper.valueIsEmpty(valor)) {
-			predicates.add(HelperCriteria.iLikeCaseInsensitive(builder, exp,
+			predicates.add(HelperPredicateCriteria.iLikeCaseInsensitive(builder, exp,
 					valor));
 		}
 		return this;
@@ -53,7 +53,7 @@ public class BuilderCriteriaPredicate {
 	public BuilderCriteriaPredicate iLikeCaseSensitive(CriteriaBuilder builder,
 			Expression<String> exp, String valor) {
 		if (!Helper.valueIsEmpty(valor)) {
-			predicates.add(HelperCriteria.iLikeCaseSensitive(builder, exp,
+			predicates.add(HelperPredicateCriteria.iLikeCaseSensitive(builder, exp,
 					valor));
 		}
 		return this;
