@@ -51,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
+import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
@@ -87,6 +88,10 @@ public final class Helper {
 
 	public static String subStringStartEndWith(String str, String value) {
 		return subStringEndWith(subStringStartWith(str, value), value);
+	}
+	
+	public static String concatArray(String value,String... params) {
+		return concatArray("",value,params);
 	}
 
 	public static String concatArray(String str, String value, String... params) {
@@ -139,12 +144,12 @@ public final class Helper {
 
 	public static String concatSplashStarWith(String str, String... values) {
 		String result = concatSplash(str, values);
-		return concaNotRepeatPrefix(result,SPLASH);
+		return concaNotRepeatPrefix(result, SPLASH);
 	}
 
 	public static String concatSplashStarEndWith(String str, String... values) {
 		String result = concatSplash(str, values);
-		return concaNotRepeatSufix(result,SPLASH);
+		return concaNotRepeatSufix(result, SPLASH);
 	}
 
 	public static String concatSplashStarStartEndWith(String str, String... values) {
@@ -844,6 +849,75 @@ public final class Helper {
 
 	}
 
+	public static Class<?> classResult(AccessibleObject ao) {
+		if (ao == null)
+			return null;
+		else if (ao instanceof Method)
+			return ((Method) ao).getReturnType();
+		else if (ao instanceof Field)
+			return ((Field) ao).getType();
+		else
+			return null;
+	}
+
+	public static AccessibleObject getFieldOrMethod(Class<?> classe, String field) {
+		return getFieldOrMethod(classe, field, "get");
+	}
+
+	public static AccessibleObject getFieldOrMethod(Object objeto, String field) {
+		return getFieldOrMethod(objeto, field, "get");
+	}
+
+	public static AccessibleObject getFieldOrMethod(Class<?> classe, String field, String prefix) {
+
+		if (Helper.isBlank(field))
+			return null;
+
+		if (field.contains(DOT_FIELD)) {
+			String[] fieldsArray = field.split(DOT_FIELD);
+			AccessibleObject ao = null;
+			Class<?> classLoop = classe;
+			for (int i = 0; i < fieldsArray.length && classLoop != null; i++) {
+				String fieldArray = fieldsArray[i];
+				ao = getFieldOrMethod(classLoop, fieldArray, prefix);
+				if (i == fieldsArray.length - 1)
+					break;
+				classLoop = classResult(ao);
+				if (ao == null)
+					return null;
+			}
+			return ao;
+		}
+
+		List<AccessibleObject> lista = new ArrayList<AccessibleObject>();
+		for (Method method : classe.getMethods()) {
+			String methodName = null;
+			if (Helper.isNotBlank(prefix)) {
+				if (method.getName().equalsIgnoreCase(prefix.concat(field)))
+					return method;
+				else if (method.getName().equalsIgnoreCase(field))
+					return method;
+			}
+		}
+		List<Field> fields = allFields(classe);
+
+		for (Field fieldObj : fields) {
+			if (fieldObj.getName().equalsIgnoreCase(field)) {
+				return fieldObj;
+			}
+		}
+
+		return null;
+	}
+
+	public static AccessibleObject getFieldOrMethod(Object objeto, String field, String prefix) {
+		if (objeto == null)
+			return null;
+		Class clazz = verifyClassHandler(objeto);
+		AccessibleObject ao = getFieldOrMethod(clazz, field, prefix);
+		return ao;
+	}
+
 	public static List<AccessibleObject> allMethodsFieldsObj(Object objeto, String prefix) {
 		if (objeto == null)
 			return null;
@@ -953,6 +1027,21 @@ public final class Helper {
 					}
 			}
 		}
+
+		return null;
+
+	}
+
+	public static <T  extends Annotation,K> K valueAnnotation(T annotation, String strField,Class<K> classeObjeto) {
+
+		for (Method method : annotation.getClass().getMethods())
+			if (method.getName().equalsIgnoreCase(strField)) {
+				try {
+					return (K)method.invoke(annotation, (Object[]) null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new APPSystemException(e);
+				}
+			}
 
 		return null;
 

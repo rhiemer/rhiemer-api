@@ -10,5 +10,6 @@ public interface ConstantesAPIJPA {
 	static final String SERVICE_APLICACAO = "serviceJPAAplicacao";
 	static final String DAO_API = "daoAPI";
 	
+	
 
 }
