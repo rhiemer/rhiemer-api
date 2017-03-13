@@ -30,6 +30,11 @@ public class BuilderCriteria implements BuildJPA {
 		this.resultMaping = builder.resultMaping;
 		this.transformMap = builder.transformMap;
 	}
+	
+	public ParametrizarCriteria getParametrizarCriteriaInternal()
+	{
+		return null;
+	}
 
 	protected void paginar(Query query) {
 		if (pager != null) {
@@ -47,10 +52,18 @@ public class BuilderCriteria implements BuildJPA {
 		CriteriaQuery criteriaQuery = builder.createQuery(_createClass);
 		Root from = criteriaQuery.from(this.resultClass);
 		final List<Predicate> predicates = new ArrayList<Predicate>();
+		
+		ParametrizarCriteria parametrizarCriteriaInteral = getParametrizarCriteriaInternal();
+		if (parametrizarCriteriaInteral != null)
+		{	
+			criteriaQuery = parametrizarCriteriaInteral.parametrizar(builder, criteriaQuery, from, predicates);
+		}	
+		
 		if (this.parametrizarCriteria != null) {
 			criteriaQuery = this.parametrizarCriteria.parametrizar(builder, criteriaQuery, from, predicates);
-			criteriaQuery = criteriaQuery.select(from).where(predicates.toArray(new Predicate[] {}));
 		}
+		if (predicates.size() > 0)
+		  criteriaQuery = criteriaQuery.select(from).where(predicates.toArray(new Predicate[] {}));
 		Query query = em.createQuery(criteriaQuery);
 		paginar(query);
 		return query;

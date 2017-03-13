@@ -134,11 +134,12 @@ public final class HelperAtributeJPA {
 	}
 
 	public static Expression getExpression(Path path, Object attribute) {
-		if (attribute instanceof String) {
-			return path.get((String) attribute);
-		} else if (attribute instanceof SingularAttribute) {
-			return path.get((SingularAttribute) attribute);
-		} else if (attribute instanceof PluralAttribute) {
+
+		Path _path = getPath(path, attribute);
+		if (_path != null)
+			return _path;
+
+		if (attribute instanceof PluralAttribute) {
 			return path.get((PluralAttribute) attribute);
 		} else if (attribute instanceof MapAttribute) {
 			return path.get((MapAttribute) attribute);

@@ -1,30 +1,22 @@
 package br.com.rhiemer.api.jpa.helper;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesCriteriaJPA.FETCH_DEFAULT;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Fetch;
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.helper.Helper;
-import br.com.rhiemer.api.util.lambda.optinal.HelperOptional;
 
 public final class HelperRootCriteria {
 
 	private static final String ATRIBUTO_OPTIONAL_JOIN = "optional";
-	private static final Boolean FETCH_DEFAULT = false;
 
 	private HelperRootCriteria() {
 
