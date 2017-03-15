@@ -1,10 +1,9 @@
-package br.com.rhiemer.api.jpa.builder;
+package br.com.rhiemer.api.jpa.criteria.builder;
 
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
@@ -14,13 +13,17 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.filtros.FiltroCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloAtributoJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloValorJPA;
+import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPA;
+import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPA;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public class ParametrizarCriteriaJPAParametro {
 
-	private Class<? extends AbstractJoinCriteriaJPA> classe;
+	private Class<? extends ICriteriaJPA> classe;
+	private ICriteriaJPA objeto;
 	private Boolean fecth;
 	private JoinType joinType;
 	private String atributo;
@@ -35,22 +38,41 @@ public class ParametrizarCriteriaJPAParametro {
 	private String path2;
 	private Attribute[] pathAttribute1;
 	private Attribute[] pathAttribute2;
+	
+	public ParametrizarCriteriaJPAParametro()
+	{
+		super();
+	}
+	
+	public ParametrizarCriteriaJPAParametro(ParametroCriteriaJPADto parametrizaCriteriaJPADto)
+	{
+		super();
+		this.setCaseSensitve(parametrizaCriteriaJPADto.getCaseSensitve());
+		this.setJoinType(parametrizaCriteriaJPADto.getJoinType());
+		this.setNot(parametrizaCriteriaJPADto.getNot());
+		this.setIncludeNull(parametrizaCriteriaJPADto.getIncludeNull());
+		this.setFecth(parametrizaCriteriaJPADto.getFecth());
+	}
 
-	protected AbstractJoinCriteriaJPA clone(CriteriaBuilder builder, Root root) {
-		AbstractJoinCriteriaJPA operacao = Helper.newInstance(classe);
-		operacao.setRoot(root);
-		operacao.setJoinType(this.getJoinType());
-		operacao.setFecth(this.getFecth());
-		operacao.setAttributes(this.getAttributes());
-		operacao.setAtributo(this.getAtributo());
+	protected ICriteriaJPA clone(CriteriaBuilder builder, Root root) {
+		ICriteriaJPA operacao = null;
+		if (this.getObjeto() != null)
+		  operacao = this.getObjeto();	
+		else
+		  operacao = Helper.newInstance(classe);
+		Helper.setValueMethodOrField(operacao,"root",root);
+		Helper.setValueMethodOrField(operacao,"builder",builder);
+		Helper.setValueMethodOrField(operacao,"joinType",this.getFecth());
+		Helper.setValueMethodOrField(operacao,"fecth",this.getFecth());
+		Helper.setValueMethodOrField(operacao,"attributes",this.getAttributes());
+		Helper.setValueMethodOrField(operacao,"atributo",this.getAtributo());
 		Helper.setValueMethodOrField(operacao,"not",this.getNot());
 		Helper.setValueMethodOrField(operacao,"caseSensitve",this.getCaseSensitve());
 		Helper.setValueMethodOrField(operacao,"includeNull",this.getIncludeNull());
-		Helper.setValueMethodOrField(operacao,"builder",builder);
 		return operacao;
 	}
 
-	protected void execute(AbstractJoinCriteriaJPA operacao, CriteriaBuilder builder, Root root, CriteriaQuery query,
+	protected void execute(ICriteriaJPA operacao, CriteriaBuilder builder, Root root, CriteriaQuery query,
 			List<Predicate> predicates) {
 		Object result = null;
 		if (operacao instanceof FiltroCriteriaIntervaloAtributoJPA)
@@ -71,13 +93,21 @@ public class ParametrizarCriteriaJPAParametro {
 		else if (operacao instanceof OrderByCriteriaJPA)
 		{
 			Order order = ((OrderByCriteriaJPA)operacao).build();
-			query.orderBy(order);
-			
+			query.orderBy(order);			
 		}		
 		else if (operacao instanceof AbstractJoinCriteriaJPA)
 		{
 			((AbstractJoinCriteriaJPA)operacao).builderJoin();
 		}
+		else if (operacao instanceof IBuilderMetodosJuncaoJPAWhere)
+		{
+			((IBuilderMetodosJuncaoJPAWhere)operacao).builderQuery(builder, root, query);
+		}
+		else if (operacao instanceof IBuilderMetodosJuncaoJPA)
+		{
+			result = ((IBuilderMetodosJuncaoJPA)operacao).builderMetodoJuncao(builder, root, query);
+		}
+		
 		
 		if (result != null)
 		{
@@ -86,17 +116,17 @@ public class ParametrizarCriteriaJPAParametro {
 	}
 	
 	public void build(CriteriaBuilder builder, Root root,CriteriaQuery query,List<Predicate> predicates) {
-		AbstractJoinCriteriaJPA operacao = clone(builder,root);
+		ICriteriaJPA operacao = clone(builder,root);
 		execute(operacao,builder,root,query,predicates);
 	}
 
 
 
-	public Class<? extends AbstractJoinCriteriaJPA> getClasse() {
+	public Class<? extends ICriteriaJPA> getClasse() {
 		return classe;
 	}
 
-	public ParametrizarCriteriaJPAParametro setClasse(Class<? extends AbstractJoinCriteriaJPA> classe) {
+	public ParametrizarCriteriaJPAParametro setClasse(Class<? extends ICriteriaJPA> classe) {
 		this.classe = classe;
 		return this;
 	}
@@ -225,6 +255,15 @@ public class ParametrizarCriteriaJPAParametro {
 
 	public ParametrizarCriteriaJPAParametro setPathAttribute2(Attribute[] pathAttribute2) {
 		this.pathAttribute2 = pathAttribute2;
+		return this;
+	}
+
+	public ICriteriaJPA getObjeto() {
+		return objeto;
+	}
+
+	public ParametrizarCriteriaJPAParametro setObjeto(ICriteriaJPA objeto) {
+		this.objeto = objeto;
 		return this;
 	}
 

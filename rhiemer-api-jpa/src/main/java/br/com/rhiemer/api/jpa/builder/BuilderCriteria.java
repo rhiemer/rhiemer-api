@@ -31,7 +31,7 @@ public class BuilderCriteria implements BuildJPA {
 		this.transformMap = builder.transformMap;
 	}
 	
-	public ParametrizarCriteria getParametrizarCriteriaInternal()
+	protected ParametrizarCriteria getParametrizarCriteriaInternal()
 	{
 		return null;
 	}

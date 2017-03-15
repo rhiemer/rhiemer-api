@@ -1,4 +1,4 @@
-package br.com.rhiemer.api.jpa.builder;
+package br.com.rhiemer.api.jpa.criteria.builder;
 
 import java.util.List;
 
@@ -7,9 +7,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import br.com.rhiemer.api.jpa.builder.ParametrizarCriteria;
+
 public class ParametrizarCriteriaJPA implements ParametrizarCriteria {
-	
-	
 	
 	
 	public ParametrizarCriteriaJPA()

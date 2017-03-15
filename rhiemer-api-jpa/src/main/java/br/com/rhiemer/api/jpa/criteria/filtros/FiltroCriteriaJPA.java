@@ -2,6 +2,7 @@ package br.com.rhiemer.api.jpa.criteria.filtros;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -58,12 +59,25 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 		Path path = builderJoin();
 		return buildFiltro(path, filtros);
 	}
+	
+	protected Boolean getFiltroIsArray() {
+		return false;
+	}
 
 	public Expression buildFiltro(Expression path, Object... filtros) {
 		List<Object> args = Helper.convertArgs(filtros);
 		List<Expression> exps = new ArrayList<>();
 
-		args.stream().filter(t -> Helper.isNotBlank(t)).forEach(t -> exps.add(buildValue(path, t)));
+		if (!getFiltroIsArray())
+		{	
+		   args.stream().filter(t -> Helper.isNotBlank(t)).forEach(t -> exps.add(buildValue(path, t)));
+		}
+		else
+		{
+		   Object[] values = args.stream().filter(t -> Helper.isNotBlank(t)).toArray();
+		   if (values != null && values.length > 0)
+		     buildValue(path,values);
+		}	
 
 		Expression expJunction = null;
 		if (exps == null || exps.size() == 0)
@@ -86,23 +100,50 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 
 	}
 
-	protected Expression buildValue(Expression path, Object filtro) {
+	protected boolean caseInsensitive(Expression path)
+	{
+		return !getCaseSensitve() && path.getJavaType().isAssignableFrom(String.class);
+	}
+	
+	protected Object tranformCaseInsensitive(Expression path,Object filtro)
+	{
+		if (!caseInsensitive(path))
+		 return filtro;
+		else
+		 return filtro.toString().toUpperCase();	
+	}
+	
+	protected Expression buildExpression(Expression path) {
 		Expression _path = path;
-		Object _filtro = filtro;
-		if (!getCaseSensitve() && path.getJavaType().isAssignableFrom(String.class)) {
+		if (caseInsensitive(path)) {
 			_path = getBuilder().upper(path);
-			_filtro = filtro.toString().toUpperCase();
 		}
 
 		if (getIncludeNull()) {
 			Expression expInsNull = builder.isNull(path);
 			Expression expJunction = builder.or(expInsNull, _path);
 			_path = expJunction;
-
 		}
 
+		return _path;
+	}
+	
+	protected Expression buildValue(Expression path, Object filtro) {
+		Expression _path = buildExpression(path);
+	    Object _filtro = tranformCaseInsensitive(path,filtro);
 		return buildSingular(_path, _filtro);
 	}
+	
+	protected Expression buildPathArray(Expression path, Object[] filtro) {
+		Expression _path = buildExpression(path);
+		Object[] _filtro = Arrays.stream(filtro).map(t->tranformCaseInsensitive(path,t)).toArray();
+		return buildArray(_path, _filtro);
+	}
+	
+	protected Expression buildArray(Expression path, Object[] filtro) {
+		return null;
+	}
+	
 
 	public Expression buildFiltro(FiltroParametro... filtros) {
 
