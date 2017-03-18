@@ -110,13 +110,14 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 		if (!caseInsensitive(path))
 		 return filtro;
 		else
-		 return filtro.toString().toUpperCase();	
+		 return filtro.toString().toUpperCase().trim();	
 	}
 	
 	protected Expression buildExpression(Expression path) {
 		Expression _path = path;
 		if (caseInsensitive(path)) {
 			_path = getBuilder().upper(path);
+			_path = getBuilder().trim(_path);
 		}
 
 		if (getIncludeNull()) {
