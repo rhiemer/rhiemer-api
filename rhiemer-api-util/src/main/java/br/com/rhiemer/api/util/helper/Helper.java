@@ -71,6 +71,16 @@ public final class Helper {
 		else
 			return StringUtils.EMPTY;
 	}
+	
+	public static String concatArrayIndex(String[] strArray,int ind,String prefix) {
+		final String[] result=new String[]{null};
+		IntStream.range(0,ind).forEach(idx->result[0] = (result[0] == null?strArray[idx]:result[0].concat(prefix).concat(strArray[idx])));
+		return result[0];
+	}
+	
+	public static String concatArrayIndex(String[] strArray,int ind) {
+		return concatArrayIndex(strArray,ind,DOT_FIELD);
+	}
 
 	public static String subStringEndWith(String str, String value) {
 		if (str.endsWith(value))

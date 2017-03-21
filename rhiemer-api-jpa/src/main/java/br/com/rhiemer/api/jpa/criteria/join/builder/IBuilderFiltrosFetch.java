@@ -12,6 +12,7 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.FetchCriteriaJPA;
+import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
 
 public interface IBuilderFiltrosFetch extends ICriteriaJPA {
 

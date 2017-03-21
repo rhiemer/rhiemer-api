@@ -11,5 +11,6 @@ public interface ConstantesAtributosJPA {
 			ManyToMany.class };
 	static Class[] ANNOTATIONS_LIST = new Class[] { OneToMany.class, ManyToMany.class };
 	static Class[] ANNOTATIONS_REFERENCE = new Class[] { OneToMany.class, ManyToMany.class,OneToOne.class };
+	static Class[] ANNOTATIONS_ATRIBUTO = new Class[] {ManyToOne.class, OneToOne.class};
 
 }

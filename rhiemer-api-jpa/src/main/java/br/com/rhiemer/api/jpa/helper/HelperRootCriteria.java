@@ -153,6 +153,18 @@ public final class HelperRootCriteria {
 		return joinLoop;
 
 	}
+	
+	public static boolean isJoinInRoot(Class<?> classe,From join, String atributo) {
+		boolean isJoinField = HelperAtributeJPA.isField(classe,atributo);
+		if (!isJoinField)
+		 return true;
+		else
+		{
+			From from = getJoinComplex(join,atributo);
+			return from != null;
+		}	
+			
+	}
 
 	public static From getJoin(From join, String atributo) {
 

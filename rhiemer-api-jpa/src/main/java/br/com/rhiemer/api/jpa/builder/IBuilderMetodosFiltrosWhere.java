@@ -9,7 +9,7 @@ import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 
-public interface IBuilderMetodosFiltrosWhere extends IBuilderMetodosFiltrosJPA, IBuilderMetodosJuncaoJPAWhere {
+public interface IBuilderMetodosFiltrosWhere extends IBuilderMetodosFiltrosExecucaoJPA, IBuilderMetodosJuncaoJPAWhere {
 
 	default CriteriaQuery builderQuery(CriteriaBuilder builder, Root root, CriteriaQuery query) {
 		List<Predicate> predicates = this.builderAll(builder, root, query);

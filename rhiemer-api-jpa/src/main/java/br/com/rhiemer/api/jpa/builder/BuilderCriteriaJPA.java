@@ -9,16 +9,31 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
+import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
+import br.com.rhiemer.api.util.helper.Helper;
 
-public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosJPA {
+public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosExecucaoJPA {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> orderBys = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> joins = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
+	private List<IJPAExecucao> parametrosExecucao = new ArrayList<>();
+
+	
 
 	public BuilderCriteriaJPA(Builder builder) {
 		super(builder);
+	}
+	
+	@Override
+	public List<IJPAExecucao> getParametrosExecucao() {
+		return this.parametrosExecucao;
+	}
+	
+	public BuilderCriteriaJPA setParametrosExecucao(IJPAExecucao... parametrosExecucao) {
+		this.parametrosExecucao = Helper.convertArgs(parametrosExecucao);
+		return this;
 	}
 
 	@Override
@@ -54,6 +69,8 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 			}
 		};
 	}
+
+	
 
 	
 

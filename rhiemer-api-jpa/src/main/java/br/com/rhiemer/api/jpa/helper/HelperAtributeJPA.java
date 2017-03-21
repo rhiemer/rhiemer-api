@@ -3,6 +3,8 @@ package br.com.rhiemer.api.jpa.helper;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_JOIN;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LIST;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_REFERENCE;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_ATRIBUTO;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -10,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
@@ -47,6 +50,14 @@ public final class HelperAtributeJPA {
 
 	public static <T extends Annotation> T annotationMappedList(AccessibleObject field) {
 		Object annotation = Arrays.stream(ANNOTATIONS_LIST).filter(x -> field.getAnnotation(x) != null).findFirst()
+				.get();
+		;
+		return (T) annotation;
+
+	}
+	
+	public static <T extends Annotation> T annotationAtributo(AccessibleObject field) {
+		Object annotation = Arrays.stream(ANNOTATIONS_ATRIBUTO).filter(x -> field.getAnnotation(x) != null).findFirst()
 				.get();
 		;
 		return (T) annotation;
@@ -125,6 +136,30 @@ public final class HelperAtributeJPA {
 		return annotation == null;
 
 	}
+	
+	public static boolean isFieldListUnit(Class<?> classe, String fieldStr) {
+		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
+		return fieldisMappedList(field);		
+	}
+	
+	public static boolean isFieldList(Class<?> classe, String atributo) {
+
+		String[] strSplit = atributo.split(DOT_FIELD);
+		return IntStream.range(0,strSplit.length).filter(idx->isFieldListUnit(classe,Helper.concatArrayIndex(strSplit,idx))).findFirst().getAsInt() >-1;
+
+	}
+	
+	public static List<String> fieldsAtributo(Class<?> classe)
+	{
+		String[] allStrFromFields = Helper.allStrFromFields(classe,ANNOTATIONS_ATRIBUTO,true);
+		return Arrays.asList(allStrFromFields);
+	}
+	
+	public static List<String> fieldsList(Class<?> classe)
+	{
+		String[] allStrFromFields = Helper.allStrFromFields(classe,ANNOTATIONS_LIST,true);
+		return Arrays.asList(allStrFromFields);
+	}
 
 	public static String attributeToString(Attribute... attributes) {
 		List<Attribute> listAttributes = Helper.convertArgs(attributes);
@@ -190,5 +225,9 @@ public final class HelperAtributeJPA {
 		return path;
 
 	}
+	
+	
+	
+	
 
 }
