@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
+import br.com.rhiemer.api.util.dto.Pager;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosExecucaoJPA {
@@ -20,10 +21,20 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
 	private List<IJPAExecucao> parametrosExecucao = new ArrayList<>();
 
-	
+	public BuilderCriteriaJPA()
+	{
+		super();
+	}
 
-	public BuilderCriteriaJPA(Builder builder) {
-		super(builder);
+	public BuilderCriteriaJPA(BuilderCreate builder) {
+		super();
+		this.setCreateClass(builder.createClass);
+		this.setResultClass(builder.resultClass);
+		this.setPager(builder.pager);
+		this.setParametrizarCriteria(builder.parametrizarCriteria);
+		this.setResultMaping(builder.resultMaping);
+		this.setTransformMap(builder.transformMap);
+		this.setParametrosExecucao(builder.parametrosExecucao);
 	}
 	
 	@Override
@@ -68,6 +79,61 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 				return query;
 			}
 		};
+	}
+	
+	public static BuilderCreate builderCreate() {
+		return new BuilderCreate();
+	}
+	
+	public static class BuilderCreate {
+
+		private Class<?> createClass;
+		private boolean transformMap;
+		private Class<?> resultClass;
+		private Pager pager;
+		private ParametrizarCriteria parametrizarCriteria;
+		private String resultMaping;
+		private IJPAExecucao[] parametrosExecucao;
+
+		public BuilderCreate createClass(Class<?> createClass) {
+			this.createClass = createClass;
+			return this;
+		}
+
+		public BuilderCreate resultClass(Class<?> resultClass) {
+			this.resultClass = resultClass;
+			return this;
+		}
+
+		public BuilderCreate pager(Pager pager) {
+			this.pager = pager;
+			return this;
+		}
+
+		public BuilderCreate parametrizarCriteria(ParametrizarCriteria parametrizarCriteria) {
+			this.parametrizarCriteria = parametrizarCriteria;
+			return this;
+		}
+
+		public BuilderCreate resultMaping(String resultMaping) {
+			this.resultMaping = resultMaping;
+			return this;
+		}
+
+		public BuilderCreate transformMap(boolean transformMap) {
+			this.transformMap = transformMap;
+			return this;
+		}
+		
+		public BuilderCreate parametrosExecucao(IJPAExecucao... parametrosExecucao) {
+			this.parametrosExecucao = parametrosExecucao;
+			return this;
+		}
+
+		public BuilderCriteriaJPA build() {
+			return new BuilderCriteriaJPA(this);
+		}
+
 	}
 
 	

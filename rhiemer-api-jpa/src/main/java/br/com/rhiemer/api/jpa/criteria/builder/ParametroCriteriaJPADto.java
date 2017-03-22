@@ -9,6 +9,7 @@ public class ParametroCriteriaJPADto {
 	private Boolean not = false;
 	private Boolean caseSensitve = false;
 	private Boolean includeNull = false;
+	private Boolean isExpression = false;
 	
 	public Boolean getFecth() {
 		return fecth;
@@ -44,6 +45,13 @@ public class ParametroCriteriaJPADto {
 	}
 	public ParametroCriteriaJPADto setIncludeNull(Boolean includeNull) {
 		this.includeNull = includeNull;
+		return this;
+	}
+	public Boolean getIsExpression() {
+		return isExpression;
+	}
+	public ParametroCriteriaJPADto setIsExpression(Boolean isExpression) {
+		this.isExpression = isExpression;
 		return this;
 	}
 

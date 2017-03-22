@@ -15,6 +15,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import br.com.rhiemer.api.jpa.builder.BuildJPA;
 import br.com.rhiemer.api.jpa.builder.BuilderQuery;
 import br.com.rhiemer.api.jpa.entity.Entity;
+import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
 import br.com.rhiemer.api.jpa.helper.HelperHQL;
 import br.com.rhiemer.api.jpa.helper.HelperUniqueKeyJPA;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
@@ -161,6 +162,8 @@ public class DaoJPAImpl implements DaoJPA {
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t, String nome, Object... k) {
 		return HelperUniqueKeyJPA.listaEntityByUniqueKeyByNome(em, t, nome, k);
 	}
+	
+	
 
 	/*
 	 * (non-Javadoc)

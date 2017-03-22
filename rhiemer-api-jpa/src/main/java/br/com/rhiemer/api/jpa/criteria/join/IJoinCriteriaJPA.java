@@ -13,10 +13,9 @@ import static br.com.rhiemer.api.jpa.constantes.ConstantesCriteriaJPA.FETCH_DEFA
 public interface IJoinCriteriaJPA extends ICriteriaJPA {
 
 	String getAtributo();
-
 	Attribute[] getAttributes();
-
-	From getRoot();
+	From getRoot();	
+	
 
 	default Boolean getFecth() {
 		return FETCH_DEFAULT;

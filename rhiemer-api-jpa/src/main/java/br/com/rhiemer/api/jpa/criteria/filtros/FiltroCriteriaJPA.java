@@ -7,10 +7,13 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.metamodel.Attribute;
 
 import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implements IFiltroCriteriaJPA {
@@ -19,6 +22,11 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 	private Boolean not = false;
 	private Boolean caseSensitve = false;
 	private Boolean includeNull = false;
+	private Boolean isExpression = false;
+
+	public Boolean getIsExpression() {
+		return isExpression;
+	}
 
 	public CriteriaBuilder getBuilder() {
 		return builder;
@@ -55,11 +63,16 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 		return this;
 	}
 
+	public FiltroCriteriaJPA setIsExpression(Boolean isExpression) {
+		this.isExpression = isExpression;
+		return this;
+	}
+
 	public Expression build(Object... filtros) {
 		Path path = builderJoin();
 		return buildFiltro(path, filtros);
 	}
-	
+
 	protected Boolean getFiltroIsArray() {
 		return false;
 	}
@@ -68,16 +81,13 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 		List<Object> args = Helper.convertArgs(filtros);
 		List<Expression> exps = new ArrayList<>();
 
-		if (!getFiltroIsArray())
-		{	
-		   args.stream().filter(t -> Helper.isNotBlank(t)).forEach(t -> exps.add(buildValue(path, t)));
+		if (!getFiltroIsArray()) {
+			args.stream().filter(t -> Helper.isNotBlank(t)).forEach(t -> exps.add(buildValue(path, t)));
+		} else {
+			Object[] values = args.stream().filter(t -> Helper.isNotBlank(t)).toArray();
+			if (values != null && values.length > 0)
+				exps.add(buildValue(path, values));
 		}
-		else
-		{
-		   Object[] values = args.stream().filter(t -> Helper.isNotBlank(t)).toArray();
-		   if (values != null && values.length > 0)
-		     buildValue(path,values);
-		}	
 
 		Expression expJunction = null;
 		if (exps == null || exps.size() == 0)
@@ -100,19 +110,17 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 
 	}
 
-	protected boolean caseInsensitive(Expression path)
-	{
+	protected boolean caseInsensitive(Expression path) {
 		return !getCaseSensitve() && path.getJavaType().isAssignableFrom(String.class);
 	}
-	
-	protected Object tranformCaseInsensitive(Expression path,Object filtro)
-	{
+
+	protected Object tranformCaseInsensitive(Expression path, Object filtro) {
 		if (!caseInsensitive(path))
-		 return filtro;
+			return filtro;
 		else
-		 return filtro.toString().toUpperCase().trim();	
+			return filtro.toString().toUpperCase().trim();
 	}
-	
+
 	protected Expression buildExpression(Expression path) {
 		Expression _path = path;
 		if (caseInsensitive(path)) {
@@ -128,23 +136,32 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 
 		return _path;
 	}
-	
+
+	protected Expression buildIsExpression(Object filtro) {
+		Expression exp = HelperRootCriteria.getExpressionObj(getRoot(), getFecth(), getJoinType(), filtro);
+		Expression _exp = buildExpression(exp);
+		return _exp;
+	}
+
 	protected Expression buildValue(Expression path, Object filtro) {
 		Expression _path = buildExpression(path);
-	    Object _filtro = tranformCaseInsensitive(path,filtro);
+		Object _filtro = null;
+		if (getIsExpression())
+			_filtro = buildIsExpression(filtro);
+		else
+			_filtro = tranformCaseInsensitive(path, filtro);
 		return buildSingular(_path, _filtro);
 	}
-	
+
 	protected Expression buildPathArray(Expression path, Object[] filtro) {
 		Expression _path = buildExpression(path);
-		Object[] _filtro = Arrays.stream(filtro).map(t->tranformCaseInsensitive(path,t)).toArray();
+		Object[] _filtro = Arrays.stream(filtro).map(t -> tranformCaseInsensitive(path, t)).toArray();
 		return buildArray(_path, _filtro);
 	}
-	
+
 	protected Expression buildArray(Expression path, Object[] filtro) {
 		return null;
 	}
-	
 
 	public Expression buildFiltro(FiltroParametro... filtros) {
 

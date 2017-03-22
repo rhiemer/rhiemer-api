@@ -1,10 +1,12 @@
 package br.com.rhiemer.api.jpa.helper;
 
 import static br.com.rhiemer.api.jpa.constantes.ConstantesCriteriaJPA.FETCH_DEFAULT;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -83,6 +85,36 @@ public final class HelperRootCriteria {
 		return (Join) joinLoop;
 
 	}
+	
+	public static Join createJoinComplexObj(From rootJoin,Boolean fecth, JoinType joinType,Object filtro) {
+
+		Join join = null;
+		if (filtro instanceof String)
+			join = HelperRootCriteria.createJoinComplex(rootJoin,(String)filtro,fecth,joinType);
+		else if (filtro instanceof Attribute[])
+			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType,(Attribute[])filtro);
+		else if (filtro instanceof Attribute)
+			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType,(Attribute)filtro);
+		else 
+			return null;
+		return join;
+
+	}
+	
+	public static Expression getExpressionObj(From rootJoin,Boolean fecth, JoinType joinType,Object filtro) {
+
+		Expression exp = null;
+		if (filtro instanceof String)
+			exp = HelperRootCriteria.getAttribute(rootJoin,(String)filtro,fecth,joinType);
+		else if (filtro instanceof Attribute[])
+			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType,(Attribute[])filtro);
+		else if (filtro instanceof Attribute)
+			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType,(Attribute)filtro);
+		else 
+			return null;
+		return exp;
+
+	}
 
 	public static <T extends From & Join, K extends Join> boolean replaceJoinType(From rootJoin, K join,
 			JoinType newJoinType) {
@@ -135,35 +167,28 @@ public final class HelperRootCriteria {
 
 	public static From getJoinComplex(From join, String atributo) {
 
-		String[] atributoSplit = atributo.split("[.]");
+		String[] atributoSplit = atributo.split(DOT_FIELD);
 		From joinLoop = join;
 		String atributoComp = "";
-		boolean isField = HelperAtributeJPA.isField(join.getJavaType(), atributo);
 
 		for (int i = 0; (i < atributoSplit.length - 1 && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
 				atributoComp = atributoComp.concat(".").concat(atributo);
 			else
 				atributoComp = atributo;
-			joinLoop = getJoin(joinLoop, atributo);
-			if (isField && i >= atributoSplit.length - 2)
+			boolean isField = HelperAtributeJPA.isField(join.getJavaType(), atributoComp);
+			if (isField)
 				break;
+			joinLoop = getJoin(joinLoop, atributo);
 		}
 
 		return joinLoop;
 
 	}
-	
-	public static boolean isJoinInRoot(Class<?> classe,From join, String atributo) {
-		boolean isJoinField = HelperAtributeJPA.isField(classe,atributo);
-		if (!isJoinField)
-		 return true;
-		else
-		{
-			From from = getJoinComplex(join,atributo);
-			return from != null;
-		}	
-			
+
+	public static boolean isJoinInRoot(Class<?> classe, From join, String atributo) {
+		From from = getJoinComplex(join, atributo);
+		return from != null;
 	}
 
 	public static From getJoin(From join, String atributo) {

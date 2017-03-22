@@ -20,6 +20,11 @@ public class BuilderCriteria implements BuildJPA {
 	private ParametrizarCriteria parametrizarCriteria;
 	private String resultMaping;
 	private Boolean transformMap = false;
+	
+	public BuilderCriteria()
+	{
+		super();
+	}
 
 	public BuilderCriteria(Builder builder) {
 		super();

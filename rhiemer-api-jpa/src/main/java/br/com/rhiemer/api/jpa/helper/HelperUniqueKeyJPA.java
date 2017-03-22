@@ -12,8 +12,10 @@ import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.annotations.UniqueKey;
 import br.com.rhiemer.api.jpa.builder.BuilderCriteria;
+import br.com.rhiemer.api.jpa.builder.BuilderCriteriaJPA;
 import br.com.rhiemer.api.jpa.builder.BuilderCriteriaPredicate;
 import br.com.rhiemer.api.jpa.builder.ParametrizarCriteria;
+import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
@@ -96,9 +98,16 @@ public final class HelperUniqueKeyJPA {
 			entity.setPrimaryKey(value);
 
 	}
-
+	
 	public static <T> T listaEntityByUniqueKey(EntityManager entityManager, PojoKeyAbstract entity, boolean isNot,
 			boolean valida, boolean atualiza, String... nomesUniqueKey) {
+		
+		return listaEntityByUniqueKey(entityManager,entity,isNot,valida,atualiza,null,nomesUniqueKey);
+		
+	}
+
+	public static <T> T listaEntityByUniqueKey(EntityManager entityManager, PojoKeyAbstract entity, boolean isNot,
+			boolean valida, boolean atualiza,IJPAExecucao[] execucoes,String... nomesUniqueKey) {
 
 		Class<?> entityClass = entity.getClass();
 		final UniqueKey[] arrayUniqueKey = entityClass.getAnnotationsByType(UniqueKey.class);
@@ -106,7 +115,7 @@ public final class HelperUniqueKeyJPA {
 		if (arrayUniqueKey == null || arrayUniqueKey.length == 0)
 			return null;
 
-		BuilderCriteria buildCriteria = BuilderCriteria.builder().resultClass(entity.getClass())
+		BuilderCriteriaJPA buildCriteria = BuilderCriteriaJPA.builderCreate().resultClass(entity.getClass()).parametrosExecucao(execucoes)
 				.parametrizarCriteria(new ParametrizarCriteria() {
 
 					@Override

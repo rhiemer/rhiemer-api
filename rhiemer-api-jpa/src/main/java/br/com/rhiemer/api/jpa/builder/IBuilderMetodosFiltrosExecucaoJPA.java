@@ -9,9 +9,10 @@ import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.execucao.builder.IBuilderExecucaoAtributos;
 import br.com.rhiemer.api.jpa.criteria.execucao.builder.IBuilderExecucaoOrderBy;
+import br.com.rhiemer.api.jpa.criteria.filtros.uniquekey.FiltroCriteriaUniqueKeyJPA;
 
 public interface IBuilderMetodosFiltrosExecucaoJPA
-		extends IBuilderMetodosFiltrosJPA, IBuilderExecucaoAtributos, IBuilderExecucaoOrderBy {
+		extends FiltroCriteriaUniqueKeyJPA,IBuilderMetodosFiltrosJPA, IBuilderExecucaoAtributos, IBuilderExecucaoOrderBy {
 	
 	
 	default List<Predicate> builderAll(CriteriaBuilder builder, Root root, CriteriaQuery query)
