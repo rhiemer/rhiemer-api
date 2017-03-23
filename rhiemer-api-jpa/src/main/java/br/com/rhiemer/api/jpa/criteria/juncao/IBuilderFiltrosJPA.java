@@ -6,7 +6,7 @@ import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametroCriteriaJPADto;
 import br.com.rhiemer.api.jpa.criteria.filtros.equals.EqualsCriteriaJPA;
 
-public interface IBuilderFiltrosJPA extends IBuilderMetodosJPA {
+public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 	
 	default MetodosJuncaoJPAOr or()
 	{
@@ -36,40 +36,40 @@ public interface IBuilderFiltrosJPA extends IBuilderMetodosJPA {
 		return objeto;
 	}
 	
-	default IBuilderFiltrosJPA equal(String atributo,Object...values)
+	default T equal(String atributo,Object...values)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class).setAtributo(atributo).setValues(values));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJPA equal(String atributo,ParametroCriteriaJPADto parametos,Object...values)
+	default T equal(String atributo,ParametroCriteriaJPADto parametos,Object...values)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class).setAtributo(atributo).setValues(values));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJPA equal(Object value,Attribute... atributes)
+	default T equal(Object value,Attribute... atributes)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class).setAttributes(atributes).setValues(new Object[]{value}));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJPA equal(Object value,ParametroCriteriaJPADto parametos,Attribute... atributes)
+	default T equal(Object value,ParametroCriteriaJPADto parametos,Attribute... atributes)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class).setAttributes(atributes).setValues(new Object[]{value}));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJPA equal(Object[] values,Attribute... atributes)
+	default T equal(Object[] values,Attribute... atributes)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class).setAttributes(atributes).setValues(values));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJPA equal(Object[] values,ParametroCriteriaJPADto parametos,Attribute... atributes)
+	default T equal(Object[] values,ParametroCriteriaJPADto parametos,Attribute... atributes)
 	{
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class).setAttributes(atributes).setValues(values));
-		return this;
+		return (T)this;
 	}
 	
 	

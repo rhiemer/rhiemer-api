@@ -16,11 +16,11 @@ import br.com.rhiemer.api.jpa.criteria.join.FetchCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPAAsc;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPADesc;
 import br.com.rhiemer.api.jpa.enums.EnumTipoOrderBY;
-import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
-import br.com.rhiemer.api.jpa.execucao.IJPAExecucaoAtributos;
-import br.com.rhiemer.api.jpa.execucao.IJPAExecucaoLista;
 import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoAtributos;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoLista;
 
 public interface IBuilderExecucaoOrderBy extends ICriteriaJPA {
 

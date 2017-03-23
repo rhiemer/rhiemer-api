@@ -6,8 +6,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import br.com.rhiemer.api.jpa.annotations.UniqueKey;
+import br.com.rhiemer.api.jpa.builder.BuilderCriteriaJPA;
 import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.helper.HelperUniqueKeyJPA;
 import br.com.rhiemer.api.jpa.mapper.EntityManagerMapClass;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
@@ -19,7 +19,7 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 	private UniqueKey constraintAnnotation;
 
 	@Override
-	public void initialize(UniqueKey constraintAnnotation) {
+	public void initialize(UniqueKey constraintAnnotation) {	
 		this.constraintAnnotation = constraintAnnotation;
 
 	}
@@ -33,7 +33,8 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 			return true;
 		}
 
-		PojoKeyAbstract result = HelperUniqueKeyJPA.listaEntityByUniqueKeyValida(entityManager, target);
+		PojoKeyAbstract result = (PojoKeyAbstract) BuilderCriteriaJPA.builderCreate().createClass(target.getClass())
+				.build().uniqueKeyValida(target).buildQuery(entityManager).getSingleResult();
 		return (result == null);
 	}
 

@@ -12,25 +12,25 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.FetchCriteriaJPA;
-import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 
-public interface IBuilderFiltrosFetch extends ICriteriaJPA {
+public interface IBuilderFiltrosFetch<T> extends ICriteriaJPA {
 
 	List<ParametrizarCriteriaJPAParametro> getFetchs();
 
-	default IBuilderFiltrosFetch addFetchs(List<ParametrizarCriteriaJPAParametro> filtros) {
+	default T addFetchs(List<ParametrizarCriteriaJPAParametro> filtros) {
 		getFetchs().addAll(filtros);
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosFetch fetch(String atributo) {
+	default T fetch(String atributo) {
 		getFetchs().add(new ParametrizarCriteriaJPAParametro().setClasse(FetchCriteriaJPA.class).setAtributo(atributo));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosFetch fetch(Attribute... atributes) {
+	default T fetch(Attribute... atributes) {
 		getFetchs().add(new ParametrizarCriteriaJPAParametro().setClasse(FetchCriteriaJPA.class).setAttributes(atributes));
-		return this;
+		return (T)this;
 	}	
 	
 	default List<Predicate> builderFetchs(CriteriaBuilder builder, Root root, CriteriaQuery query) {

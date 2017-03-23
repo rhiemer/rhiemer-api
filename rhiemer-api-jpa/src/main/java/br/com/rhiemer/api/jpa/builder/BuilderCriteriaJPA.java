@@ -9,17 +9,17 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
-import br.com.rhiemer.api.jpa.execucao.IJPAExecucao;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.dto.Pager;
 import br.com.rhiemer.api.util.helper.Helper;
 
-public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosExecucaoJPA {
+public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosExecucaoJPA<BuilderCriteriaJPA> {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> orderBys = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> joins = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
-	private List<IJPAExecucao> parametrosExecucao = new ArrayList<>();
+	
 
 	public BuilderCriteriaJPA()
 	{
@@ -35,16 +35,6 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 		this.setResultMaping(builder.resultMaping);
 		this.setTransformMap(builder.transformMap);
 		this.setParametrosExecucao(builder.parametrosExecucao);
-	}
-	
-	@Override
-	public List<IJPAExecucao> getParametrosExecucao() {
-		return this.parametrosExecucao;
-	}
-	
-	public BuilderCriteriaJPA setParametrosExecucao(IJPAExecucao... parametrosExecucao) {
-		this.parametrosExecucao = Helper.convertArgs(parametrosExecucao);
-		return this;
 	}
 
 	@Override
@@ -93,7 +83,7 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 		private Pager pager;
 		private ParametrizarCriteria parametrizarCriteria;
 		private String resultMaping;
-		private IJPAExecucao[] parametrosExecucao;
+		private IExecucao[] parametrosExecucao;
 
 		public BuilderCreate createClass(Class<?> createClass) {
 			this.createClass = createClass;
@@ -125,7 +115,7 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 			return this;
 		}
 		
-		public BuilderCreate parametrosExecucao(IJPAExecucao... parametrosExecucao) {
+		public BuilderCreate parametrosExecucao(IExecucao... parametrosExecucao) {
 			this.parametrosExecucao = parametrosExecucao;
 			return this;
 		}

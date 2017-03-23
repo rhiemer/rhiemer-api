@@ -13,6 +13,7 @@ import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.util.annotations.app.ServiceAplicacao;
 import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
 import br.com.rhiemer.api.util.annotations.interceptor.Trace;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 @Trace
@@ -109,8 +110,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <K, T> T procurarPeloIdLazy(K k) {
-		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, k);
+	public <K, T> T procurarPeloIdLazy(K k,IExecucao... parametrosExecucao) {
+		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, k,parametrosExecucao);
 	}
 
 	@Override
@@ -132,8 +133,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> List<T> listarTodos() {
-		return this.getDao().listarTodos((Class<T>) classeObjeto);
+	public <T> List<T> listarTodos(IExecucao... parametrosExecucao) {
+		return this.getDao().listarTodos((Class<T>) classeObjeto,parametrosExecucao);
 	}
 
 	/*
@@ -173,8 +174,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe) {
-		return this.getDao().buscarObjetoSalvoLazy(t, (Class<T>) classeObjeto);
+	public <T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe,IExecucao... parametrosExecucao) {
+		return this.getDao().buscarObjetoSalvoLazy(t, (Class<T>) classeObjeto,parametrosExecucao);
 	}
 
 	/*
@@ -233,8 +234,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> List<T> listaTodosPaginada(int firstResult, int maxResults) {
-		return this.getDao().listaTodosPaginada((Class<T>) classeObjeto, firstResult, maxResults);
+	public <T> List<T> listaTodosPaginada(int firstResult, int maxResults,IExecucao... parametrosExecucao) {
+		return this.getDao().listaTodosPaginada((Class<T>) classeObjeto, firstResult, maxResults,parametrosExecucao);
 	}
 
 	/*

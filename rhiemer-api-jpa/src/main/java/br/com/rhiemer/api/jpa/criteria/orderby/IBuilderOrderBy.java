@@ -12,33 +12,33 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 
-public interface IBuilderOrderBy extends ICriteriaJPA {
+public interface IBuilderOrderBy<T> extends ICriteriaJPA {
 
 	List<ParametrizarCriteriaJPAParametro> getOrderBys();
 
-	default IBuilderOrderBy addOrderBy(List<ParametrizarCriteriaJPAParametro> filtros) {
+	default T addOrderBy(List<ParametrizarCriteriaJPAParametro> filtros) {
 		getOrderBys().addAll(filtros);
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderOrderBy orderBy(String atributo) {
+	default T orderBy(String atributo) {
 		getOrderBys().add(new ParametrizarCriteriaJPAParametro().setClasse(OrderByCriteriaJPAAsc.class).setAtributo(atributo));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderOrderBy orderBy(Attribute... atributes) {
+	default T orderBy(Attribute... atributes) {
 		getOrderBys().add(new ParametrizarCriteriaJPAParametro().setClasse(OrderByCriteriaJPAAsc.class).setAttributes(atributes));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderOrderBy orderByDesc(String atributo) {
+	default T orderByDesc(String atributo) {
 		getOrderBys().add(new ParametrizarCriteriaJPAParametro().setClasse(OrderByCriteriaJPADesc.class).setAtributo(atributo));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderOrderBy orderByDesc(Attribute... atributes) {
+	default T orderByDesc(Attribute... atributes) {
 		getOrderBys().add(new ParametrizarCriteriaJPAParametro().setClasse(OrderByCriteriaJPADesc.class).setAttributes(atributes));
-		return this;
+		return (T)this;
 	}
 
 	default List<Predicate> builderOrderBy(CriteriaBuilder builder, Root root, CriteriaQuery query) {

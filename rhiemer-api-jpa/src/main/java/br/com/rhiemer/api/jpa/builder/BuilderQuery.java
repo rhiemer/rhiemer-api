@@ -5,7 +5,9 @@ import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.nativeQuery;
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.query;
 import static br.com.rhiemer.api.jpa.enums.EnumTipoQuery.resource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -14,11 +16,14 @@ import javax.persistence.Query;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import br.com.rhiemer.api.jpa.builder.BuilderCriteria.Builder;
 import br.com.rhiemer.api.jpa.enums.EnumTipoQuery;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.dto.Arquivo;
 import br.com.rhiemer.api.util.dto.Pager;
 import br.com.rhiemer.api.util.helper.FileUtils;
+import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public class BuilderQuery implements BuildJPA {
@@ -31,6 +36,7 @@ public class BuilderQuery implements BuildJPA {
 	private ParametrizarQuery parametrizarQuery;
 	private String resultMaping;
 	private Boolean transformMap = false;
+	private List<IExecucao> parametrosExecucao = new ArrayList<>();
 
 	public BuilderQuery(Builder builder) {
 		super();
@@ -42,6 +48,7 @@ public class BuilderQuery implements BuildJPA {
 		this.parametrizarQuery = builder.parametrizarQuery;
 		this.resultMaping = builder.resultMaping;
 		this.transformMap = builder.transformMap;
+		this.setParametrosExecucao(builder.parametrosExecucao);
 	}
 
 	public EnumTipoQuery getTipoQuery() {
@@ -98,6 +105,15 @@ public class BuilderQuery implements BuildJPA {
 
 	protected void setResultMaping(String resultMaping) {
 		this.resultMaping = resultMaping;
+	}
+	
+	public List<IExecucao> getParametrosExecucao() {
+		return this.parametrosExecucao;
+	}
+	
+	public BuilderQuery setParametrosExecucao(IExecucao... parametrosExecucao) {
+		this.parametrosExecucao = Helper.convertArgs(parametrosExecucao);
+		return this;
 	}
 
 	protected Arquivo buscarArquivo() {
@@ -199,6 +215,7 @@ public class BuilderQuery implements BuildJPA {
 		private Map<Object, Object> parameters;
 		private ParametrizarQuery parametrizarQuery;
 		private String resultMaping;
+		private IExecucao[] parametrosExecucao;
 
 		public Builder tipoQuery(EnumTipoQuery tipoQuery) {
 			this.tipoQuery = tipoQuery;
@@ -251,6 +268,11 @@ public class BuilderQuery implements BuildJPA {
 
 		public Builder transformMap(boolean transformMap) {
 			this.transformMap = transformMap;
+			return this;
+		}
+		
+		public Builder parametrosExecucao(IExecucao... parametrosExecucao) {
+			this.parametrosExecucao = parametrosExecucao;
 			return this;
 		}
 

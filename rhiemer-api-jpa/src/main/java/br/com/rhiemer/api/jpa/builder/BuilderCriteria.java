@@ -10,7 +10,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.dto.Pager;
+import br.com.rhiemer.api.util.helper.Helper;
 
 public class BuilderCriteria implements BuildJPA {
 
@@ -20,6 +22,7 @@ public class BuilderCriteria implements BuildJPA {
 	private ParametrizarCriteria parametrizarCriteria;
 	private String resultMaping;
 	private Boolean transformMap = false;
+	private List<IExecucao> parametrosExecucao = new ArrayList<>();
 	
 	public BuilderCriteria()
 	{
@@ -34,6 +37,7 @@ public class BuilderCriteria implements BuildJPA {
 		this.parametrizarCriteria = builder.parametrizarCriteria;
 		this.resultMaping = builder.resultMaping;
 		this.transformMap = builder.transformMap;
+		this.setParametrosExecucao(builder.parametrosExecucao);
 	}
 	
 	protected ParametrizarCriteria getParametrizarCriteriaInternal()
@@ -86,6 +90,7 @@ public class BuilderCriteria implements BuildJPA {
 		private Pager pager;
 		private ParametrizarCriteria parametrizarCriteria;
 		private String resultMaping;
+		private IExecucao[] parametrosExecucao;
 
 		public Builder createClass(Class<?> createClass) {
 			this.createClass = createClass;
@@ -114,6 +119,11 @@ public class BuilderCriteria implements BuildJPA {
 
 		public Builder transformMap(boolean transformMap) {
 			this.transformMap = transformMap;
+			return this;
+		}
+		
+		public Builder parametrosExecucao(IExecucao... parametrosExecucao) {
+			this.parametrosExecucao = parametrosExecucao;
 			return this;
 		}
 
@@ -169,6 +179,15 @@ public class BuilderCriteria implements BuildJPA {
 
 	public void setTransformMap(Boolean transformMap) {
 		this.transformMap = transformMap;
+	}
+	
+	public List<IExecucao> getParametrosExecucao() {
+		return this.parametrosExecucao;
+	}
+	
+	public BuilderCriteria setParametrosExecucao(IExecucao... parametrosExecucao) {
+		this.parametrosExecucao = Helper.convertArgs(parametrosExecucao);
+		return this;
 	}
 
 	

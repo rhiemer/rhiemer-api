@@ -11,8 +11,8 @@ import br.com.rhiemer.api.jpa.criteria.execucao.builder.IBuilderExecucaoAtributo
 import br.com.rhiemer.api.jpa.criteria.execucao.builder.IBuilderExecucaoOrderBy;
 import br.com.rhiemer.api.jpa.criteria.filtros.uniquekey.FiltroCriteriaUniqueKeyJPA;
 
-public interface IBuilderMetodosFiltrosExecucaoJPA
-		extends FiltroCriteriaUniqueKeyJPA,IBuilderMetodosFiltrosJPA, IBuilderExecucaoAtributos, IBuilderExecucaoOrderBy {
+public interface IBuilderMetodosFiltrosExecucaoJPA<T>
+		extends FiltroCriteriaUniqueKeyJPA<T>,IBuilderMetodosFiltrosJPA<T>, IBuilderExecucaoAtributos, IBuilderExecucaoOrderBy {
 	
 	
 	default List<Predicate> builderAll(CriteriaBuilder builder, Root root, CriteriaQuery query)

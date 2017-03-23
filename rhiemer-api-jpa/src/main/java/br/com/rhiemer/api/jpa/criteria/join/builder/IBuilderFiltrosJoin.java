@@ -13,23 +13,23 @@ import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.JoinCriteriaJPA;
 
-public interface IBuilderFiltrosJoin extends ICriteriaJPA {
+public interface IBuilderFiltrosJoin<T> extends ICriteriaJPA {
 
 	List<ParametrizarCriteriaJPAParametro> getJoins();
 
-	default IBuilderFiltrosJoin addJoins(List<ParametrizarCriteriaJPAParametro> filtros) {
+	default T addJoins(List<ParametrizarCriteriaJPAParametro> filtros) {
 		getJoins().addAll(filtros);
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJoin join(String atributo) {
+	default T join(String atributo) {
 		getJoins().add(new ParametrizarCriteriaJPAParametro().setClasse(JoinCriteriaJPA.class).setAtributo(atributo));
-		return this;
+		return (T)this;
 	}
 	
-	default IBuilderFiltrosJoin join(Attribute... atributes) {
+	default T join(Attribute... atributes) {
 		getJoins().add(new ParametrizarCriteriaJPAParametro().setClasse(JoinCriteriaJPA.class).setAttributes(atributes));
-		return this;
+		return (T)this;
 	}	
 	
 	default List<Predicate> builderJoins(CriteriaBuilder builder, Root root, CriteriaQuery query) {

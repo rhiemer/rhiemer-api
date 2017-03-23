@@ -12,8 +12,8 @@ import br.com.rhiemer.api.jpa.criteria.join.builder.IBuilderFiltrosJoin;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderFiltrosJPA;
 import br.com.rhiemer.api.jpa.criteria.orderby.IBuilderOrderBy;
 
-public interface IBuilderMetodosFiltrosJPA
-		extends IBuilderFiltrosJPA, IBuilderOrderBy, IBuilderFiltrosJoin, IBuilderFiltrosFetch {
+public interface IBuilderMetodosFiltrosJPA<T>
+		extends IBuilderFiltrosJPA<T>, IBuilderOrderBy<T>, IBuilderFiltrosJoin<T>, IBuilderFiltrosFetch<T> {
 
 	default List<Predicate> builderAll(CriteriaBuilder builder, Root root, CriteriaQuery query)
 	{

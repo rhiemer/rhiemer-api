@@ -39,8 +39,11 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-envers</artifactId>
 		</dependency>
-		
-
+		<dependency>
+			<groupId>net.sf.beanlib</groupId>
+			<artifactId>beanlib-hibernate</artifactId>
+			<version>5.0.2beta</version>
+		</dependency>
 	</dependencies>
 
 	<profiles>
