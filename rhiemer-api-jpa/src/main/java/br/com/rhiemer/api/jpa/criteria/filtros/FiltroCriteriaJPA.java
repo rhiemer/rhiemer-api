@@ -7,12 +7,12 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.metamodel.Attribute;
 
 import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
 import br.com.rhiemer.api.util.helper.Helper;
 
@@ -75,6 +75,14 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 
 	protected Boolean getFiltroIsArray() {
 		return false;
+	}
+
+	public String atributoBuild() {
+		Attribute[] _attributes = getAttributes();
+		if (_attributes != null && _attributes.length > 0)
+			return HelperAtributeJPA.attributeToString(_attributes);
+		else
+			return getAtributo();
 	}
 
 	public Expression buildFiltro(Expression path, Object... filtros) {
@@ -143,6 +151,13 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 		return _exp;
 	}
 
+	protected Object buildValueObjComplex(Object filtro) {
+
+		String attr = atributoBuild();
+		return HelperAtributeJPA.createEntity(getRoot().getJavaType(), attr, filtro);
+
+	}
+
 	protected Expression buildValue(Expression path, Object filtro) {
 		Expression _path = buildExpression(path);
 		Object _filtro = null;
@@ -150,7 +165,8 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 			_filtro = buildIsExpression(filtro);
 		else
 			_filtro = tranformCaseInsensitive(path, filtro);
-		return buildSingular(_path, _filtro);
+
+		return buildSingular(_path, buildValueObjComplex(_filtro));
 	}
 
 	protected Expression buildPathArray(Expression path, Object[] filtro) {

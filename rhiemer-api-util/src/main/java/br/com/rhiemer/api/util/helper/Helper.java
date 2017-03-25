@@ -51,7 +51,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
-import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.exception.APPSystemException;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 

@@ -24,11 +24,11 @@ import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoLista;
 
 public interface IBuilderExecucaoOrderBy extends ICriteriaJPA {
 
-	Class<?> getCreateClass();
+	Class<?> getResultClass();
 
 	default void builderExecucaoOrderBy(CriteriaBuilder builder, Root root, CriteriaQuery query) {
-		Arrays.stream(getCreateClass().getAnnotationsByType(OrderByAtributo.class))
-				.filter(t -> HelperRootCriteria.isJoinInRoot(getCreateClass(), root, t.value()))
+		Arrays.stream(getResultClass().getAnnotationsByType(OrderByAtributo.class))
+				.filter(t -> HelperRootCriteria.isJoinInRoot(getResultClass(), root, t.value()))
 				.forEach(t -> new ParametrizarCriteriaJPAParametro()
 						.setClasse(t.tipo() == EnumTipoOrderBY.DESC ? OrderByCriteriaJPADesc.class
 								: OrderByCriteriaJPAAsc.class)

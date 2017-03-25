@@ -1,5 +1,7 @@
 package br.com.rhiemer.api.jpa.criteria.juncao;
 
+import java.util.Map;
+
 import javax.persistence.metamodel.Attribute;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
@@ -8,30 +10,30 @@ import br.com.rhiemer.api.jpa.criteria.filtros.equals.EqualsCriteriaJPA;
 
 public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 	
-	default MetodosJuncaoJPAOr or()
+	default MetodosJuncaoJPAOr<T> or()
 	{
-		MetodosJuncaoJPAOr objeto = new MetodosJuncaoJPAOr(this);
+		MetodosJuncaoJPAOr<T> objeto = new MetodosJuncaoJPAOr(this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(objeto));
 		return objeto;
 	}
 	
-	default MetodosJuncaoJPAOr orNot()
+	default MetodosJuncaoJPAOr<T> orNot()
 	{
-		MetodosJuncaoJPAOr objeto =  new MetodosJuncaoJPAOr(this);
+		MetodosJuncaoJPAOr<T> objeto =  new MetodosJuncaoJPAOr(this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setNot(true).setObjeto(objeto));
 		return objeto;
 	}
 	
-	default MetodosJuncaoJPAAnd and()
+	default MetodosJuncaoJPAAnd<T> and()
 	{
-		MetodosJuncaoJPAAnd objeto = new MetodosJuncaoJPAAnd(this);
+		MetodosJuncaoJPAAnd<T> objeto = new MetodosJuncaoJPAAnd(this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(objeto));
 		return objeto;
 	}
 	
-	default MetodosJuncaoJPAAnd andNot()
+	default MetodosJuncaoJPAAnd<T> andNot()
 	{
-		MetodosJuncaoJPAAnd objeto =  new MetodosJuncaoJPAAnd(this);
+		MetodosJuncaoJPAAnd<T> objeto =  new MetodosJuncaoJPAAnd(this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setNot(true).setObjeto(objeto));
 		return objeto;
 	}
@@ -71,6 +73,14 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class).setAttributes(atributes).setValues(values));
 		return (T)this;
 	}
+	
+	default T equal(Map<String,Object> map)
+	{
+		map.forEach((x,y)->equal(x,y));
+		return (T)this;
+	}
+	
+	
 	
 	
 	

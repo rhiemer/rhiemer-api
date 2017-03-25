@@ -20,7 +20,7 @@ import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoSemAtributos;
 
 public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 
-	Class<?> getCreateClass();
+	Class<?> getResultClass();
 
 	List<IExecucao> getParametrosExecucao();
 
@@ -35,17 +35,17 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 		}	
 		if (getParametrosExecucao().stream().filter(t -> t instanceof IExecucaoAtributos).findFirst()
 				.get() != null) {
-			List<String> fieldsAtributo = HelperAtributeJPA.fieldsAtributo(getCreateClass());
-			fieldsAtributo.addAll(Arrays.stream(getCreateClass().getAnnotationsByType(ExecucaoAtributo.class))
-					.filter(t -> !HelperAtributeJPA.isFieldList(getCreateClass(), t.value()))
+			List<String> fieldsAtributo = HelperAtributeJPA.fieldsAtributo(getResultClass());
+			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
+					.filter(t -> !HelperAtributeJPA.isFieldList(getResultClass(), t.value()))
 					.map(ExecucaoAtributo::value).collect(Collectors.toList()));
 			fieldsAtributo.stream().forEach(t -> new ParametrizarCriteriaJPAParametro()
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));
 		}
 		if (getParametrosExecucao().stream().filter(t -> t instanceof IExecucaoLista).findFirst().get() != null) {
-			List<String> fieldsAtributo = HelperAtributeJPA.fieldsList(getCreateClass());
-			fieldsAtributo.addAll(Arrays.stream(getCreateClass().getAnnotationsByType(ExecucaoAtributo.class))
-					.filter(t -> HelperAtributeJPA.isFieldList(getCreateClass(), t.value()))
+			List<String> fieldsAtributo = HelperAtributeJPA.fieldsList(getResultClass());
+			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
+					.filter(t -> HelperAtributeJPA.isFieldList(getResultClass(), t.value()))
 					.map(ExecucaoAtributo::value).collect(Collectors.toList()));
 			fieldsAtributo.stream().forEach(t -> new ParametrizarCriteriaJPAParametro()
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));

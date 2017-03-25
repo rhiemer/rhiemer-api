@@ -32,8 +32,9 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 		if (entityManager == null) {
 			return true;
 		}
+		 
 
-		PojoKeyAbstract result = (PojoKeyAbstract) BuilderCriteriaJPA.builderCreate().createClass(target.getClass())
+		PojoKeyAbstract result = (PojoKeyAbstract) BuilderCriteriaJPA.builderCreate().resultClass(target.getClass())
 				.build().uniqueKeyValida(target).buildQuery(entityManager).getSingleResult();
 		return (result == null);
 	}

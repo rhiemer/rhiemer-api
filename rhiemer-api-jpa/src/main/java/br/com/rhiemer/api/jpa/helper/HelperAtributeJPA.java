@@ -4,12 +4,15 @@ import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIO
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LIST;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_REFERENCE;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_ATRIBUTO;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_CREATE;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -23,6 +26,8 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperPojo;
+import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class HelperAtributeJPA {
 
@@ -55,12 +60,29 @@ public final class HelperAtributeJPA {
 		return (T) annotation;
 
 	}
-	
+
 	public static <T extends Annotation> T annotationAtributo(AccessibleObject field) {
 		Object annotation = Arrays.stream(ANNOTATIONS_ATRIBUTO).filter(x -> field.getAnnotation(x) != null).findFirst()
 				.get();
 		;
 		return (T) annotation;
+
+	}
+
+	public static <T extends Annotation> T annotationCreate(AccessibleObject field) {
+		Object annotation = Arrays.stream(ANNOTATIONS_CREATE).filter(x -> field.getAnnotation(x) != null).findFirst()
+				.get();
+		;
+		return (T) annotation;
+
+	}
+
+	public static <T extends Annotation> T annotationCreate(Class<?> classe, String fieldStr) {
+		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
+		if (field != null)
+			return annotationCreate(field);
+		else
+			return null;
 
 	}
 
@@ -130,34 +152,44 @@ public final class HelperAtributeJPA {
 
 	}
 
+	public static boolean fieldisCreate(Class<?> classe, String fieldStr) {
+		return annotationCreate(classe, fieldStr) != null;
+
+	}
+
+	public static boolean fieldisCreate(AccessibleObject field) {
+		return annotationCreate(field) != null;
+
+	}
+
 	public static boolean isField(Class<?> classe, String atributo) {
 
 		Annotation annotation = annotationJoin(classe, atributo);
 		return annotation == null;
 
 	}
-	
+
 	public static boolean isFieldListUnit(Class<?> classe, String fieldStr) {
 		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
-		return fieldisMappedList(field);		
+		return fieldisMappedList(field);
 	}
-	
+
 	public static boolean isFieldList(Class<?> classe, String atributo) {
 
 		String[] strSplit = atributo.split(DOT_FIELD);
-		return IntStream.range(0,strSplit.length).filter(idx->isFieldListUnit(classe,Helper.concatArrayIndex(strSplit,idx))).findFirst().getAsInt() >-1;
+		return IntStream.range(0, strSplit.length)
+				.filter(idx -> isFieldListUnit(classe, Helper.concatArrayIndex(strSplit, idx))).findFirst()
+				.getAsInt() > -1;
 
 	}
-	
-	public static List<String> fieldsAtributo(Class<?> classe)
-	{
-		String[] allStrFromFields = Helper.allStrFromFields(classe,ANNOTATIONS_ATRIBUTO,true);
+
+	public static List<String> fieldsAtributo(Class<?> classe) {
+		String[] allStrFromFields = Helper.allStrFromFields(classe, ANNOTATIONS_ATRIBUTO, true);
 		return Arrays.asList(allStrFromFields);
 	}
-	
-	public static List<String> fieldsList(Class<?> classe)
-	{
-		String[] allStrFromFields = Helper.allStrFromFields(classe,ANNOTATIONS_LIST,true);
+
+	public static List<String> fieldsList(Class<?> classe) {
+		String[] allStrFromFields = Helper.allStrFromFields(classe, ANNOTATIONS_LIST, true);
 		return Arrays.asList(allStrFromFields);
 	}
 
@@ -225,9 +257,49 @@ public final class HelperAtributeJPA {
 		return path;
 
 	}
-	
-	
-	
-	
+
+	public static Object createEntity(Class<?> classe, String atributo, Object... chaves) {
+		if ((chaves == null || chaves.length == 0) && atributo != null && !fieldisJoin(classe, atributo))
+			return chaves;
+
+		Class<?> type = null;
+		if (atributo != null)
+			type = Helper.getTypeProperty(classe, atributo);
+		else
+			type = classe;
+
+		if (!chaves[0].getClass().isArray() && type != null && type.isInstance(chaves[0]))
+			return chaves;
+
+		return HelperPojo.newInstancePrimaryKey((Class<PojoKeyAbstract>) type, chaves);
+
+	}
+
+	public static Object createEntity(Class<?> classe, Object... chaves) {
+
+		return createEntity(classe, null, chaves);
+
+	}
+
+	public static Map<String, Object> mapCreateEntity(Class<?> classe, Object... chaves) {
+
+		Map<String, Object> result = new HashMap<>();
+		Map<String, Class<?>> _primaryKeys = Helper.getPrimaryKeyList(classe);
+		if (_primaryKeys.size() <= 1) {
+			Object[] _chaves = Helper.convertArgsArray(Object.class, chaves);
+			Object value = HelperAtributeJPA.createEntity(classe, _chaves);
+			result.put(_primaryKeys.keySet().iterator().next(), value);
+		} else {
+			int i = -1;
+			for (Map.Entry<String, Class<?>> entry : _primaryKeys.entrySet()) {
+				i++;
+				Object value = HelperAtributeJPA.createEntity(classe, entry.getKey(), chaves[i]);
+				result.put(entry.getKey(), value);
+			}
+		}
+
+		return result;
+
+	}
 
 }

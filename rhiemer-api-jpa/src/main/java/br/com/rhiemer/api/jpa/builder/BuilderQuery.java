@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.rhiemer.api.jpa.builder.BuilderCriteria.Builder;
 import br.com.rhiemer.api.jpa.enums.EnumTipoQuery;
+import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.dto.Arquivo;
@@ -181,6 +182,13 @@ public class BuilderQuery implements BuildJPA {
 
 		return query;
 	}
+	
+	public BuilderQuery addParameterPrimaryKey(Object... params) {
+		if (this.parameters == null)
+			this.parameters = new HashMap<>();
+		this.parameters.putAll(HelperAtributeJPA.mapCreateEntity(getResultClass(),params));
+		return this;
+	}
 
 	protected void paginar(Query query) {
 		if (pager != null) {
@@ -259,12 +267,7 @@ public class BuilderQuery implements BuildJPA {
 			return this;
 		}
 
-		public <T extends PojoKeyAbstract> Builder addParameterPrimaryKey(T entidade) {
-			if (this.parameters == null)
-				this.parameters = new HashMap<>();
-			this.parameters.putAll(entidade.primaryKeyValueMap());
-			return this;
-		}
+		
 
 		public Builder transformMap(boolean transformMap) {
 			this.transformMap = transformMap;

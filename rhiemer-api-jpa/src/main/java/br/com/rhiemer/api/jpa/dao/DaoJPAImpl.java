@@ -3,21 +3,19 @@ package br.com.rhiemer.api.jpa.dao;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesDesligarEvenetosJPA.PRE_UPDATE;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import br.com.rhiemer.api.jpa.annotations.TratarLazy;
 import br.com.rhiemer.api.jpa.builder.BuildJPA;
 import br.com.rhiemer.api.jpa.builder.BuilderCriteriaJPA;
 import br.com.rhiemer.api.jpa.builder.BuilderQuery;
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.HelperHQL;
-import br.com.rhiemer.api.jpa.helper.HelperLazy;
 import br.com.rhiemer.api.jpa.helper.JPAUtils;
-import br.com.rhiemer.api.jpa.parametros.execucao.IExecucaoLazy;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEvento;
 import br.com.rhiemer.api.util.annotations.evento.DesligaEventoInterceptorDiscovery;
 import br.com.rhiemer.api.util.annotations.interceptor.SemTrace;
@@ -37,27 +35,10 @@ import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
  */
 
 @Trace
+@TratarLazy
 public class DaoJPAImpl implements DaoJPA {
 
 	private EntityManager em;
-
-	private <T> T verificaLazy(T t, IExecucao... parametrosExecucao) {
-		List<IExecucao> _parametrosExecucao = Helper.convertArgs(parametrosExecucao);
-		if (t == null || (parametrosExecucao != null
-				&& (_parametrosExecucao.stream().filter(x -> x instanceof IExecucaoLazy).findFirst().get() != null))) {
-			return t;
-		}
-		return HelperLazy.copyDTO(t);
-	}
-
-	private <T> Collection<T> verificaLazy(Collection<T> t, IExecucao... parametrosExecucao) {
-		List<IExecucao> _parametrosExecucao = Helper.convertArgs(parametrosExecucao);
-		if (t == null || (parametrosExecucao != null
-				&& (_parametrosExecucao.stream().filter(x -> x instanceof IExecucaoLazy).findFirst().get() != null))) {
-			return t;
-		}
-		return HelperLazy.copyCollection(t);
-	}
 
 	@Override
 	@SemTrace
@@ -83,7 +64,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#adicionar(T)
 	 */
 	@Override
-	public <T> T adicionar(T t) {
+	public <T> T adicionar(T t, IExecucao... parametrosExecucao) {
 		em.persist(t);
 		return t;
 	}
@@ -94,7 +75,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#atualizar(T)
 	 */
 	@Override
-	public <T> T atualizar(T t) {
+	public <T> T atualizar(T t, IExecucao... parametrosExecucao) {
 		return em.merge(t);
 	}
 
@@ -104,9 +85,9 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#adicionarOuatualizar(T)
 	 */
 	@Override
-	public <T extends PojoKeyAbstract> T adicionarOuatualizar(T t) {
+	public <T extends PojoKeyAbstract> T adicionarOuatualizar(T t, IExecucao... parametrosExecucao) {
 		T value = excutarQueryUniqueResult(
-				BuilderCriteriaJPA.builderCreate().createClass(t.getClass()).build().uniqueKeyValida(t));
+				BuilderCriteriaJPA.builderCreate().resultClass(t.getClass()).build().uniqueKeyValida(t));
 		if (value == null) {
 			em.persist(t);
 			return t;
@@ -135,7 +116,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 */
 	@Override
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
-	public <K, T> T procurarPeloId(Class<T> t, K k) {
+	public <K, T> T procurarPeloId(Class<T> t, K k, IExecucao... parametrosExecucao) {
 		return em.find(t, k);
 	}
 
@@ -148,28 +129,33 @@ public class DaoJPAImpl implements DaoJPA {
 	@Override
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
-	public <K, T> T procurarPeloIdLazy(Class<T> classe, K k, IExecucao... parametrosExecucao) {
+	public <T> T procurarPeloIdLazy(Class<T> classe, Object... chaves) {
 
 		T result = null;
 		String namedQuery = classe.getSimpleName() + ".procurarPeloIdLazy";
 		boolean verificaNamedQuery = JPAUtils.verifcaNamedQuery(em.getEntityManagerFactory(), namedQuery);
 		if (verificaNamedQuery) {
-			result = excutarQueryUniqueResult(BuilderQuery.builder().resultClass(classe).sql(namedQuery)
-					.addParameterPrimaryKey((PojoKeyAbstract) k).build());
+			result = excutarQueryUniqueResult(
+					BuilderQuery.builder().resultClass(classe).sql(namedQuery).build().addParameterPrimaryKey(chaves));
 		} else {
-			result = excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().createClass(classe)
-					.parametrosExecucao(parametrosExecucao).build().primaryKey((PojoKeyAbstract) k));
+			result = excutarQueryUniqueResult(
+					BuilderCriteriaJPA.builderCreate().resultClass(classe).build().primaryKey(chaves));
 		}
 
-		return verificaLazy(result, parametrosExecucao);
+		return result;
 
+	}
+
+	@Override
+	public <K, T> T procurarPeloIdLazy(Class<T> classe, K k, IExecucao... parametrosExecucao) {
+		return procurarPeloIdLazy(classe, k);
 	}
 
 	@Override
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k) {
-		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().createClass(t).build().uniqueKeyByNome(k));
+		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(k));
 
 	}
 
@@ -178,7 +164,23 @@ public class DaoJPAImpl implements DaoJPA {
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t, String nome, Object... k) {
 		return excutarQueryUniqueResult(
-				BuilderCriteriaJPA.builderCreate().createClass(t).build().uniqueKeyByNome(nome, k));
+				BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(nome, k));
+	}
+
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object[] k, IExecucao... parametrosExecucao) {
+		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(k));
+	}
+
+	@Override
+	@DesligaEventoInterceptorDiscovery
+	@DesligaEvento(chaveEvento = PRE_UPDATE)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t, String nome, Object[] k,
+			IExecucao... parametrosExecucao) {
+		return excutarQueryUniqueResult(
+				BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(nome, k));
 	}
 
 	/*
@@ -191,7 +193,7 @@ public class DaoJPAImpl implements DaoJPA {
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> List<T> listarTodos(Class<T> t, IExecucao... parametrosExecucao) {
 		return excutarQueryList(
-				BuilderCriteriaJPA.builderCreate().createClass(t).parametrosExecucao(parametrosExecucao).build());
+				BuilderCriteriaJPA.builderCreate().resultClass(t).parametrosExecucao(parametrosExecucao).build());
 	}
 
 	private <T> void copiar(T t1, T t2) {
@@ -225,8 +227,8 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#copiarDoObjeto(T, java.lang.Class)
 	 */
 	@Override
-	public <T> T copiarDoObjeto(T t, Class<T> classe) {
-		T objetoSalvo = buscarObjetoSalvo(t, classe);
+	public <T> T copiarDoObjeto(T t, Class<T> classe, IExecucao... parametrosExecucao) {
+		T objetoSalvo = buscarObjetoSalvo(t, classe, parametrosExecucao);
 		copiar(objetoSalvo, t);
 		return objetoSalvo;
 	}
@@ -237,7 +239,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#buscarObjetoSalvo(T, java.lang.Class)
 	 */
 	@Override
-	public <T, K> T buscarObjetoSalvo(T t, Class<T> classe) {
+	public <T, K> T buscarObjetoSalvo(T t, Class<T> classe, IExecucao... parametrosExecucao) {
 		K chave = chaveDoObjeto(t);
 		if (chave == null)
 			throw new IllegalArgumentException("Chave do objeto " + t + " está nula .");
@@ -271,7 +273,7 @@ public class DaoJPAImpl implements DaoJPA {
 	 * @see br.com.rhiemer.api.jpa.dao.Dao#removerPeloId(K, java.lang.Class)
 	 */
 	@Override
-	public <T, K> T removerPeloId(K id, Class<T> classe) {
+	public <T, K> T removerPeloId(K id, Class<T> classe, IExecucao... parametrosExecucao) {
 		T instancia = procurarPeloId(classe, id);
 		remover(instancia);
 		return instancia;
@@ -302,7 +304,7 @@ public class DaoJPAImpl implements DaoJPA {
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> List<T> listaTodosPaginada(Class<T> classe, int firstResult, int maxResults,
 			IExecucao... parametrosExecucao) {
-		List<T> lista = excutarQueryList(BuilderCriteriaJPA.builderCreate().createClass(classe)
+		List<T> lista = excutarQueryList(BuilderCriteriaJPA.builderCreate().resultClass(classe)
 				.parametrosExecucao(parametrosExecucao).pager(new Pager(firstResult, maxResults)).build());
 		return lista;
 	}
@@ -328,9 +330,8 @@ public class DaoJPAImpl implements DaoJPA {
 	@Override
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
-	public <T> List<T> excutarQueryList(BuildJPA query) {
-		return (List<T>) verificaLazy(query.buildQuery(em).getResultList(), query.getParametrosExecucao() == null ? null
-				: query.getParametrosExecucao().toArray(new IExecucao[] {}));
+	public <T> List<T> excutarQueryList(BuildJPA query, IExecucao... parametrosExecucao) {
+		return query.buildQuery(em).getResultList();
 	}
 
 	/*
@@ -343,10 +344,8 @@ public class DaoJPAImpl implements DaoJPA {
 	@Override
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
-	public <T> T excutarQueryUniqueResult(BuildJPA query) {
-
-		return verificaLazy((T) query.buildQuery(em).getSingleResult(), query.getParametrosExecucao() == null ? null
-				: query.getParametrosExecucao().toArray(new IExecucao[] {}));
+	public <T> T excutarQueryUniqueResult(BuildJPA query, IExecucao... parametrosExecucao) {
+		return (T) query.buildQuery(em).getSingleResult();
 	}
 
 	/*
@@ -365,13 +364,13 @@ public class DaoJPAImpl implements DaoJPA {
 	public <T> void deletar(T t) {
 		String strDelete = HelperHQL.sqlDelete((PojoKeyAbstract) t);
 		if (!Helper.isBlank(strDelete)) {
-			BuildJPA query = BuilderQuery.builder().sql(strDelete).addParameterPrimaryKey((PojoKeyAbstract) t).build();
+			BuildJPA query = BuilderQuery.builder().sql(strDelete).build().addParameterPrimaryKey(t);
 			excutarUpdateQuery(query);
 		}
 	}
 
 	@Override
-	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id, Class<T> classe) {
+	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id, Class<T> classe, IExecucao... parametrosExecucao) {
 		if (id == null)
 			return null;
 		T instancia = PojoHelper.newInstacePrimaryKey(classe, id);

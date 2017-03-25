@@ -4,30 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
+import br.com.rhiemer.api.util.helper.Helper;
 
-public class MetodosJuncaoJPA  {
+public abstract class MetodosJuncaoJPA<T> {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
 	private Boolean not;
-	final private IBuilderMetodosJPA anterior;
-	
-	
+	final private IBuilderFiltrosJPA<T> anterior;
+
 	public MetodosJuncaoJPA() {
 		super();
-		this.anterior = null;		
+		this.anterior = null;
 	}
-	
 
-	public MetodosJuncaoJPA(IBuilderMetodosJPA anterior) {
+	public MetodosJuncaoJPA(IBuilderFiltrosJPA<T> anterior) {
 		super();
 		this.anterior = anterior;
 	}
 
-
 	public List<ParametrizarCriteriaJPAParametro> getFiltros() {
 		return filtros;
 	}
-	
+
 	public Boolean getNot() {
 		return not;
 	}
@@ -36,9 +34,18 @@ public class MetodosJuncaoJPA  {
 		this.not = not;
 	}
 
-	public IBuilderMetodosJPA getAnterior() {
+	public IBuilderFiltrosJPA<T> getAnterior() {
 		return anterior;
 	}
 
+	public T getRoot() {
+		Object _root = this;
+		Object _anterior = this;
+		do {
+			_root = _anterior;
+			_anterior = Helper.getValueMethodOrField(_root, "anterior");
+		} while (_anterior != null);
+		return (T) _root;
+	}
 
 }

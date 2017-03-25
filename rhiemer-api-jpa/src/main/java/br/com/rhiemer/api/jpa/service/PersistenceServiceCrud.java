@@ -66,8 +66,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 * @see br.com.rhiemer.api.util.service.PersistenceServiceBean#adicionar(T)
 	 */
 	@Override
-	public <T> T adicionar(T t) {
-		return this.getDao().adicionar(t);
+	public <T> T adicionar(T t, IExecucao... parametrosExecucao) {
+		return this.getDao().adicionar(t, parametrosExecucao);
 	}
 
 	/*
@@ -76,13 +76,13 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 * @see br.com.rhiemer.api.util.service.PersistenceServiceBean#atualizar(T)
 	 */
 	@Override
-	public <T> T atualizar(T t) {
-		return this.getDao().atualizar(t);
+	public <T> T atualizar(T t, IExecucao... parametrosExecucao) {
+		return this.getDao().atualizar(t, parametrosExecucao);
 	}
 
 	@Override
-	public <T extends PojoKeyAbstract> T adicionarOuAtualizar(T t) {
-		return this.getDao().adicionarOuatualizar(t);
+	public <T extends PojoKeyAbstract> T adicionarOuAtualizar(T t, IExecucao... parametrosExecucao) {
+		return this.getDao().adicionarOuatualizar(t, parametrosExecucao);
 	}
 
 	/*
@@ -96,6 +96,11 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 
 	}
 
+	@Override
+	public <K, T> T procurarPeloId(K k, IExecucao... parametrosExecucao) {
+		return this.getDao().procurarPeloId((Class<T>) classeObjeto, k, parametrosExecucao);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -104,14 +109,14 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <K, T> T procurarPeloId(K k) {
-		return this.getDao().procurarPeloId((Class<T>) classeObjeto, k);
+	public <T> T procurarPeloIdLazy(Object... chaves) {
+		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, chaves);
 	}
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <K, T> T procurarPeloIdLazy(K k,IExecucao... parametrosExecucao) {
-		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, k,parametrosExecucao);
+	public <T> T procurarPeloIdLazy(Object[] chaves, IExecucao... parametrosExecucao) {
+		return this.getDao().procurarPeloIdLazy((Class<T>) classeObjeto, chaves, parametrosExecucao);
 	}
 
 	@Override
@@ -126,6 +131,19 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 		return this.getDao().procurarPorUniqueKeyByNome((Class<T>) classeObjeto, nome, k);
 	}
 
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Object[] k, IExecucao... parametrosExecucao) {
+		return this.getDao().procurarPorUniqueKey((Class<T>) classeObjeto, k, parametrosExecucao);
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(String nome, Object[] k,
+			IExecucao... parametrosExecucao) {
+		return this.getDao().procurarPorUniqueKeyByNome((Class<T>) classeObjeto, nome, k, parametrosExecucao);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -134,7 +152,7 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public <T> List<T> listarTodos(IExecucao... parametrosExecucao) {
-		return this.getDao().listarTodos((Class<T>) classeObjeto,parametrosExecucao);
+		return this.getDao().listarTodos((Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	/*
@@ -155,8 +173,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 * br.com.rhiemer.api.util.service.PersistenceServiceBean#copiarDoObjeto(T)
 	 */
 	@Override
-	public <T> T copiarDoObjeto(T t) {
-		return this.getDao().copiarDoObjeto(t, (Class<T>) classeObjeto);
+	public <T> T copiarDoObjeto(T t, IExecucao... parametrosExecucao) {
+		return this.getDao().copiarDoObjeto(t, (Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	/*
@@ -168,14 +186,14 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> T buscarObjetoSalvo(T t) {
-		return this.getDao().buscarObjetoSalvo(t, (Class<T>) classeObjeto);
+	public <T> T buscarObjetoSalvo(T t, IExecucao... parametrosExecucao) {
+		return this.getDao().buscarObjetoSalvo(t, (Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe,IExecucao... parametrosExecucao) {
-		return this.getDao().buscarObjetoSalvoLazy(t, (Class<T>) classeObjeto,parametrosExecucao);
+	public <T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe, IExecucao... parametrosExecucao) {
+		return this.getDao().buscarObjetoSalvoLazy(t, (Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	/*
@@ -198,8 +216,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 * br.com.rhiemer.api.util.service.PersistenceServiceBean#removerPeloId(K)
 	 */
 	@Override
-	public <T, K> T removerPeloId(K id) {
-		return this.getDao().removerPeloId(id, (Class<T>) classeObjeto);
+	public <T, K> T removerPeloId(K id, IExecucao... parametrosExecucao) {
+		return this.getDao().removerPeloId(id, (Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	@Override
@@ -209,8 +227,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	}
 
 	@Override
-	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id) {
-		return this.getDao().deletarPeloId(id, (Class<T>) classeObjeto);
+	public <T extends PojoKeyAbstract, K> T deletarPeloId(K id, IExecucao... parametrosExecucao) {
+		return this.getDao().deletarPeloId(id, (Class<T>) classeObjeto, parametrosExecucao);
 	}
 
 	/*
@@ -234,8 +252,8 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	 */
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> List<T> listaTodosPaginada(int firstResult, int maxResults,IExecucao... parametrosExecucao) {
-		return this.getDao().listaTodosPaginada((Class<T>) classeObjeto, firstResult, maxResults,parametrosExecucao);
+	public <T> List<T> listaTodosPaginada(int firstResult, int maxResults, IExecucao... parametrosExecucao) {
+		return this.getDao().listaTodosPaginada((Class<T>) classeObjeto, firstResult, maxResults, parametrosExecucao);
 	}
 
 	/*
@@ -250,30 +268,30 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> List<T> excutarQueryList(BuildJPA query) {
-		return (List<T>) this.getDao().excutarQueryList(query);
+	public <T> List<T> excutarQueryList(BuildJPA query, IExecucao... parametrosExecucao) {
+		return (List<T>) this.getDao().excutarQueryList(query, parametrosExecucao);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> T excutarQueryUniqueResult(BuildJPA query) {
-		return (T) this.getDao().excutarQueryUniqueResult(query);
+	public <T> T excutarQueryUniqueResult(BuildJPA query, IExecucao... parametrosExecucao) {
+		return (T) this.getDao().excutarQueryUniqueResult(query, parametrosExecucao);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> List<T> excutarTypeQueryList(BuildJPA query) {
+	public <T> List<T> excutarTypeQueryList(BuildJPA query, IExecucao... parametrosExecucao) {
 		if (query.getResultClass() == null)
 			query.setResultClass(classeObjeto);
-		return this.getDao().excutarQueryList(query);
+		return this.getDao().excutarQueryList(query, parametrosExecucao);
 	}
 
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T> T excutarTypeQueryUniqueResult(BuildJPA query) {
+	public <T> T excutarTypeQueryUniqueResult(BuildJPA query, IExecucao... parametrosExecucao) {
 		if (query.getResultClass() == null)
 			query.setResultClass(classeObjeto);
-		return this.getDao().excutarQueryUniqueResult(query);
+		return this.getDao().excutarQueryUniqueResult(query, parametrosExecucao);
 	}
 
-	public int excutarUpdateQuery(BuildJPA query) {
+	public int excutarUpdateQuery(BuildJPA query, IExecucao... parametrosExecucao) {
 		return this.getDao().excutarUpdateQuery(query);
 	}
 

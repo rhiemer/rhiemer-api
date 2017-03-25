@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.rhiemer.api.util.annotations.entity.AtributoPrimaryKey;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public abstract class PojoKeyAbstract extends PojoAbstract {
@@ -51,12 +53,11 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 		}
 		return this.primaryKeyTypes;
 	}
-	
-	
-	public Map<Object,Object> primaryKeyValueMap() {		
-		Map<Object,Object> map = new HashMap<>();
-		this.primaryKey.forEach(t->map.put(t,Helper.getValueMethodOrField(this,t)));
-		return map;		
+
+	public Map<Object, Object> primaryKeyValueMap() {
+		Map<Object, Object> map = new HashMap<>();
+		this.primaryKey.forEach(t -> map.put(t, Helper.getValueMethodOrField(this, t)));
+		return map;
 	}
 
 	@Transient
@@ -95,6 +96,33 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 		for (int i = 0; i < keys.length; i++) {
 			Helper.setValueMethodOrField(this, getPrimaryKeyList().get(i), keys[i]);
 		}
+	}
+
+	@JsonIgnore
+	@XmlTransient
+	public boolean setPrimaryKeyAtributo(Object... keys) {
+		if (keys == null || keys.length == 0)
+			return false;
+
+		AtributoPrimaryKey[] atributosPrimaryKey = this.getClass().getAnnotationsByType(AtributoPrimaryKey.class);
+		if (atributosPrimaryKey.length == 0 || atributosPrimaryKey.length != keys.length)
+			return false;
+
+		if (IntStream.range(0, atributosPrimaryKey.length).filter(i -> keys[i] == null
+				|| !keys[i].getClass().isAssignableFrom(Helper.getTypeProperty(this, atributosPrimaryKey[i].value())))
+				.findFirst().getAsInt() >= 0)
+			return false;
+		IntStream.range(0, atributosPrimaryKey.length)
+				.forEach(i -> Helper.setValueProperty(this, atributosPrimaryKey[i].value(), keys[i]));
+		return true;
+	}
+
+	@JsonIgnore
+	@XmlTransient
+	public void setPrimaryKeyArrayAtributo(Object... keys) {
+		boolean result = setPrimaryKeyAtributo(keys);
+		if (!result)
+			setPrimaryKeyArray(keys);
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package br.com.rhiemer.api.jpa.criteria.juncao;
 
-public class MetodosJuncaoJPAOr extends MetodosJuncaoJPA implements IBuilderMetodosJuncaoJPAOr,IBuilderFiltrosJPA {
+public class MetodosJuncaoJPAOr<T> extends MetodosJuncaoJPA<T> implements IBuilderMetodosJuncaoJPAOr,IBuilderFiltrosJPA<T> {
 
 	public MetodosJuncaoJPAOr() {
 		super();
 	}
 
-	public MetodosJuncaoJPAOr(IBuilderMetodosJPA anterior) {
+	public MetodosJuncaoJPAOr(IBuilderFiltrosJPA<T> anterior) {
 		super(anterior);
 	}
 
