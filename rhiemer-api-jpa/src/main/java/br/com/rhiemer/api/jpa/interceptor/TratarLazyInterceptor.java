@@ -14,7 +14,7 @@ import br.com.rhiemer.api.jpa.annotations.SemTratarLazy;
 import br.com.rhiemer.api.jpa.annotations.TratarLazy;
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.HelperLazy;
-import br.com.rhiemer.api.jpa.parametros.execucao.IExecucaoLazy;
+import br.com.rhiemer.api.jpa.parametros.execucao.ExecucaoLazy;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.helper.Helper;
 
@@ -39,7 +39,7 @@ public class TratarLazyInterceptor {
 				.getParameters()[invocationContext.getParameters().length - 1] instanceof IExecucao[]) {
 			List<IExecucao> args = Helper.convertArgs(
 					(IExecucao[]) invocationContext.getParameters()[invocationContext.getParameters().length - 1]);
-			if (args.stream().filter(x -> x instanceof IExecucaoLazy).findFirst().get() != null)
+			if (args.stream().filter(x -> x instanceof ExecucaoLazy).findFirst().get() != null)
 				return result;
 		}
 

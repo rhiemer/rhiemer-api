@@ -19,8 +19,8 @@ import br.com.rhiemer.api.jpa.enums.EnumTipoOrderBY;
 import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
-import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoAtributos;
-import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoLista;
+import br.com.rhiemer.api.util.dao.parametros.execucao.ExecucaoAtributos;
+import br.com.rhiemer.api.util.dao.parametros.execucao.ExecucaoLista;
 
 public interface IBuilderExecucaoOrderBy extends ICriteriaJPA {
 

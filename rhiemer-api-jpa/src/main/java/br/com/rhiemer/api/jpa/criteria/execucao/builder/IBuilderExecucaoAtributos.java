@@ -14,9 +14,9 @@ import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.FetchCriteriaJPA;
 import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
-import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoAtributos;
-import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoLista;
-import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucaoSemAtributos;
+import br.com.rhiemer.api.util.dao.parametros.execucao.ExecucaoAtributos;
+import br.com.rhiemer.api.util.dao.parametros.execucao.ExecucaoLista;
+import br.com.rhiemer.api.util.dao.parametros.execucao.ExecucaoSemAtributos;
 
 public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 
@@ -28,12 +28,12 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 		if (getParametrosExecucao() == null)
 			return;
 		
-		if (getParametrosExecucao().stream().filter(t -> t instanceof IExecucaoSemAtributos).findFirst()
+		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoSemAtributos).findFirst()
 				.get() != null)
 		{
 			return;
 		}	
-		if (getParametrosExecucao().stream().filter(t -> t instanceof IExecucaoAtributos).findFirst()
+		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoAtributos).findFirst()
 				.get() != null) {
 			List<String> fieldsAtributo = HelperAtributeJPA.fieldsAtributo(getResultClass());
 			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
@@ -42,7 +42,7 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 			fieldsAtributo.stream().forEach(t -> new ParametrizarCriteriaJPAParametro()
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));
 		}
-		if (getParametrosExecucao().stream().filter(t -> t instanceof IExecucaoLista).findFirst().get() != null) {
+		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoLista).findFirst().get() != null) {
 			List<String> fieldsAtributo = HelperAtributeJPA.fieldsList(getResultClass());
 			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
 					.filter(t -> HelperAtributeJPA.isFieldList(getResultClass(), t.value()))
