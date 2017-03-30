@@ -27,14 +27,11 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 	default void builderExecucaoAtributos(CriteriaBuilder builder, Root root, CriteriaQuery query) {
 		if (getParametrosExecucao() == null)
 			return;
-		
-		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoSemAtributos).findFirst()
-				.get() != null)
-		{
+
+		if (getParametrosExecucao().stream().filter(ExecucaoSemAtributos.class::isInstance).findFirst().isPresent()) {
 			return;
-		}	
-		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoAtributos).findFirst()
-				.get() != null) {
+		}
+		if (getParametrosExecucao().stream().filter(ExecucaoAtributos.class::isInstance).findFirst().isPresent()) {
 			List<String> fieldsAtributo = HelperAtributeJPA.fieldsAtributo(getResultClass());
 			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
 					.filter(t -> !HelperAtributeJPA.isFieldList(getResultClass(), t.value()))
@@ -42,7 +39,7 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 			fieldsAtributo.stream().forEach(t -> new ParametrizarCriteriaJPAParametro()
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));
 		}
-		if (getParametrosExecucao().stream().filter(t -> t instanceof ExecucaoLista).findFirst().get() != null) {
+		if (getParametrosExecucao().stream().filter(ExecucaoLista.class::isInstance).findFirst().get() != null) {
 			List<String> fieldsAtributo = HelperAtributeJPA.fieldsList(getResultClass());
 			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
 					.filter(t -> HelperAtributeJPA.isFieldList(getResultClass(), t.value()))
@@ -51,7 +48,5 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));
 		}
 	}
-	
-	
 
 }

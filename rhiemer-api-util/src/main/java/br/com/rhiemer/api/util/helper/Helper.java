@@ -70,15 +70,16 @@ public final class Helper {
 		else
 			return StringUtils.EMPTY;
 	}
-	
-	public static String concatArrayIndex(String[] strArray,int ind,String prefix) {
-		final String[] result=new String[]{null};
-		IntStream.range(0,ind).forEach(idx->result[0] = (result[0] == null?strArray[idx]:result[0].concat(prefix).concat(strArray[idx])));
+
+	public static String concatArrayIndex(String[] strArray, int ind, String prefix) {
+		final String[] result = new String[] { null };
+		IntStream.range(0, ind).forEach(idx -> result[0] = (result[0] == null ? strArray[idx]
+				: result[0].concat(prefix).concat(strArray[idx])));
 		return result[0];
 	}
-	
-	public static String concatArrayIndex(String[] strArray,int ind) {
-		return concatArrayIndex(strArray,ind,DOT_FIELD);
+
+	public static String concatArrayIndex(String[] strArray, int ind) {
+		return concatArrayIndex(strArray, ind, DOT_FIELD);
 	}
 
 	public static String subStringEndWith(String str, String value) {
@@ -98,9 +99,9 @@ public final class Helper {
 	public static String subStringStartEndWith(String str, String value) {
 		return subStringEndWith(subStringStartWith(str, value), value);
 	}
-	
-	public static String concatArray(String value,String... params) {
-		return concatArray("",value,params);
+
+	public static String concatArray(String value, String... params) {
+		return concatArray("", value, params);
 	}
 
 	public static String concatArray(String str, String value, String... params) {
@@ -869,6 +870,13 @@ public final class Helper {
 			return null;
 	}
 
+	public static Class<?> classResult(Class<?> classe, String field) {
+		AccessibleObject ao = getFieldOrMethod(classe, field);
+		if (ao == null)
+			return null;
+		return classResult(ao);
+	}
+
 	public static AccessibleObject getFieldOrMethod(Class<?> classe, String field) {
 		return getFieldOrMethod(classe, field, "get");
 	}
@@ -994,6 +1002,52 @@ public final class Helper {
 		return classe;
 	}
 
+	public static <T extends Annotation> T valueAnnotationOfFieldSplit(Class<?> classe, String strField,
+			Class<?> annotationClass, String prefix) {
+
+		String[] s = strField.split(DOT_FIELD);
+		Class<?> clazz = classe;
+		for (int i = 0; clazz != null && i < s.length; i++) {
+			if (i != s.length - 1) {
+				clazz = getTypePropertyComplex(clazz, s[i], DOT_FIELD);
+			} else
+				return (T) valueAnnotationOfField(clazz, s[i], annotationClass, prefix);
+
+		}
+
+		return null;
+
+	}
+
+	public static <T extends Annotation> T valueAnnotationOfFieldSplit(Class<?> classe, String strField,
+			Class<?> annotationClass) {
+
+		return (T)valueAnnotationOfFieldSplit(classe, strField, annotationClass, "get");
+
+	}
+
+	public static <T extends Annotation> T valueAnnotationOfField(Class<?> classe, String strField,
+			Class<?> annotationClass, String prefix) {
+
+		List<AccessibleObject> lista = allMethodsFields(classe,null);
+		for (AccessibleObject field : lista) {
+			String _name = field instanceof Field ? ((Field) field).getName() : ((Method) field).getName();
+			if (strField.equalsIgnoreCase(_name)
+					|| (isNotBlank(prefix) && prefix.concat(strField).equalsIgnoreCase(_name))) {
+				Annotation _annotation = field.getAnnotation((Class<? extends Annotation>)annotationClass);
+				if (_annotation != null)
+					return (T) _annotation;
+			}
+		}
+		return null;
+
+	}
+
+	public static <T extends Annotation> T valueAnnotationOfField(Class<?> classe, String strField,
+			Class<?> annotationClass) {
+		return valueAnnotationOfField(classe, strField, annotationClass, "get");
+	}
+
 	public static Object valueAnnotationOfField(Object objeto, String strField, Class annotationClass,
 			String property) {
 
@@ -1041,12 +1095,12 @@ public final class Helper {
 
 	}
 
-	public static <T  extends Annotation,K> K valueAnnotation(T annotation, String strField,Class<K> classeObjeto) {
+	public static <T extends Annotation, K> K valueAnnotation(T annotation, String strField, Class<K> classeObjeto) {
 
 		for (Method method : annotation.getClass().getMethods())
 			if (method.getName().equalsIgnoreCase(strField)) {
 				try {
-					return (K)method.invoke(annotation, (Object[]) null);
+					return (K) method.invoke(annotation, (Object[]) null);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 					throw new APPSystemException(e);
 				}

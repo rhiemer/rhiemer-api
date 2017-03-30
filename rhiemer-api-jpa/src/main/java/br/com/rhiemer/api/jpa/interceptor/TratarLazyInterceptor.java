@@ -39,7 +39,7 @@ public class TratarLazyInterceptor {
 				.getParameters()[invocationContext.getParameters().length - 1] instanceof IExecucao[]) {
 			List<IExecucao> args = Helper.convertArgs(
 					(IExecucao[]) invocationContext.getParameters()[invocationContext.getParameters().length - 1]);
-			if (args.stream().filter(x -> x instanceof ExecucaoLazy).findFirst().get() != null)
+			if (args.stream().filter(ExecucaoLazy.class::isInstance).findFirst().isPresent())
 				return result;
 		}
 

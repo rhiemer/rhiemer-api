@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -23,6 +24,8 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+
+import com.google.common.collect.Iterables;
 
 import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.helper.Helper;
@@ -37,80 +40,73 @@ public final class HelperAtributeJPA {
 
 	}
 
-	public static <T extends Annotation> T annotationReference(AccessibleObject field) {
-		Object annotation = Arrays.stream(ANNOTATIONS_REFERENCE).filter(x -> field.getAnnotation(x) != null).findFirst()
-				.get();
-		;
+	private static <T extends Annotation> T annotationStr(Class<? extends Annotation>[] arrayClass, Class<?> classe,
+			String fieldStr) {
+
+		Object annotation = Arrays.stream((Class[]) arrayClass)
+				.map(x -> Helper.valueAnnotationOfFieldSplit(classe, fieldStr, x)).filter(y -> y != null).findFirst()
+				.orElse(null);
 		return (T) annotation;
+	}
+
+	private static <T extends Annotation> T annotationAccessibleObject(Class<? extends Annotation>[] arrayClass,
+			AccessibleObject field) {
+		Object annotation = Arrays.stream((Class[]) arrayClass)
+				.map(x -> field.getAnnotation((Class<? extends Annotation>) x)).filter(y -> y != null).findFirst()
+				.orElse(null);
+		return (T) annotation;
+	}
+
+	public static <T extends Annotation> T annotationReference(AccessibleObject field) {
+		return annotationAccessibleObject(ANNOTATIONS_REFERENCE, field);
 
 	}
 
 	public static <T extends Annotation> T annotationJoin(AccessibleObject field) {
-		Object annotation = Arrays.stream(ANNOTATIONS_JOIN).filter(x -> field.getAnnotation(x) != null).findFirst()
-				.get();
-		;
-		return (T) annotation;
+		return annotationAccessibleObject(ANNOTATIONS_JOIN, field);
 
+	}
+
+	public static <T extends Annotation> T annotationJoin(Class<?> classe, String fieldStr) {
+		return annotationStr(ANNOTATIONS_JOIN, classe, fieldStr);
 	}
 
 	public static <T extends Annotation> T annotationMappedList(AccessibleObject field) {
-		Object annotation = Arrays.stream(ANNOTATIONS_LIST).filter(x -> field.getAnnotation(x) != null).findFirst()
-				.get();
-		;
-		return (T) annotation;
+		return annotationAccessibleObject(ANNOTATIONS_LIST, field);
+	}
 
+	public static <T extends Annotation> T annotationMappedList(Class<?> classe, String fieldStr) {
+		return annotationStr(ANNOTATIONS_LIST, classe, fieldStr);
 	}
 
 	public static <T extends Annotation> T annotationAtributo(AccessibleObject field) {
-		Object annotation = Arrays.stream(ANNOTATIONS_ATRIBUTO).filter(x -> field.getAnnotation(x) != null).findFirst()
-				.get();
-		;
-		return (T) annotation;
-
+		return annotationAccessibleObject(ANNOTATIONS_ATRIBUTO, field);
 	}
 
 	public static <T extends Annotation> T annotationCreate(AccessibleObject field) {
 		Object annotation = Arrays.stream(ANNOTATIONS_CREATE).filter(x -> field.getAnnotation(x) != null).findFirst()
-				.get();
-		;
+				.orElse(null);
 		return (T) annotation;
 
 	}
 
 	public static <T extends Annotation> T annotationCreate(Class<?> classe, String fieldStr) {
-		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
-		if (field != null)
-			return annotationCreate(field);
-		else
-			return null;
+		return annotationStr(ANNOTATIONS_CREATE, classe, fieldStr);
 
 	}
 
 	public static <T extends Annotation> T annotationReference(Class<?> classe, String fieldStr) {
-		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
-		if (field != null) {
-			Annotation ar = annotationReference(field);
-			if (ar == null)
-				return null;
-
-			String mappedBy = Helper.valueAnnotation(ar, ATRIBUTO_MAPPED_BY, String.class);
-			if (Helper.isBlank(mappedBy))
-				return null;
-
-			Class<?> classResult = Helper.classResult(field);
-			Annotation aJoin = annotationJoin(classResult, mappedBy);
-			return (T) aJoin;
-		} else
+		Annotation ar = annotationStr(ANNOTATIONS_REFERENCE, classe, fieldStr);
+		if (ar == null)
 			return null;
 
-	}
-
-	public static <T extends Annotation> T annotationJoin(Class<?> classe, String fieldStr) {
-		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
-		if (field != null)
-			return annotationJoin(field);
-		else
+		String mappedBy = Helper.valueAnnotation(ar, ATRIBUTO_MAPPED_BY, String.class);
+		if (Helper.isBlank(mappedBy))
 			return null;
+
+		Class<?> classResult = Helper.classResult(classe, fieldStr);
+		Annotation aJoin = annotationJoin(classResult, mappedBy);
+		return (T) aJoin;
 
 	}
 
@@ -120,15 +116,6 @@ public final class HelperAtributeJPA {
 			return (T) aReference;
 
 		return annotationJoin(classe, fieldStr);
-
-	}
-
-	public static <T extends Annotation> T annotationMappedList(Class<?> classe, String fieldStr) {
-		AccessibleObject field = Helper.getFieldOrMethod(classe, fieldStr);
-		if (field != null)
-			return annotationMappedList(field);
-		else
-			return null;
 
 	}
 
@@ -179,7 +166,7 @@ public final class HelperAtributeJPA {
 		String[] strSplit = atributo.split(DOT_FIELD);
 		return IntStream.range(0, strSplit.length)
 				.filter(idx -> isFieldListUnit(classe, Helper.concatArrayIndex(strSplit, idx))).findFirst()
-				.getAsInt() > -1;
+				.orElse(-1) > -1;
 
 	}
 

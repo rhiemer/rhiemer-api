@@ -70,47 +70,48 @@ public final class HelperRootCriteria {
 		String[] atributoSplit = atributo.split("[.]");
 		From joinLoop = rootJoin;
 		String atributoComp = "";
-		boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributo);
 
-		for (int i = 0; (i < atributoSplit.length - 1 && joinLoop != null); i++) {
+		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
 				atributoComp = atributoComp.concat(".").concat(atributo);
 			else
 				atributoComp = atributo;
-			joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
-			if (isField && i >= atributoSplit.length - 2)
+			boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributoComp);
+			if (isField)
 				break;
+			joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
+
 		}
 
 		return (Join) joinLoop;
 
 	}
-	
-	public static Join createJoinComplexObj(From rootJoin,Boolean fecth, JoinType joinType,Object filtro) {
+
+	public static Join createJoinComplexObj(From rootJoin, Boolean fecth, JoinType joinType, Object filtro) {
 
 		Join join = null;
 		if (filtro instanceof String)
-			join = HelperRootCriteria.createJoinComplex(rootJoin,(String)filtro,fecth,joinType);
+			join = HelperRootCriteria.createJoinComplex(rootJoin, (String) filtro, fecth, joinType);
 		else if (filtro instanceof Attribute[])
-			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType,(Attribute[])filtro);
+			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType, (Attribute[]) filtro);
 		else if (filtro instanceof Attribute)
-			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType,(Attribute)filtro);
-		else 
+			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType, (Attribute) filtro);
+		else
 			return null;
 		return join;
 
 	}
-	
-	public static Expression getExpressionObj(From rootJoin,Boolean fecth, JoinType joinType,Object filtro) {
+
+	public static Expression getExpressionObj(From rootJoin, Boolean fecth, JoinType joinType, Object filtro) {
 
 		Expression exp = null;
 		if (filtro instanceof String)
-			exp = HelperRootCriteria.getAttribute(rootJoin,(String)filtro,fecth,joinType);
+			exp = HelperRootCriteria.getAttribute(rootJoin, (String) filtro, fecth, joinType);
 		else if (filtro instanceof Attribute[])
-			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType,(Attribute[])filtro);
+			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType, (Attribute[]) filtro);
 		else if (filtro instanceof Attribute)
-			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType,(Attribute)filtro);
-		else 
+			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType, (Attribute) filtro);
+		else
 			return null;
 		return exp;
 
@@ -171,7 +172,7 @@ public final class HelperRootCriteria {
 		From joinLoop = join;
 		String atributoComp = "";
 
-		for (int i = 0; (i < atributoSplit.length - 1 && joinLoop != null); i++) {
+		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
 				atributoComp = atributoComp.concat(".").concat(atributo);
 			else
@@ -244,7 +245,7 @@ public final class HelperRootCriteria {
 	}
 
 	public static From getJoinByAlias(Set<? extends From> froms, String atributo) {
-		return froms.stream().filter(x -> equalsFrom(x, atributo)).findFirst().get();
+		return froms.stream().filter(x -> equalsFrom(x, atributo)).findFirst().orElse(null);
 	}
 
 	public static boolean equalsFrom(From from, String atributo) {
