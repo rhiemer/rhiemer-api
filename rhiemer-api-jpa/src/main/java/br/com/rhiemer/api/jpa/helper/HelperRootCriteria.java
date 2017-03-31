@@ -130,6 +130,7 @@ public final class HelperRootCriteria {
 	public static Join createJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
 
 		JoinType aJoinType = joinType;
+		Join result = null;
 		if (aJoinType == null) {
 			aJoinType = joinTypeDefault(rootJoin.getJavaType(), atributo);
 		}
@@ -144,7 +145,7 @@ public final class HelperRootCriteria {
 			}
 			if (joinFetch == null) {
 				replaceJoinFecth(rootJoin, atributo);
-				return (Join) rootJoin.fetch(atributo, aJoinType);
+				result = (Join) rootJoin.fetch(atributo, aJoinType);
 			}
 		} else {
 			From joinCreate = getJoinByAlias(rootJoin.getJoins(), atributo);
@@ -157,12 +158,14 @@ public final class HelperRootCriteria {
 			}
 
 			if (joinCreate == null) {
-				return (Join) rootJoin.join(atributo, aJoinType);
+				result = (Join) rootJoin.join(atributo, aJoinType);
 			}
 
 		}
 
-		return null;
+		if (result != null)
+			result.alias(atributo);
+		return result;
 
 	}
 
@@ -249,7 +252,7 @@ public final class HelperRootCriteria {
 	}
 
 	public static boolean equalsFrom(From from, String atributo) {
-		if (from.getAlias().equalsIgnoreCase(atributo))
+		if (from.getAlias() != null && from.getAlias().equalsIgnoreCase(atributo))
 			return true;
 		else
 			return false;

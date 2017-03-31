@@ -39,7 +39,7 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 			fieldsAtributo.stream().forEach(t -> new ParametrizarCriteriaJPAParametro()
 					.setClasse(FetchCriteriaJPA.class).setAtributo(t).build(builder, root, query, null));
 		}
-		if (getParametrosExecucao().stream().filter(ExecucaoLista.class::isInstance).findFirst().get() != null) {
+		if (getParametrosExecucao().stream().filter(ExecucaoLista.class::isInstance).findFirst().isPresent()) {
 			List<String> fieldsAtributo = HelperAtributeJPA.fieldsList(getResultClass());
 			fieldsAtributo.addAll(Arrays.stream(getResultClass().getAnnotationsByType(ExecucaoAtributo.class))
 					.filter(t -> HelperAtributeJPA.isFieldList(getResultClass(), t.value()))

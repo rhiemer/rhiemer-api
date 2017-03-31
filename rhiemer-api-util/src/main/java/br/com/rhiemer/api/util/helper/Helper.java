@@ -338,26 +338,38 @@ public final class Helper {
 			}
 		}
 
+		return getValueField(objeto,property);
+
+	}
+
+	public static <T> Object getValueField(T objeto, String property) {
+
 		List<Field> fields = allFields(objeto.getClass());
 		for (Field field : fields)
 			if (field.getName().equalsIgnoreCase(property)) {
 
-				boolean _setacessible = false;
-				if (field.getModifiers() != Member.PUBLIC) {
-					field.setAccessible(true);
-					_setacessible = true;
-				}
-
-				try {
-					return field.get(objeto);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new APPSystemException(e);
-				} finally {
-					if (_setacessible)
-						field.setAccessible(false);
-				}
+				return getValueField(objeto, field);
 			}
 		return null;
+
+	}
+
+	public static <T> Object getValueField(T objeto, Field field) {
+
+		boolean _setacessible = false;
+		if (field.getModifiers() != Member.PUBLIC) {
+			field.setAccessible(true);
+			_setacessible = true;
+		}
+
+		try {
+			return field.get(objeto);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new APPSystemException(e);
+		} finally {
+			if (_setacessible)
+				field.setAccessible(false);
+		}
 
 	}
 
@@ -1022,19 +1034,19 @@ public final class Helper {
 	public static <T extends Annotation> T valueAnnotationOfFieldSplit(Class<?> classe, String strField,
 			Class<?> annotationClass) {
 
-		return (T)valueAnnotationOfFieldSplit(classe, strField, annotationClass, "get");
+		return (T) valueAnnotationOfFieldSplit(classe, strField, annotationClass, "get");
 
 	}
 
 	public static <T extends Annotation> T valueAnnotationOfField(Class<?> classe, String strField,
 			Class<?> annotationClass, String prefix) {
 
-		List<AccessibleObject> lista = allMethodsFields(classe,null);
+		List<AccessibleObject> lista = allMethodsFields(classe, null);
 		for (AccessibleObject field : lista) {
 			String _name = field instanceof Field ? ((Field) field).getName() : ((Method) field).getName();
 			if (strField.equalsIgnoreCase(_name)
 					|| (isNotBlank(prefix) && prefix.concat(strField).equalsIgnoreCase(_name))) {
-				Annotation _annotation = field.getAnnotation((Class<? extends Annotation>)annotationClass);
+				Annotation _annotation = field.getAnnotation((Class<? extends Annotation>) annotationClass);
 				if (_annotation != null)
 					return (T) _annotation;
 			}
@@ -1827,6 +1839,20 @@ public final class Helper {
 			throw new APPSystemException(e);
 		}
 		return data;
+	}
+
+	public static boolean isInstanceOrCollection(Object result, Class<?> classe) {
+		if (result == null) {
+			return false;
+		} else if (result instanceof Collection
+				&& ((Collection) result).stream().filter(classe::isInstance).findFirst().isPresent()) {
+			return true;
+		} else if (!(classe.isInstance(result))) {
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 
 }
