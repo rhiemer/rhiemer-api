@@ -321,24 +321,15 @@ public final class Helper {
 
 	public static <T> Object getValueProperty(T objeto, String property) {
 
-		for (Method method : objeto.getClass().getMethods()) {
-			if (method.getName().equalsIgnoreCase("get" + property)) {
-				try {
-					return method.invoke(objeto, (Object[]) null);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new APPSystemException(e);
-				}
-			}
-			if (method.getName().equalsIgnoreCase(property)) {
-				try {
-					return method.invoke(objeto, (Object[]) null);
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new APPSystemException(e);
-				}
-			}
-		}
+		Method _methodGet = methodGet(objeto, property);
+		if (_methodGet != null)
+			return invokeMethod(_methodGet, objeto);
 
-		return getValueField(objeto,property);
+		Method _method = getMethodObject(objeto.getClass(), property);
+		if (_method != null)
+			return invokeMethod(_method, objeto);
+
+		return getValueField(objeto, property);
 
 	}
 
@@ -351,6 +342,111 @@ public final class Helper {
 				return getValueField(objeto, field);
 			}
 		return null;
+
+	}
+
+	public static Object invokeMethodGet(Object objeto, String methodName) {
+		String _methodName = "get" + methodName;
+		return invokeMethod(objeto, _methodName);
+	}
+
+	public static void invokeMethodSet(Object objeto, String methodName, Object param) {
+		Method method = methodSet(objeto.getClass(), methodName);
+		if (method != null)
+			invokeMethod(method, objeto, param);
+	}
+
+	public static Method methodGet(Class<?> classe, String methodName) {
+		String _methodName = "get" + methodName;
+		Method method = getMethodObject(classe, _methodName);
+		return method;
+	}
+
+	public static Method methodSet(Class<?> classe, String methodName) {
+		String _methodName = "set" + methodName;
+		Method method = getMethodByName(classe, _methodName);
+		return method;
+	}
+
+	public static Method getMethodByName(Class<?> classe, String methodName) {
+		return Arrays.asList(classe.getMethods()).stream().filter(x -> x.getName().equalsIgnoreCase(methodName))
+				.findFirst().orElse(null);
+	}
+
+	public static Method methodGet(Object objeto, String methodName) {
+		Method method = methodGet(objeto.getClass(), methodName);
+		return method;
+	}
+
+	public static Method methodSet(Object objeto, String methodName) {
+		Method method = methodSet(objeto.getClass(), methodName);
+		return method;
+	}
+
+	public static Object invokeMethod(Method method, Object objeto, Object... params) {
+		Object[] _params = null;
+		if (params != null && params.length > 0) {
+			_params = convertObjectReflextionParams(convertArgsArray(Object.class, params), method.getParameterTypes());
+		}
+		try {
+			return method.invoke(objeto, _params);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new APPSystemException(e);
+		}
+	}
+
+	public static Object invokeMethodComplex(Object objeto, String methodName, Object... params) {
+
+		return invokeMethodComplex(objeto, methodName, DOT_FIELD, params);
+
+	}
+
+	public static Object invokeMethodComplex(Object objeto, String methodName, String separator, Object... params) {
+
+		String[] s = methodName.split(separator);
+		Object _objeto = objeto;
+		for (int i = 0; _objeto != null && i < s.length; i++) {
+			if (i != s.length - 1) {
+				_objeto = getValueProperty(_objeto, s[i]);
+			} else
+				return invokeMethod(_objeto, s[i], params);
+
+		}
+
+		return null;
+
+	}
+
+	public static Object[] convertObjectReflextionParams(Object[] args, Class<?>[] classes) {
+
+		List<Object> objectList = new ArrayList<>();
+		IntStream.range(0, args.length).filter(idx -> classes.length > idx)
+				.forEach(idx -> objectList.add(convertObjectReflextion(args[idx], classes[idx])));
+		return objectList.toArray((Object[]) Array.newInstance(Object.class, 1));
+
+	}
+
+	public static Object invokeMethod(Object objeto, String methodName, Object... params) {
+		Method method = getMethodObject(objeto.getClass(), methodName, params);
+		if (method == null)
+			return null;
+		else
+			return invokeMethod(method, objeto, params);
+	}
+
+	public static Method getMethodObject(Class<?> classe, String methodName, Object... params) {
+		Class<?>[] arrayClasseParams = convertObjectToClassArray(params);
+		return getMethod(classe, methodName, arrayClasseParams);
+	}
+
+	public static Method getMethod(Class<?> classe, String methodName, Class<?>... classeParams) {
+		Class[] arrayClasseParams = convertArgsArray(Class.class, classeParams);
+		return Arrays.asList(classe.getMethods()).stream()
+				.filter(x -> (x.getName().equalsIgnoreCase(methodName)
+						&& ((x.getParameterTypes() == null || x.getParameterTypes().length == 0)
+								&& arrayClasseParams.length == 0)
+						|| compareClassArray(x.getParameterTypes(), arrayClasseParams)))
+				.findFirst().orElse(null);
 
 	}
 
@@ -663,36 +759,50 @@ public final class Helper {
 
 	public static <T, O> void setValueProperty(T objeto, String property, O value) {
 
-		for (Method method : objeto.getClass().getMethods())
-			if (method.getName().equalsIgnoreCase("set" + property) || method.getName().equalsIgnoreCase(property)) {
-				try {
-					method.invoke(objeto,
-							new Object[] { convertObjectReflextion(value, method.getParameterTypes()[0]) });
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					throw new APPSystemException(e);
-				}
-				return;
-			}
+		Method _methodSet = methodSet(objeto, property);
+		if (_methodSet != null) {
+			invokeMethod(_methodSet, objeto, value);
+			return;
+		}
+
+		Method _method = getMethodObject(objeto.getClass(), property, value);
+		if (_method != null) {
+			invokeMethod(_method, objeto, value);
+			return;
+		}
+
+		setValueField(objeto, property, value);
+
+	}
+
+	public static void setValueField(Object objeto, String property, Object value) {
 
 		List<Field> fields = allFields(objeto.getClass());
 		for (Field field : fields)
 			if (field.getName().equalsIgnoreCase(property)) {
-				boolean _setacessible = false;
-				if (field.getModifiers() != Member.PUBLIC) {
-					field.setAccessible(true);
-					_setacessible = true;
-				}
-
-				try {
-					field.set(objeto, convertObjectReflextion(value, field.getType()));
-					return;
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new APPSystemException(e);
-				} finally {
-					if (_setacessible)
-						field.setAccessible(false);
-				}
+				setValueField(objeto, field, value);
+				return;
 			}
+
+	}
+
+	public static void setValueField(Object objeto, Field field, Object value) {
+
+		boolean _setacessible = false;
+		if (field.getModifiers() != Member.PUBLIC) {
+			field.setAccessible(true);
+			_setacessible = true;
+		}
+
+		try {
+			field.set(objeto, convertObjectReflextion(value, field.getType()));
+			return;
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new APPSystemException(e);
+		} finally {
+			if (_setacessible)
+				field.setAccessible(false);
+		}
 
 	}
 
@@ -1553,7 +1663,8 @@ public final class Helper {
 		List<Field> result = new ArrayList<>();
 		while (clazz != null && !clazz.equals(Object.class)) {
 			for (Field f : clazz.getDeclaredFields()) {
-				result.add(f);
+				if (!Modifier.isStatic((f.getModifiers())))
+					result.add(f);
 			}
 			clazz = clazz.getSuperclass();
 		}
@@ -1567,6 +1678,8 @@ public final class Helper {
 		List<Field> result = new ArrayList<>();
 		while (clazz != null && !clazz.equals(Object.class)) {
 			loopField: for (Field f : clazz.getDeclaredFields()) {
+				if (Modifier.isStatic((f.getModifiers())))
+					continue;
 				for (Class annotation : annotations) {
 					Annotation _annotation = f.getAnnotation(annotation);
 					if (_annotation != null) {
@@ -1769,14 +1882,15 @@ public final class Helper {
 				.filter(x -> ((x.getParameterTypes() == null || x.getParameterTypes().length == 0)
 						&& arrayClasseParams.length == 0)
 						|| compareClassArray(x.getParameterTypes(), arrayClasseParams))
-				.findFirst().get();
+				.findFirst().orElse(null);
 
 	}
 
 	public static List<Class<?>> convertObjectToClass(Object... classeParams) {
 		List<Class<?>> arrayClasseParams = new ArrayList<>();
-		Optional.ofNullable(classeParams).ifPresent(t -> Arrays.asList(convertArgsArray(Object.class, classeParams))
-				.forEach(x -> arrayClasseParams.add(x.getClass())));
+		Optional.ofNullable(classeParams).filter(t -> classeParams.length > 0)
+				.ifPresent(t -> Arrays.asList(convertArgsArray(Object.class, classeParams))
+						.forEach(x -> arrayClasseParams.add(x.getClass())));
 		return arrayClasseParams;
 	}
 

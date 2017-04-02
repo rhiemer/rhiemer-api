@@ -1,10 +1,10 @@
 package br.com.rhiemer.api.jpa.helper;
 
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_ATRIBUTO;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_CREATE;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_JOIN;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LIST;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_REFERENCE;
-import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_ATRIBUTO;
-import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_CREATE;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
@@ -13,8 +13,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,9 +23,6 @@ import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import com.google.common.collect.Iterables;
-
-import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.helper.HelperPojo;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;

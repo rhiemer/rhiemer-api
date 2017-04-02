@@ -2,6 +2,7 @@ package br.com.rhiemer.api.jpa.constantes;
 
 import java.lang.annotation.Annotation;
 
+import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -16,5 +17,7 @@ public interface ConstantesAtributosJPA {
 	static Class<? extends Annotation>[] ANNOTATIONS_REFERENCE = new Class[] { OneToMany.class, ManyToMany.class,OneToOne.class };
 	static Class<? extends Annotation>[] ANNOTATIONS_ATRIBUTO = new Class[] {ManyToOne.class, OneToOne.class};
 	static Class<? extends Annotation>[] ANNOTATIONS_CREATE = new Class[] { ManyToOne.class, OneToOne.class,EmbeddedId.class };
+	static Class<? extends Annotation>[] ANNOTATIONS_LAZY = new Class[] { OneToMany.class, ManyToOne.class, OneToOne.class,
+			ManyToMany.class,EmbeddedId.class,Embedded.class };
 	
 }

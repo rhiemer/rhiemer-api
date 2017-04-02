@@ -23,6 +23,7 @@ import org.hibernate.envers.Audited;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.rhiemer.api.jpa.converter.SimNaoConverter;
+import br.com.rhiemer.api.jpa.helper.HelperLazy;
 import br.com.rhiemer.api.jpa.listener.ListenerEntity;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
@@ -148,7 +149,7 @@ public abstract class GenericEntity extends PojoKeyAbstract implements Entity {
 
 	@Override
 	public Object clone() {
-		GenericEntity clone = (GenericEntity) super.clone();
+		GenericEntity clone = (GenericEntity) HelperLazy.retirarLazyCopy(this);
 		clone.ultimaAlteracao = null;
 		clone.version = null;
 		return clone;

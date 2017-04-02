@@ -9,14 +9,13 @@ import javax.annotation.Priority;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import javax.persistence.EntityManager;
 
 import br.com.rhiemer.api.jpa.annotations.SemTratarLazy;
 import br.com.rhiemer.api.jpa.annotations.TratarLazy;
 import br.com.rhiemer.api.jpa.entity.Entity;
 import br.com.rhiemer.api.jpa.helper.HelperLazy;
 import br.com.rhiemer.api.jpa.parametros.execucao.ExecucaoFetchAll;
-import br.com.rhiemer.api.jpa.parametros.execucao.ExecucaoLazy;
+import br.com.rhiemer.api.jpa.parametros.execucao.ExecucaoSemLazy;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.helper.Helper;
 
@@ -35,36 +34,33 @@ public class TratarLazyInterceptor {
 		Object result = invocationContext.proceed();
 		if (result == null) {
 			return result;
-		} else if (!Helper.isInstanceOrCollection(result, Entity.class)) {
-			return result;
 		}
 
 		boolean fetchAll = false;
+		boolean execucaoSemLazy = false;
 
 		if (invocationContext.getParameters() != null && invocationContext
 				.getParameters()[invocationContext.getParameters().length - 1] instanceof IExecucao[]) {
 			List<IExecucao> args = Helper.convertArgs(
 					(IExecucao[]) invocationContext.getParameters()[invocationContext.getParameters().length - 1]);
-			if (args.stream().filter(ExecucaoLazy.class::isInstance).findFirst().isPresent())
-				return result;
+			execucaoSemLazy = args.stream().filter(ExecucaoSemLazy.class::isInstance).findFirst().isPresent();
 			fetchAll = args.stream().filter(ExecucaoFetchAll.class::isInstance).findFirst().isPresent();
 		}
-
-		EntityManager em = (EntityManager) Helper.getValueMethodOrField(invocationContext.getTarget(), "entityManager");
 
 		if (result instanceof Collection) {
 			if (fetchAll) {
 				return HelperLazy.copyCollectionFully((Collection) result);
-			} else if (em != null) {
-				HelperLazy.unproxyCollection((Collection) result, em);
+			} else if (execucaoSemLazy) {
+				HelperLazy.retirarLazyCollection((Collection) result);
 				return result;
 			}
 
 		} else {
 			if (fetchAll) {
 				return HelperLazy.copyDTOFully(result);
-			} else if (em != null) {
-				return HelperLazy.unproxy(result);
+			} else if (execucaoSemLazy) {
+				HelperLazy.retirarLazy(result);
+				return result;
 			}
 		}
 
