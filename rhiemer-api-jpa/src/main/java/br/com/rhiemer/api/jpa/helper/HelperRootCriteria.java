@@ -24,7 +24,7 @@ public final class HelperRootCriteria {
 
 	}
 
-	public static Join createJoinComplex(From rootJoin, String atributo) {
+	public static From createJoinComplex(From rootJoin, String atributo) {
 		return createJoinComplex(rootJoin, atributo, FETCH_DEFAULT, null);
 	}
 
@@ -32,7 +32,7 @@ public final class HelperRootCriteria {
 		return getAttribute(rootJoin, atributo, FETCH_DEFAULT, null);
 	}
 
-	public static Join createJoinComplex(From rootJoin, Attribute... attributes) {
+	public static From createJoinComplex(From rootJoin, Attribute... attributes) {
 		return createJoinComplex(rootJoin, FETCH_DEFAULT, null, attributes);
 	}
 
@@ -40,7 +40,7 @@ public final class HelperRootCriteria {
 		return getAttribute(rootJoin, FETCH_DEFAULT, null, attributes);
 	}
 
-	public static Join createJoinComplex(From rootJoin, Boolean fecth, JoinType joinType, Attribute... attributes) {
+	public static From createJoinComplex(From rootJoin, Boolean fecth, JoinType joinType, Attribute... attributes) {
 
 		String atributesStr = HelperAtributeJPA.attributeToString(attributes);
 		return createJoinComplex(rootJoin, atributesStr, fecth, joinType);
@@ -58,14 +58,14 @@ public final class HelperRootCriteria {
 		if (!atributo.contains(ConstantesAPI.DOT_FIELD)) {
 			return HelperAtributeJPA.getAttribute(rootJoin, atributo);
 		} else {
-			Join join = createJoinComplex(rootJoin, atributo, fecth, joinType);
+			From join = createJoinComplex(rootJoin, atributo, fecth, joinType);
 			String[] atributoSplit = atributo.split("[.]");
 			String lastAtributo = atributoSplit[atributoSplit.length - 1];
 			return HelperAtributeJPA.getAttribute(join, lastAtributo);
 		}
 	}
 
-	public static Join createJoinComplex(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
+	public static From createJoinComplex(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
 
 		String[] atributoSplit = atributo.split("[.]");
 		From joinLoop = rootJoin;
@@ -83,13 +83,13 @@ public final class HelperRootCriteria {
 
 		}
 
-		return (Join) joinLoop;
+		return joinLoop;
 
 	}
 
-	public static Join createJoinComplexObj(From rootJoin, Boolean fecth, JoinType joinType, Object filtro) {
+	public static From createJoinComplexObj(From rootJoin, Boolean fecth, JoinType joinType, Object filtro) {
 
-		Join join = null;
+		From join = null;
 		if (filtro instanceof String)
 			join = HelperRootCriteria.createJoinComplex(rootJoin, (String) filtro, fecth, joinType);
 		else if (filtro instanceof Attribute[])
@@ -127,7 +127,7 @@ public final class HelperRootCriteria {
 
 	}
 
-	public static Join createJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
+	public static From createJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
 
 		JoinType aJoinType = joinType;
 		Join result = null;

@@ -1,6 +1,7 @@
 package br.com.rhiemer.api.util.helper;
 
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ANNOTATIOSID;
+import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DATES_FORMAT;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.ENCONDING_PADRAO;
 
@@ -31,6 +32,9 @@ import java.lang.reflect.ParameterizedType;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -294,29 +298,21 @@ public final class Helper {
 	}
 
 	public static Class getPropertyTypeClass(Class clazz, String property) {
-		for (Method method : clazz.getMethods())
-			if (method.getName().equalsIgnoreCase("get" + property) || (method.getName().equalsIgnoreCase(property))) {
-				return method.getReturnType();
-			}
 
-		List<Field> fields = allFields(clazz);
-		for (Field field : fields)
-			if (field.getName().equalsIgnoreCase(property)) {
+		Field field = geField(clazz, property);
+		if (field != null)
+			return field.getType();
 
-				boolean _setacessible = false;
-				if (field.getModifiers() != Member.PUBLIC) {
-					field.setAccessible(true);
-					_setacessible = true;
-				}
+		Method _methodGet = methodGet(clazz, property);
+		if (_methodGet != null)
+			return _methodGet.getReturnType();
 
-				try {
-					return field.getType();
-				} finally {
-					if (_setacessible)
-						field.setAccessible(false);
-				}
-			}
+		Method _method = getMethod(clazz, property);
+		if (_method != null)
+			return _method.getReturnType();
+		
 		return null;
+
 	}
 
 	public static <T> Object getValueProperty(T objeto, String property) {
@@ -332,16 +328,28 @@ public final class Helper {
 		return getValueField(objeto, property);
 
 	}
+	
+	public static Field geField(Class<?> classe, String property) {
 
-	public static <T> Object getValueField(T objeto, String property) {
-
-		List<Field> fields = allFields(objeto.getClass());
+		List<Field> fields = allFields(classe);
 		for (Field field : fields)
 			if (field.getName().equalsIgnoreCase(property)) {
 
-				return getValueField(objeto, field);
+				return field;
 			}
 		return null;
+
+	}
+
+	public static <T> Field geFieldObj(T objeto, String property) {
+
+	   return geField(objeto.getClass(),property);
+
+	}
+
+	public static <T> Object getValueField(T objeto, String property) {
+
+		return Optional.ofNullable(geFieldObj(objeto, property)).map(x -> getValueField(objeto, x)).orElse(null);
 
 	}
 
@@ -421,7 +429,7 @@ public final class Helper {
 
 		List<Object> objectList = new ArrayList<>();
 		IntStream.range(0, args.length).filter(idx -> classes.length > idx)
-				.forEach(idx -> objectList.add(convertObjectReflextion(args[idx], classes[idx])));
+				.forEach(idx -> objectList.add(convertObjectReflextionVerifiyNull(args[idx], classes[idx])));
 		return objectList.toArray((Object[]) Array.newInstance(Object.class, 1));
 
 	}
@@ -703,52 +711,125 @@ public final class Helper {
 
 	}
 
-	public static <T, O> Object convertObjectReflextion(O objetoTarget, Class classe) {
-		// if (classe.getSuperclass().equals(objetoTarget.getClass()))
+	public static Date strToDate(String dateStr) {
+
+		return Arrays.stream(DATES_FORMAT).map(x -> Helper.strToDateSimple(x, dateStr.trim().replace(" ", "")))
+				.filter(x -> x != null).findFirst().orElse(null);
+
+	}
+
+	public static Date strToDateSimple(String dateFormat, String dateStr) {
+
+		DateFormat df = new SimpleDateFormat(dateFormat);
+		try {
+			return df.parse(dateStr);
+		} catch (ParseException e) {
+			return null;
+		}
+
+	}
+
+	public static <O> Object parsePrimitive(O objetoTarget, Class<?> classe) {
+		String s = objetoTarget + "";
+		if (classe.equals(int.class))
+			return Integer.parseInt(s);
+		else if (classe.isInstance(new Integer(0).longValue()))
+			return Long.parseLong(s);
+		else if (classe.isInstance(new Integer(0).doubleValue()))
+			return Double.parseDouble(s);
+		else if (classe.isInstance(new Integer(0).shortValue()))
+			return Short.parseShort(s);
+		else if (classe.isInstance(new Integer(0).byteValue()))
+			return Byte.parseByte(s);
+		else if (classe.isInstance(true))
+			return charToBoolean(s);
+		else if (classe.isInstance(s.toCharArray()[0]))
+			return s.toCharArray()[0];
+		else
+			return null;
+	}
+
+	public static <O> Object parseString(String s, Class<?> classe) {
+
+		if (s == null)
+			return null;
+
+		if (String.class.isAssignableFrom(classe))
+			return s;
+
+		if (classe.isPrimitive()) {
+			return parsePrimitive(s, classe);
+		}
+
+		if (Integer.class.isAssignableFrom(classe))
+			return Integer.valueOf(s);
+		else if (Long.class.isAssignableFrom(classe))
+			return Long.valueOf(s);
+		else if (Double.class.isAssignableFrom(classe))
+			return Double.valueOf(s);
+		else if (Short.class.isAssignableFrom(classe))
+			return Short.valueOf(s);
+		else if (Byte.class.isAssignableFrom(classe))
+			return Byte.valueOf(s);
+		else if (Boolean.class.isAssignableFrom(classe))
+			return Boolean.valueOf(charToBoolean(s));
+		else if (Character.class.isAssignableFrom(classe))
+			return Character.valueOf(s.toCharArray()[0]);
+		else if (Date.class.isAssignableFrom(classe))
+			return strToDate(s);
+		else if (Calendar.class.isAssignableFrom(classe)) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(strToDate(s));
+			return strToDate(s);
+		} else {
+			Object result = Helper.getConstructorObject(classe, s);
+			return result;
+		}
+
+	}
+
+	public static <O> Object verifyNull(Object obj) {
+
+		if (obj == null)
+			return null;
+
+		if ((Double.class.isInstance(obj) || obj.getClass().isInstance(new Integer(0).doubleValue()))) {
+			if (((Double) obj).isNaN())
+				return null;
+		}
+		return obj;
+	}
+
+	public static <O> Object convertObjectReflextion(O objetoTarget, Class classe) {
 		if (objetoTarget == null || classe.isInstance(objetoTarget) || ProxyUtils.isProxiedCdi(objetoTarget.getClass()))
 			return objetoTarget;
 
-		String s = objetoTarget + "";
-		if (classe.isPrimitive()) {
-			if (classe.equals(int.class))
-				return Integer.parseInt(s);
-			else if (classe.isInstance(new Integer(0).longValue()))
-				return Long.parseLong(s);
-			else if (classe.isInstance(new Integer(0).doubleValue()))
-				return Double.parseDouble(s);
-			else if (classe.isInstance(new Integer(0).shortValue()))
-				return Short.parseShort(s);
-			else if (classe.isInstance(new Integer(0).byteValue()))
-				return Byte.parseByte(s);
-			else if (classe.isInstance(true))
-				return charToBoolean(s);
-			else if (classe.isInstance(s.toCharArray()[0]))
-				return s.toCharArray()[0];
-		}
+		Object objNull = verifyNull(objetoTarget);
+		if (objNull == null)
+			return null;
 
-		// if (classe.isInstance(new Long(0)) || classe.isInstance(new
-		// Integer(0)))
-		// s = new Integer(objetoTarget + "") + "";
+		if (classe.isPrimitive())
+			return parsePrimitive(objetoTarget, classe);
 
-		if (classe.isInstance(new Boolean(true)))
-			return charToBoolean(s);
-		else if (classe.isInstance(new Date())) {
-			if (objetoTarget instanceof Calendar)
-				return ((Calendar) objetoTarget).getTime();
-		} else if (classe.isInstance(Calendar.getInstance())) {
-			if (objetoTarget instanceof Date) {
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime((Date) objetoTarget);
-				return calendar;
-			}
-		}
+		Object result = Helper.parseString(objetoTarget.toString(), classe);
+		if (result != null)
+			return result;
 
-		try {
-			return classe.getConstructor(String.class).newInstance(s);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			throw new APPSystemException(e);
-		}
+		result = Helper.getConstructorObject(classe, objetoTarget);
+		if (result != null)
+			return result;
+
+		return null;
+
+	}
+
+	public static <O> Object convertObjectReflextionVerifiyNull(O objetoTarget, Class classe) {
+
+		Object result = convertObjectReflextion(objetoTarget, classe);
+		if (result != null)
+			return result;
+		else
+			return objetoTarget;
 
 	}
 

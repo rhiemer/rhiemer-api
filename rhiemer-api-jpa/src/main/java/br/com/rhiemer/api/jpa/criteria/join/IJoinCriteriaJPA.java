@@ -25,7 +25,7 @@ public interface IJoinCriteriaJPA extends ICriteriaJPA {
 		return null;
 	}
 
-	default Join builderJoin() {
+	default From builderJoin() {
 		Attribute[] _attributes = getAttributes();
 		if (_attributes != null && _attributes.length > 0)
 			return HelperRootCriteria.createJoinComplex(getRoot(), getFecth(), getJoinType(), _attributes);

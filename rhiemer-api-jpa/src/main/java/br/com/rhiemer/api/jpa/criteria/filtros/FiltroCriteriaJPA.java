@@ -124,7 +124,7 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 
 	protected Object tranformCaseInsensitive(Expression path, Object filtro) {
 		if (!caseInsensitive(path))
-			return filtro;
+			return Helper.convertObjectReflextionVerifiyNull(filtro, path.getJavaType());
 		else
 			return filtro.toString().toUpperCase().trim();
 	}

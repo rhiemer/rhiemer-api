@@ -246,7 +246,7 @@ public final class HelperAtributeJPA {
 
 		Class<?> type = null;
 		if (atributo != null)
-			type = Helper.getTypeProperty(classe, atributo);
+			type = Helper.getPropertyTypeClass(classe, atributo);
 		else
 			type = classe;
 
@@ -267,19 +267,12 @@ public final class HelperAtributeJPA {
 
 		Map<String, Object> result = new HashMap<>();
 		Map<String, Class<?>> _primaryKeys = Helper.getPrimaryKeyList(classe);
-		if (_primaryKeys.size() <= 1) {
-			Object[] _chaves = Helper.convertArgsArray(Object.class, chaves);
-			Object value = HelperAtributeJPA.createEntity(classe, _chaves);
-			result.put(_primaryKeys.keySet().iterator().next(), value);
-		} else {
-			int i = -1;
-			for (Map.Entry<String, Class<?>> entry : _primaryKeys.entrySet()) {
-				i++;
-				Object value = HelperAtributeJPA.createEntity(classe, entry.getKey(), chaves[i]);
-				result.put(entry.getKey(), value);
-			}
+		int i = -1;
+		for (Map.Entry<String, Class<?>> entry : _primaryKeys.entrySet()) {
+			i++;
+			Object value = HelperAtributeJPA.createEntity(classe, entry.getKey(), chaves[i]);
+			result.put(entry.getKey(), value);
 		}
-
 		return result;
 
 	}
