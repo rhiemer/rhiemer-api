@@ -10,11 +10,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 
+import br.com.rhiemer.api.jpa.criteria.atributos.IAtributoCreateCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.FiltroCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloAtributoJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloValorJPA;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
-import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.join.IJoinCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPA;
@@ -91,8 +92,10 @@ public class ParametrizarCriteriaJPAParametro {
 		} else if (operacao instanceof OrderByCriteriaJPA) {
 			Order order = ((OrderByCriteriaJPA) operacao).build();
 			query.orderBy(order);
-		} else if (operacao instanceof AbstractJoinCriteriaJPA) {
-			((AbstractJoinCriteriaJPA) operacao).builderJoin();
+		} else if (operacao instanceof IAtributoCreateCriteriaJPA) {
+			((IAtributoCreateCriteriaJPA) operacao).builderAtributoCriteria();
+		} else if (operacao instanceof IJoinCriteriaJPA) {
+			((IJoinCriteriaJPA) operacao).builderJoin();
 		} else if (operacao instanceof IBuilderMetodosJuncaoJPAWhere) {
 			((IBuilderMetodosJuncaoJPAWhere) operacao).builderQuery(builder, root, query);
 		} else if (operacao instanceof IBuilderMetodosJuncaoJPA) {

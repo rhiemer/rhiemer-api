@@ -11,12 +11,12 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.metamodel.Attribute;
 
-import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.atributos.AbstractAtributoCriteriaJPA;
 import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
 import br.com.rhiemer.api.util.helper.Helper;
 
-public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implements IFiltroCriteriaJPA {
+public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA implements IFiltroCriteriaJPA {
 
 	private CriteriaBuilder builder;
 	private Boolean not = false;
@@ -69,7 +69,7 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 	}
 
 	public Expression build(Object... filtros) {
-		Path path = builderJoin();
+		Path path = builderAtributoCriteria();
 		return buildFiltro(path, filtros);
 	}
 
@@ -102,7 +102,7 @@ public abstract class FiltroCriteriaJPA extends AbstractJoinCriteriaJPA implemen
 			return null;
 		else if (exps.size() > 1) {
 			Predicate[] array = (Predicate[]) Array.newInstance(exps.get(0).getClass(), 1);
-			expJunction = builder.or(exps.toArray(array));
+			expJunction = getBuilder().or(exps.toArray(array));
 		} else {
 			expJunction = exps.get(0);
 		}

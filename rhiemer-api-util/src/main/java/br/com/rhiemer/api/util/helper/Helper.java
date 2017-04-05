@@ -66,6 +66,20 @@ public final class Helper {
 	private Helper() {
 	}
 
+	public static String subsStrIndexOf(String str, String value) {
+		if (isBlank(str))
+			return str;
+
+		if (isBlank(value))
+			return str;
+
+		int indexOf = str.lastIndexOf(value);
+		if (indexOf == -1)
+			return null;
+		else
+			return value.substring(indexOf);
+	}
+
 	public static String concat(String str, String value) {
 		if (isBlank(value) && isNotBlank(str))
 			return str;
@@ -274,6 +288,16 @@ public final class Helper {
 		return getTypePropertyComplex(classe, property, DOT_FIELD);
 	}
 
+	public static boolean isInstance(Class classe, String property, Object value) {
+		Class<?> atributeType = getPropertyType(classe, property);
+		return atributeType.isInstance(value);
+	}
+
+	public static boolean isAssignableFrom(Class classe, String property, Class value) {
+		Class<?> atributeType = getPropertyType(classe, property);
+		return (atributeType.isAssignableFrom(value) || value.isAssignableFrom(atributeType));
+	}
+
 	public static Class getTypePropertyComplex(Class classe, String property, String separetor) {
 
 		String[] s = property.split(separetor);
@@ -310,7 +334,7 @@ public final class Helper {
 		Method _method = getMethod(clazz, property);
 		if (_method != null)
 			return _method.getReturnType();
-		
+
 		return null;
 
 	}
@@ -328,7 +352,7 @@ public final class Helper {
 		return getValueField(objeto, property);
 
 	}
-	
+
 	public static Field geField(Class<?> classe, String property) {
 
 		List<Field> fields = allFields(classe);
@@ -343,7 +367,7 @@ public final class Helper {
 
 	public static <T> Field geFieldObj(T objeto, String property) {
 
-	   return geField(objeto.getClass(),property);
+		return geField(objeto.getClass(), property);
 
 	}
 
@@ -1723,6 +1747,46 @@ public final class Helper {
 		}
 
 		return primaryKeyTypes;
+	}
+
+	public static Map<String, Object> valuePrimaryKeyList(Class<?> classe, Object obj) {
+
+		final Map<String, Object> primaryKeyValues = new HashMap<>();
+
+		for (Class<?> annotation : ANNOTATIOSID) {
+			List<Field> fields = allFields(classe);
+			for (Field f : fields) {
+
+				if (f.getAnnotation((Class<? extends Annotation>) annotation) != null) {
+					primaryKeyValues.put(f.getName(), getValueField(obj, f));
+				}
+			}
+		}
+
+		return primaryKeyValues;
+	}
+
+	public static Map<String, Object> valuePrimaryKeyListParams(Class<?> classe, Object... keys) {
+
+		final Map<String, Object> primaryKeyValues = new HashMap<>();
+		final List<Object> listKeys = convertArgs(keys);
+
+		List<Field> fields = allFields(classe);
+		for (Class<?> annotation : ANNOTATIOSID) {
+
+			int i = -1;
+			for (Field f : fields) {
+				if (i >= listKeys.size())
+					break;
+				if (f.getAnnotation((Class<? extends Annotation>) annotation) != null) {
+					i++;
+					primaryKeyValues.put(f.getName(), convertObjectReflextionVerifiyNull(listKeys.get(i), f.getType()));
+				}
+
+			}
+		}
+
+		return primaryKeyValues;
 	}
 
 	public static Object validaPrimaryKeyValor(Class<?> classe, String id) {

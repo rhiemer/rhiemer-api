@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.rhiemer.api.util.annotations.entity.AtributoPrimaryKey;
 import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperPojoKey;
 
 public abstract class PojoKeyAbstract extends PojoAbstract {
 
@@ -93,36 +94,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 	@JsonIgnore
 	@XmlTransient
 	public void setPrimaryKeyArray(Object... keys) {
-		for (int i = 0; i < keys.length; i++) {
-			Helper.setValueMethodOrField(this, getPrimaryKeyList().get(i), keys[i]);
-		}
-	}
-
-	@JsonIgnore
-	@XmlTransient
-	public boolean setPrimaryKeyAtributo(Object... keys) {
-		if (keys == null || keys.length == 0)
-			return false;
-
-		AtributoPrimaryKey[] atributosPrimaryKey = this.getClass().getAnnotationsByType(AtributoPrimaryKey.class);
-		if (atributosPrimaryKey.length == 0 || atributosPrimaryKey.length != keys.length)
-			return false;
-
-		if (IntStream.range(0, atributosPrimaryKey.length).filter(i -> keys[i] == null
-				|| !keys[i].getClass().isAssignableFrom(Helper.getTypeProperty(this, atributosPrimaryKey[i].value())))
-				.findFirst().getAsInt() >= 0)
-			return false;
-		IntStream.range(0, atributosPrimaryKey.length)
-				.forEach(i -> Helper.setValueProperty(this, atributosPrimaryKey[i].value(), keys[i]));
-		return true;
-	}
-
-	@JsonIgnore
-	@XmlTransient
-	public void setPrimaryKeyArrayAtributo(Object... keys) {
-		boolean result = setPrimaryKeyAtributo(keys);
-		if (!result)
-			setPrimaryKeyArray(keys);
+		HelperPojoKey.setAtributoPrimaryKey(this, keys);
 	}
 
 	@Override
@@ -161,27 +133,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 
 	@Override
 	public int compareTo(Pojo pojo) {
-		if (pojo == null)
-			return -1;
-
-		for (String property : getPrimaryKeyList()) {
-
-			Object resultMethodFrom = Helper.getValueMethodOrField(this, property);
-			Object resultMethodTo = Helper.getValueMethodOrField(pojo, property);
-
-			int result = 0;
-			if (resultMethodFrom != null || resultMethodTo != null)
-				if (resultMethodFrom == null && resultMethodTo != null)
-					return -1;
-				else
-					result = Helper.compareToObj(resultMethodFrom, resultMethodTo);
-
-			if (result != 0)
-				return result;
-
-		}
-
-		return 0;
+		return compareToKey(pojo);
 	}
 
 	public Object[] arrayPrimaryKey() {
@@ -193,22 +145,7 @@ public abstract class PojoKeyAbstract extends PojoAbstract {
 	}
 
 	public int compareToKey(Object... keys) {
-		if (getPrimaryKeyList() == null || getPrimaryKeyList().size() == 0)
-			throw new IllegalArgumentException(
-					String.format("Sem primaryKey definida para a classe %s", this.getClass().toString()));
-
-		if (keys.length != getPrimaryKeyList().size())
-			throw new IllegalArgumentException(
-					String.format("Tamanho da chave [%s] dferente da quantidade de parametros [%s]", keys.length,
-							getPrimaryKeyList().size()));
-
-		for (int i = 0; i < arrayPrimaryKey().length; i++) {
-			int compara = Helper.compareToObj(arrayPrimaryKey()[i], keys[i]);
-			if (compara != 0)
-				return compara;
-		}
-
-		return 0;
+		return HelperPojoKey.compareToKey(this, keys);
 
 	}
 

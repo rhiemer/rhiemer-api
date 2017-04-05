@@ -53,23 +53,14 @@ public final class HelperRootCriteria {
 		return getAttribute(rootJoin, atributesStr, fecth, joinType);
 	}
 
-	public static Path getAttribute(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
-
-		if (!atributo.contains(ConstantesAPI.DOT_FIELD)) {
-			return HelperAtributeJPA.getAttribute(rootJoin, atributo);
-		} else {
-			From join = createJoinComplex(rootJoin, atributo, fecth, joinType);
-			String[] atributoSplit = atributo.split("[.]");
-			String lastAtributo = atributoSplit[atributoSplit.length - 1];
-			return HelperAtributeJPA.getAttribute(join, lastAtributo);
-		}
-	}
-
-	public static From createJoinComplex(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
+	public static Path getAttributeOrJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType,
+			boolean breakJoin, boolean last) {
 
 		String[] atributoSplit = atributo.split("[.]");
 		From joinLoop = rootJoin;
 		String atributoComp = "";
+		Path pathAtt = null;
+		boolean _lastJoin = true;
 
 		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
@@ -77,13 +68,34 @@ public final class HelperRootCriteria {
 			else
 				atributoComp = atributo;
 			boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributoComp);
-			if (isField)
-				break;
-			joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
+			if (!isField) {
+				joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
+				_lastJoin = true;
+			} else {
+				if (_lastJoin)
+					pathAtt = HelperAtributeJPA.getAttribute(joinLoop, atributo);
+				else
+					pathAtt = HelperAtributeJPA.getAttribute(pathAtt, atributo);
+				_lastJoin = false;
+			}
 
 		}
 
-		return joinLoop;
+		if (breakJoin || (last && _lastJoin))
+			return joinLoop;
+		else
+			return pathAtt;
+
+	}
+
+	public static Path getAttribute(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
+
+		return getAttributeOrJoin(rootJoin, atributo, fecth, joinType, false, false);
+	}
+
+	public static From createJoinComplex(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
+
+		return (From) getAttributeOrJoin(rootJoin, atributo, fecth, joinType, true, false);
 
 	}
 

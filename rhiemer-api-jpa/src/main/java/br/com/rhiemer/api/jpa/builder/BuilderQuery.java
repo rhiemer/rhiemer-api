@@ -25,6 +25,7 @@ import br.com.rhiemer.api.util.dto.Arquivo;
 import br.com.rhiemer.api.util.dto.Pager;
 import br.com.rhiemer.api.util.helper.FileUtils;
 import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperPojoKey;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public class BuilderQuery implements BuildJPA {
@@ -107,11 +108,11 @@ public class BuilderQuery implements BuildJPA {
 	protected void setResultMaping(String resultMaping) {
 		this.resultMaping = resultMaping;
 	}
-	
+
 	public List<IExecucao> getParametrosExecucao() {
 		return this.parametrosExecucao;
 	}
-	
+
 	public BuilderQuery setParametrosExecucao(IExecucao... parametrosExecucao) {
 		this.parametrosExecucao = Helper.convertArgs(parametrosExecucao);
 		return this;
@@ -182,11 +183,11 @@ public class BuilderQuery implements BuildJPA {
 
 		return query;
 	}
-	
+
 	public BuilderQuery addParameterPrimaryKey(Object... params) {
 		if (this.parameters == null)
 			this.parameters = new HashMap<>();
-		this.parameters.putAll(HelperAtributeJPA.mapCreateEntity(getResultClass(),params));
+		this.parameters.putAll(HelperPojoKey.mapPrimaryKey(getResultClass(), params));
 		return this;
 	}
 
@@ -267,13 +268,11 @@ public class BuilderQuery implements BuildJPA {
 			return this;
 		}
 
-		
-
 		public Builder transformMap(boolean transformMap) {
 			this.transformMap = transformMap;
 			return this;
 		}
-		
+
 		public Builder parametrosExecucao(IExecucao... parametrosExecucao) {
 			this.parametrosExecucao = parametrosExecucao;
 			return this;

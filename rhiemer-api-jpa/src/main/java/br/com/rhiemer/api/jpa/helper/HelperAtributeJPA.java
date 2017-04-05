@@ -5,14 +5,13 @@ import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIO
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_JOIN;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LIST;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_REFERENCE;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LAZY;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,7 +23,7 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import br.com.rhiemer.api.util.helper.Helper;
-import br.com.rhiemer.api.util.helper.HelperPojo;
+import br.com.rhiemer.api.util.helper.HelperPojoKey;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class HelperAtributeJPA {
@@ -62,8 +61,17 @@ public final class HelperAtributeJPA {
 
 	}
 
+	public static <T extends Annotation> T annotationLazy(AccessibleObject field) {
+		return annotationAccessibleObject(ANNOTATIONS_LAZY, field);
+
+	}
+
 	public static <T extends Annotation> T annotationJoin(Class<?> classe, String fieldStr) {
 		return annotationStr(ANNOTATIONS_JOIN, classe, fieldStr);
+	}
+
+	public static <T extends Annotation> T annotationLazy(Class<?> classe, String fieldStr) {
+		return annotationStr(ANNOTATIONS_LAZY, classe, fieldStr);
 	}
 
 	public static <T extends Annotation> T annotationMappedList(AccessibleObject field) {
@@ -141,6 +149,16 @@ public final class HelperAtributeJPA {
 
 	public static boolean fieldisCreate(AccessibleObject field) {
 		return annotationCreate(field) != null;
+
+	}
+
+	public static boolean fieldisLazy(AccessibleObject field) {
+		return annotationLazy(field) != null;
+
+	}
+
+	public static boolean fieldisLazy(Class<?> classe, String fieldStr) {
+		return annotationLazy(classe, fieldStr) != null;
 
 	}
 
@@ -241,39 +259,19 @@ public final class HelperAtributeJPA {
 	}
 
 	public static Object createEntity(Class<?> classe, String atributo, Object... chaves) {
-		if ((chaves == null || chaves.length == 0) && atributo != null && !fieldisJoin(classe, atributo))
-			return chaves;
-
 		Class<?> type = null;
 		if (atributo != null)
 			type = Helper.getPropertyTypeClass(classe, atributo);
 		else
 			type = classe;
 
-		if (!chaves[0].getClass().isArray() && type != null && type.isInstance(chaves[0]))
-			return chaves;
-
-		return HelperPojo.newInstancePrimaryKey((Class<PojoKeyAbstract>) type, chaves);
+		return HelperPojoKey.verifyNewInstancePrimaryKey((Class<PojoKeyAbstract>) type, chaves);
 
 	}
 
 	public static Object createEntity(Class<?> classe, Object... chaves) {
 
 		return createEntity(classe, null, chaves);
-
-	}
-
-	public static Map<String, Object> mapCreateEntity(Class<?> classe, Object... chaves) {
-
-		Map<String, Object> result = new HashMap<>();
-		Map<String, Class<?>> _primaryKeys = Helper.getPrimaryKeyList(classe);
-		int i = -1;
-		for (Map.Entry<String, Class<?>> entry : _primaryKeys.entrySet()) {
-			i++;
-			Object value = HelperAtributeJPA.createEntity(classe, entry.getKey(), chaves[i]);
-			result.put(entry.getKey(), value);
-		}
-		return result;
 
 	}
 

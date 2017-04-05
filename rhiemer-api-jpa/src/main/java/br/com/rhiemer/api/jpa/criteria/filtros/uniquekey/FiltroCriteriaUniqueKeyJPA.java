@@ -9,9 +9,8 @@ import br.com.rhiemer.api.jpa.criteria.filtros.equals.EqualsCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.MetodosJuncaoJPAAnd;
 import br.com.rhiemer.api.jpa.criteria.juncao.MetodosJuncaoJPAOr;
-import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.util.helper.Helper;
-import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
+import br.com.rhiemer.api.util.helper.HelperPojoKey;
 
 public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
@@ -19,14 +18,14 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
 	default T primaryKeyNot(Object... chaves) {
 		MetodosJuncaoJPAAnd and1 = new MetodosJuncaoJPAAnd().andNot();
-		Map<String, Object> map = HelperAtributeJPA.mapCreateEntity(getResultClass(), chaves);
+		Map<String, Object> map = HelperPojoKey.mapPrimaryKey(getResultClass(), chaves);
 		and1.equal(map);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(and1));
 		return (T) this;
 	}
 
 	default T primaryKey(Object... chaves) {
-		Map<String, Object> map = HelperAtributeJPA.mapCreateEntity(getResultClass(), chaves);
+		Map<String, Object> map = HelperPojoKey.mapPrimaryKey(getResultClass(), chaves);
 		map.forEach((x, y) -> getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class)
 				.setAtributo(x).setValues(new Object[] { y })));
 		return (T) this;
@@ -39,7 +38,7 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
 		for (UniqueKey uniqueKey : arrayUniqueKey) {
 			if (chave.equalsIgnoreCase(uniqueKey.nome())) {
-				PojoKeyAbstract entity = (PojoKeyAbstract) Helper.newInstance(getResultClass());
+				Object entity = Helper.newInstance(getResultClass());
 				for (int i = 0; i < params.length && i < uniqueKey.columnNames().length; i++) {
 					Helper.setValueMethodOrField(entity, uniqueKey.columnNames()[i], params[i]);
 				}
@@ -60,8 +59,7 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
 			int i;
 			for (i = 0; i < params.length && i < uniqueKey.columnNames().length; i++) {
-				Class<?> atributeType = Helper.getPropertyType(getResultClass(), uniqueKey.columnNames()[i]);
-				if (!atributeType.isInstance(params[i]))
+				if (!Helper.isInstance(getResultClass(), uniqueKey.columnNames()[i], params[i]))
 					continue loop1;
 			}
 
@@ -75,27 +73,27 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
 	}
 
-	default T uniqueKeyValida(PojoKeyAbstract entity) {
+	default T uniqueKeyValida(Object entity) {
 		uniqueKey(entity, true, true, false);
 		return (T) this;
 	}
 
-	default T uniqueKeyAtualiza(PojoKeyAbstract entity) {
+	default T uniqueKeyAtualiza(Object entity) {
 		uniqueKey(entity, false, false, true);
 		return (T) this;
 	}
 
-	default T uniqueKey(PojoKeyAbstract entity) {
+	default T uniqueKey(Object entity) {
 		uniqueKey(entity, false, true, true);
 		return (T) this;
 	}
 
-	default T uniqueKeyNot(PojoKeyAbstract entity) {
+	default T uniqueKeyNot(Object entity) {
 		uniqueKey(entity, true, true, true);
 		return (T) this;
 	}
 
-	default T uniqueKey(PojoKeyAbstract entity, boolean isNot, boolean valida, boolean atualiza,
+	default T uniqueKey(Object entity, boolean isNot, boolean valida, boolean atualiza,
 			String... nomesUniqueKey) {
 
 		Class<?> entityClass = entity.getClass();

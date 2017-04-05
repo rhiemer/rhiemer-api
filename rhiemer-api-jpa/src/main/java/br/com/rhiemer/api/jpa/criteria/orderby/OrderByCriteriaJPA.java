@@ -5,9 +5,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 
-import br.com.rhiemer.api.jpa.criteria.join.AbstractJoinCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.atributos.AbstractAtributoCriteriaJPA;
 
-public abstract class OrderByCriteriaJPA extends AbstractJoinCriteriaJPA  {
+public abstract class OrderByCriteriaJPA extends AbstractAtributoCriteriaJPA {
 
 	private CriteriaBuilder builder;
 
@@ -20,12 +20,10 @@ public abstract class OrderByCriteriaJPA extends AbstractJoinCriteriaJPA  {
 	}
 
 	public Order build() {
-		Path path = builderJoin();
+		Path path = builderAtributoCriteria();
 		return buildOrderBy(path);
 	}
 
 	public abstract Order buildOrderBy(Expression path);
-	
-
 
 }
