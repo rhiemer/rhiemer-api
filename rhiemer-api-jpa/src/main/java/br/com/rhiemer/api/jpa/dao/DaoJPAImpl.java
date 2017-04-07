@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -154,8 +155,8 @@ public class DaoJPAImpl implements DaoJPA {
 	@Override
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
-	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k) {
-		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(k));
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyParams(Class<T> t, Object... k) {
+		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByParams(k));
 
 	}
 
@@ -171,7 +172,7 @@ public class DaoJPAImpl implements DaoJPA {
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object[] k, IExecucao... parametrosExecucao) {
-		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByNome(k));
+		return excutarQueryUniqueResult(BuilderCriteriaJPA.builderCreate().resultClass(t).build().uniqueKeyByParams(k));
 	}
 
 	@Override
@@ -345,7 +346,13 @@ public class DaoJPAImpl implements DaoJPA {
 	@DesligaEventoInterceptorDiscovery
 	@DesligaEvento(chaveEvento = PRE_UPDATE)
 	public <T> T excutarQueryUniqueResult(BuildJPA query, IExecucao... parametrosExecucao) {
-		return (T) query.buildQuery(em).getSingleResult();
+		try {
+			return (T) query.buildQuery(em).getSingleResult();
+
+		} catch (NoResultException e) {
+			return null;
+		}
+
 	}
 
 	/*

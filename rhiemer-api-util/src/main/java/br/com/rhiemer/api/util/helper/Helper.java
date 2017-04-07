@@ -2035,11 +2035,12 @@ public final class Helper {
 		List<Class<?>> arrayClasseParams = new ArrayList<>();
 		Optional.ofNullable(classeParams).filter(t -> classeParams.length > 0)
 				.ifPresent(t -> Arrays.asList(convertArgsArray(Object.class, classeParams))
-						.forEach(x -> arrayClasseParams.add(x.getClass())));
+						.forEach(x -> arrayClasseParams.add(x == null ? null : x.getClass())));
 		return arrayClasseParams;
 	}
 
 	public static Class<?>[] convertObjectToClassArray(Object... classeParams) {
+
 		List<Class<?>> arrayClasseParams = convertObjectToClass(classeParams);
 		return arrayClasseParams.toArray(new Class<?>[] {});
 	}

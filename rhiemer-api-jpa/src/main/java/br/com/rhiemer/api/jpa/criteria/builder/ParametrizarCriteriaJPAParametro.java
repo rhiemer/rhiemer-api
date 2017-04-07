@@ -59,18 +59,19 @@ public class ParametrizarCriteriaJPAParametro {
 		ICriteriaJPA operacao = null;
 		if (this.getObjeto() != null)
 			operacao = this.getObjeto();
-		else
+		else {
 			operacao = Helper.newInstance(classe);
+			Helper.setValueMethodOrField(operacao, "not", this.getNot());
+			Helper.setValueMethodOrField(operacao, "caseSensitve", this.getCaseSensitve());
+			Helper.setValueMethodOrField(operacao, "includeNull", this.getIncludeNull());
+			Helper.setValueMethodOrField(operacao, "isExpression", this.getIsExpression());
+			Helper.setValueMethodOrField(operacao, "joinType", this.getJoinType());
+			Helper.setValueMethodOrField(operacao, "fecth", this.getFecth());
+			Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
+			Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());
+		}
 		Helper.setValueMethodOrField(operacao, "root", root);
 		Helper.setValueMethodOrField(operacao, "builder", builder);
-		Helper.setValueMethodOrField(operacao, "joinType", this.getFecth());
-		Helper.setValueMethodOrField(operacao, "fecth", this.getFecth());
-		Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
-		Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());
-		Helper.setValueMethodOrField(operacao, "not", this.getNot());
-		Helper.setValueMethodOrField(operacao, "caseSensitve", this.getCaseSensitve());
-		Helper.setValueMethodOrField(operacao, "includeNull", this.getIncludeNull());
-		Helper.setValueMethodOrField(operacao, "isExpression", this.getIsExpression());
 		return operacao;
 	}
 

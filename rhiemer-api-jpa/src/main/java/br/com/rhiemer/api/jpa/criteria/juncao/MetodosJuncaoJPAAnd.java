@@ -9,6 +9,14 @@ public class MetodosJuncaoJPAAnd<T> extends MetodosJuncaoJPA<T> implements IBuil
 	public MetodosJuncaoJPAAnd(IBuilderFiltrosJPA<T> anterior) {
 		super(anterior);
 	}
+	
+	public MetodosJuncaoJPAAnd(boolean not) {
+		super(not);
+	}
+	
+	public MetodosJuncaoJPAAnd(boolean not,IBuilderFiltrosJPA<T> anterior) {
+		super(not,anterior);
+	}
 
 
 }

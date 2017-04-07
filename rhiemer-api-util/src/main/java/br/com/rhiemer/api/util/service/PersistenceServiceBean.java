@@ -23,7 +23,7 @@ public interface PersistenceServiceBean<T, K> extends PersistenceService {
 
 	<T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe, IExecucao... parametrosExecucao);
 
-	<T extends PojoKeyAbstract> T procurarPorUniqueKey(Object... k);
+	<T extends PojoKeyAbstract> T procurarPorUniqueKeyParams(Object... k);
 
 	<T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(String nome, Object... k);
 

@@ -9,7 +9,7 @@ import br.com.rhiemer.api.util.helper.Helper;
 public abstract class MetodosJuncaoJPA<T> {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
-	private Boolean not;
+	private Boolean not=false;
 	final private IBuilderFiltrosJPA<T> anterior;
 
 	public MetodosJuncaoJPA() {
@@ -20,6 +20,19 @@ public abstract class MetodosJuncaoJPA<T> {
 	public MetodosJuncaoJPA(IBuilderFiltrosJPA<T> anterior) {
 		super();
 		this.anterior = anterior;
+		this.not=false;
+	}
+	
+	public MetodosJuncaoJPA(boolean not) {
+		super();
+		this.anterior = null;
+		this.not=not;
+	}
+	
+	public MetodosJuncaoJPA(boolean not,IBuilderFiltrosJPA<T> anterior) {
+		super();
+		this.anterior = anterior;
+		this.not=not;
 	}
 
 	public List<ParametrizarCriteriaJPAParametro> getFiltros() {
@@ -47,5 +60,7 @@ public abstract class MetodosJuncaoJPA<T> {
 		} while (_anterior != null);
 		return (T) _root;
 	}
+	
+	
 
 }

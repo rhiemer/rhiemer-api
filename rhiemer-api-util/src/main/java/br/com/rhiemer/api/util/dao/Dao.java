@@ -25,7 +25,7 @@ public interface Dao {
 	
 	<T, K> T buscarObjetoSalvoLazy(T t, Class<T> classe,IExecucao... parametrosExecucao);
 	
-	<T extends PojoKeyAbstract> T procurarPorUniqueKey(Class<T> t, Object... k);
+	<T extends PojoKeyAbstract> T procurarPorUniqueKeyParams(Class<T> t, Object... k);
 	
 	<T extends PojoKeyAbstract> T procurarPorUniqueKeyByNome(Class<T> t,String nome,Object... k);
 	

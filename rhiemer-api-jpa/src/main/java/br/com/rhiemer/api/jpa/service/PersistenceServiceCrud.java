@@ -121,7 +121,7 @@ public class PersistenceServiceCrud<T extends Entity, K extends Serializable>
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-	public <T extends PojoKeyAbstract> T procurarPorUniqueKey(Object... k) {
+	public <T extends PojoKeyAbstract> T procurarPorUniqueKeyParams(Object... k) {
 		return this.getDao().procurarPorUniqueKey((Class<T>) classeObjeto, k);
 	}
 
