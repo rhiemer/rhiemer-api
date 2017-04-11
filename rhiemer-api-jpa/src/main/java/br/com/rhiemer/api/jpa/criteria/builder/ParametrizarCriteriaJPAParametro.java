@@ -31,7 +31,7 @@ public class ParametrizarCriteriaJPAParametro {
 	private Object[] values;
 	private Attribute[] attributes;
 	private Boolean not = false;
-	private Boolean caseSensitve = false;
+	private Boolean caseSensitve = true;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
 	private Object filtro1;

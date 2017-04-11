@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -349,7 +350,7 @@ public class DaoJPAImpl implements DaoJPA {
 		try {
 			return (T) query.buildQuery(em).getSingleResult();
 
-		} catch (NoResultException e) {
+		} catch (NonUniqueResultException | NoResultException e) {
 			return null;
 		}
 

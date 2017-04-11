@@ -135,7 +135,10 @@ public final class Helper {
 				newValue = subStringStartWith(listValue.get(i), value);
 			else
 				newValue = subStringStartEndWith(listValue.get(i), value);
-			result = result.concat(value).concat(newValue);
+			if (isNotBlank(result))
+				result = concat(concat(result, value), newValue);
+			else
+				result = newValue;
 
 		}
 
@@ -418,7 +421,7 @@ public final class Helper {
 	public static Object invokeMethod(Method method, Object objeto, Object... params) {
 		Object[] _params = null;
 		if (params != null && params.length > 0) {
-			_params = convertObjectReflextionParams(convertArgsArray(Object.class, params), method.getParameterTypes());
+			_params = convertObjectReflextionParams(params, method.getParameterTypes());
 		}
 		try {
 			return method.invoke(objeto, _params);
@@ -451,10 +454,8 @@ public final class Helper {
 
 	public static Object[] convertObjectReflextionParams(Object[] args, Class<?>[] classes) {
 
-		List<Object> objectList = new ArrayList<>();
-		IntStream.range(0, args.length).filter(idx -> classes.length > idx)
-				.forEach(idx -> objectList.add(convertObjectReflextionVerifiyNull(args[idx], classes[idx])));
-		return objectList.toArray((Object[]) Array.newInstance(Object.class, 1));
+		return IntStream.range(0, args.length).filter(idx -> classes.length > idx)
+				.mapToObj(idx -> convertObjectReflextionVerifiyNull(args[idx], classes[idx])).toArray();
 
 	}
 
@@ -824,22 +825,56 @@ public final class Helper {
 		return obj;
 	}
 
-	public static <O> Object convertObjectReflextion(O objetoTarget, Class classe) {
-		if (objetoTarget == null || classe.isInstance(objetoTarget) || ProxyUtils.isProxiedCdi(objetoTarget.getClass()))
+	public static boolean verifyObjectArray(Class classe, Object objetoTarget) {
+		return verifyObjectArray(classe, objetoTarget.getClass());
+	}
+
+	public static boolean verifyObjectArray(Object objetoTarget, Class classe) {
+		return verifyObjectArray(objetoTarget.getClass(), classe);
+	}
+
+	public static boolean verifyObjectArray(Class<?> classeTarget, Class<?> classe) {
+		return (!classeTarget.isArray() && classe.isArray());
+	}
+
+	public static Object convertObjectArray(Object objetoTarget, Class classe) {
+		if (verifyObjectArray(objetoTarget, classe)) {
+			return convertArgsArray(classe.getClass().getComponentType(), objetoTarget);
+		} else if (verifyObjectArray(classe, objetoTarget)) {
+			return ((Object[]) objetoTarget)[0];
+		} else {
+			return objetoTarget;
+		}
+	}
+
+	public static <O, T> Object convertObjectReflextion(O objetoTarget, Class<T> classe) {
+
+		if (objetoTarget == null)
 			return objetoTarget;
 
-		Object objNull = verifyNull(objetoTarget);
+		Object _objetoTarget = convertObjectArray(objetoTarget, classe);
+		if (_objetoTarget.getClass().isArray()) {
+			Object[] _arrayObject = Arrays.stream((Object[]) _objetoTarget)
+					.map(x -> convertObjectReflextion(x, classe.getComponentType())).toArray();
+			T[] _arrayResult = (T[]) convertArgsArray(classe.getComponentType(), _arrayObject);
+			return _arrayResult;
+		}
+
+		if (classe.isInstance(_objetoTarget) || ProxyUtils.isProxiedCdi(_objetoTarget.getClass()))
+			return _objetoTarget;
+
+		Object objNull = verifyNull(_objetoTarget);
 		if (objNull == null)
 			return null;
 
 		if (classe.isPrimitive())
-			return parsePrimitive(objetoTarget, classe);
+			return parsePrimitive(_objetoTarget, classe);
 
-		Object result = Helper.parseString(objetoTarget.toString(), classe);
+		Object result = Helper.parseString(_objetoTarget.toString(), classe);
 		if (result != null)
 			return result;
 
-		result = Helper.getConstructorObject(classe, objetoTarget);
+		result = Helper.getConstructorObject(classe, _objetoTarget);
 		if (result != null)
 			return result;
 

@@ -20,7 +20,7 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 
 	private CriteriaBuilder builder;
 	private Boolean not = false;
-	private Boolean caseSensitve = false;
+	private Boolean caseSensitve = true;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
 

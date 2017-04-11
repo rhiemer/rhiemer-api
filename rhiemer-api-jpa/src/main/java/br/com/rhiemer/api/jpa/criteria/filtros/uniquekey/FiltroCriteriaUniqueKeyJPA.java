@@ -125,12 +125,12 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 				continue loop1;
 			}
 
-			MetodosJuncaoJPAOr or = and1.or();
+			MetodosJuncaoJPAAnd and2 = and1.or().and();
 			String[] columnNames = uk.columnNames();
 			for (int i = 0; i < columnNames.length; i++) {
 				String propertyName = columnNames[i];
 				Object propertyValue = Helper.getValueMethodOrField(entity, propertyName);
-				or.and().equal(propertyName, propertyValue);
+				and2.equal(propertyName, propertyValue);
 			}
 		}
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(and1));

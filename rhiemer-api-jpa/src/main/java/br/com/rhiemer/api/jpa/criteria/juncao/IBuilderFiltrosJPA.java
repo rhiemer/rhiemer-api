@@ -46,25 +46,25 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		return (T) this;
 	}
 
-	default T equal(Object value, Attribute... atributes) {
+	default T equalAtribute(Object value, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(new Object[] { value }));
 		return (T) this;
 	}
 
-	default T equal(Object value, ParametroCriteriaJPADto parametos, Attribute... atributes) {
+	default T equalAtribute(Object value, ParametroCriteriaJPADto parametos, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(new Object[] { value }));
 		return (T) this;
 	}
 
-	default T equal(Object[] values, Attribute... atributes) {
+	default T equalAtribute(Object[] values, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(values));
 		return (T) this;
 	}
 
-	default T equal(Object[] values, ParametroCriteriaJPADto parametos, Attribute... atributes) {
+	default T equalAtribute(Object[] values, ParametroCriteriaJPADto parametos, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(values));
 		return (T) this;

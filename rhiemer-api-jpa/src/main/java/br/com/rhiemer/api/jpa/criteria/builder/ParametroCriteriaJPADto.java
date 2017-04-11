@@ -7,7 +7,7 @@ public class ParametroCriteriaJPADto {
 	private Boolean fecth;
 	private JoinType joinType;
 	private Boolean not = false;
-	private Boolean caseSensitve = false;
+	private Boolean caseSensitve = true;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
 	

@@ -56,7 +56,7 @@ public final class HelperRootCriteria {
 	public static Path getAttributeOrJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType,
 			boolean breakJoin, boolean last) {
 
-		String[] atributoSplit = atributo.split("[.]");
+		String[] atributoSplit = atributo.split(DOT_FIELD);
 		From joinLoop = rootJoin;
 		String atributoComp = "";
 		Path pathAtt = null;
@@ -64,9 +64,9 @@ public final class HelperRootCriteria {
 
 		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
-				atributoComp = atributoComp.concat(".").concat(atributo);
+				atributoComp = atributoSplit[i].concat(".").concat(atributo);
 			else
-				atributoComp = atributo;
+				atributoComp = atributoSplit[i];
 			boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributoComp);
 			if (!isField) {
 				joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
@@ -187,18 +187,27 @@ public final class HelperRootCriteria {
 		From joinLoop = join;
 		String atributoComp = "";
 
+		boolean _lastJoin = false;
+
 		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
-				atributoComp = atributoComp.concat(".").concat(atributo);
+				atributoComp = atributoSplit[i].concat(".").concat(atributo);
 			else
-				atributoComp = atributo;
+				atributoComp = atributoSplit[i];
 			boolean isField = HelperAtributeJPA.isField(join.getJavaType(), atributoComp);
-			if (isField)
-				break;
-			joinLoop = getJoin(joinLoop, atributo);
+			if (!isField) {
+				joinLoop = getJoin(joinLoop, atributo);
+				_lastJoin = true;
+			} else {
+				_lastJoin = false;
+			}
+
 		}
 
-		return joinLoop;
+		if (_lastJoin)
+			return joinLoop;
+		else
+			return null;
 
 	}
 
