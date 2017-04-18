@@ -1,5 +1,6 @@
 package br.com.rhiemer.api.jpa.criteria.builder;
 
+import static br.com.rhiemer.api.jpa.constantes.ConstantesCriteriaJPA.FETCH_DEFAULT;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -25,7 +26,7 @@ public class ParametrizarCriteriaJPAParametro {
 
 	private Class<? extends ICriteriaJPA> classe;
 	private ICriteriaJPA objeto;
-	private Boolean fecth;
+	private Boolean fecth = FETCH_DEFAULT;
 	private JoinType joinType;
 	private String atributo;
 	private Object[] values;

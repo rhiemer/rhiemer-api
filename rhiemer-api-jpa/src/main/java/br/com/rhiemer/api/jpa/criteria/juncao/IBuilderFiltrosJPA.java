@@ -7,8 +7,23 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametroCriteriaJPADto;
 import br.com.rhiemer.api.jpa.criteria.filtros.equals.EqualsCriteriaJPA;
+import br.com.rhiemer.api.util.helper.Helper;
 
 public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
+
+	default T root() {
+		if (this instanceof MetodosJuncaoJPA)
+			return (T) ((MetodosJuncaoJPA) this).getRoot();
+		else
+			return (T) this;
+	}
+
+	default IBuilderFiltrosJPA<T> anterior() {
+		if (this instanceof MetodosJuncaoJPA)
+			return ((MetodosJuncaoJPA) this).getAnterior();
+		else
+			return (IBuilderFiltrosJPA) this;
+	}
 
 	default MetodosJuncaoJPAOr<T> or() {
 		MetodosJuncaoJPAOr<T> objeto = new MetodosJuncaoJPAOr(this);
@@ -29,15 +44,15 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 	}
 
 	default MetodosJuncaoJPAAnd<T> andNot() {
-		MetodosJuncaoJPAAnd<T> objeto = new MetodosJuncaoJPAAnd(true,this);
+		MetodosJuncaoJPAAnd<T> objeto = new MetodosJuncaoJPAAnd(true, this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(objeto));
 		return objeto;
 	}
 
-	default T equal(String atributo, Object... values) {
+	default IBuilderFiltrosJPA<T> equal(String atributo, Object... values) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class).setAtributo(atributo)
 				.setValues(values));
-		return (T) this;
+		return this;
 	}
 
 	default T equal(String atributo, ParametroCriteriaJPADto parametos, Object... values) {

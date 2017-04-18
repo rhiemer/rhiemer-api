@@ -3,9 +3,9 @@ package br.com.rhiemer.api.jpa.helper;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_ATRIBUTO;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_CREATE;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_JOIN;
+import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LAZY;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LIST;
 import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_REFERENCE;
-import static br.com.rhiemer.api.jpa.constantes.ConstantesAtributosJPA.ANNOTATIONS_LAZY;
 import static br.com.rhiemer.api.util.constantes.ConstantesAPI.DOT_FIELD;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +24,6 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import br.com.rhiemer.api.util.helper.Helper;
 import br.com.rhiemer.api.util.helper.HelperPojoKey;
-import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class HelperAtributeJPA {
 
@@ -261,11 +260,11 @@ public final class HelperAtributeJPA {
 	public static Object createEntity(Class<?> classe, String atributo, Object... chaves) {
 		Class<?> type = null;
 		if (atributo != null)
-			type = Helper.getPropertyTypeClass(classe, atributo);
+			type = Helper.getTypePropertyComplex(classe, atributo);
 		else
 			type = classe;
 
-		return HelperPojoKey.verifyNewInstancePrimaryKey((Class<PojoKeyAbstract>) type, chaves);
+		return HelperPojoKey.verifyNewInstancePrimaryKey(type, chaves);
 
 	}
 

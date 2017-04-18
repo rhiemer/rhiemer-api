@@ -301,6 +301,12 @@ public final class Helper {
 		return (atributeType.isAssignableFrom(value) || value.isAssignableFrom(atributeType));
 	}
 
+	public static Class getTypePropertyComplex(Class classe, String property) {
+
+		return getTypePropertyComplex(classe, property, DOT_FIELD);
+
+	}
+
 	public static Class getTypePropertyComplex(Class classe, String property, String separetor) {
 
 		String[] s = property.split(separetor);
@@ -316,6 +322,10 @@ public final class Helper {
 
 	public static Class getTypePropertyComplex(Object objeto, String property, String separetor) {
 		return getTypePropertyComplex(objeto.getClass(), property, separetor);
+	}
+
+	public static Class getTypePropertyComplex(Object objeto, String property) {
+		return getTypePropertyComplex(objeto, property, DOT_FIELD);
 	}
 
 	public static <T> Class<?> getTypeProperty(T objeto, String property) {
@@ -874,9 +884,11 @@ public final class Helper {
 		if (result != null)
 			return result;
 
-		result = Helper.getConstructorObject(classe, _objetoTarget);
-		if (result != null)
+		Constructor constructor = Helper.getConstructorObject(classe, _objetoTarget);
+		if (constructor != null) {
+			result = newInstance(classe, _objetoTarget);
 			return result;
+		}
 
 		return null;
 

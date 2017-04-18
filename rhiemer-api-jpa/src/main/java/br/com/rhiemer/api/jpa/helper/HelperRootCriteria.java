@@ -64,24 +64,24 @@ public final class HelperRootCriteria {
 
 		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
-				atributoComp = atributoSplit[i].concat(".").concat(atributo);
+				atributoComp = atributoComp.concat(".").concat(atributoSplit[i]);
 			else
 				atributoComp = atributoSplit[i];
 			boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributoComp);
 			if (!isField) {
-				joinLoop = createJoin(joinLoop, atributoComp, fecth, joinType);
+				joinLoop = createJoin(joinLoop, atributoSplit[i], fecth, joinType);
 				_lastJoin = true;
 			} else {
 				if (_lastJoin)
-					pathAtt = HelperAtributeJPA.getAttribute(joinLoop, atributo);
+					pathAtt = HelperAtributeJPA.getAttribute(joinLoop, atributoSplit[i]);
 				else
-					pathAtt = HelperAtributeJPA.getAttribute(pathAtt, atributo);
+					pathAtt = HelperAtributeJPA.getAttribute(pathAtt, atributoSplit[i]);
 				_lastJoin = false;
 			}
 
 		}
 
-		if (breakJoin || (last && _lastJoin))
+		if (breakJoin || (last && _lastJoin) || (_lastJoin && pathAtt == null))
 			return joinLoop;
 		else
 			return pathAtt;
@@ -103,11 +103,11 @@ public final class HelperRootCriteria {
 
 		From join = null;
 		if (filtro instanceof String)
-			join = HelperRootCriteria.createJoinComplex(rootJoin, (String) filtro, fecth, joinType);
+			join = createJoinComplex(rootJoin, (String) filtro, fecth, joinType);
 		else if (filtro instanceof Attribute[])
-			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType, (Attribute[]) filtro);
+			join = createJoinComplex(rootJoin, fecth, joinType, (Attribute[]) filtro);
 		else if (filtro instanceof Attribute)
-			join = HelperRootCriteria.createJoinComplex(rootJoin, fecth, joinType, (Attribute) filtro);
+			join = createJoinComplex(rootJoin, fecth, joinType, (Attribute) filtro);
 		else
 			return null;
 		return join;
@@ -118,11 +118,11 @@ public final class HelperRootCriteria {
 
 		Expression exp = null;
 		if (filtro instanceof String)
-			exp = HelperRootCriteria.getAttribute(rootJoin, (String) filtro, fecth, joinType);
+			exp = getAttribute(rootJoin, (String) filtro, fecth, joinType);
 		else if (filtro instanceof Attribute[])
-			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType, (Attribute[]) filtro);
+			exp = getAttribute(rootJoin, fecth, joinType, (Attribute[]) filtro);
 		else if (filtro instanceof Attribute)
-			exp = HelperRootCriteria.getAttribute(rootJoin, fecth, joinType, (Attribute) filtro);
+			exp = getAttribute(rootJoin, fecth, joinType, (Attribute) filtro);
 		else
 			return null;
 		return exp;
@@ -191,12 +191,12 @@ public final class HelperRootCriteria {
 
 		for (int i = 0; (i < atributoSplit.length && joinLoop != null); i++) {
 			if (Helper.isNotBlank(atributoComp))
-				atributoComp = atributoSplit[i].concat(".").concat(atributo);
+				atributoComp = atributoComp.concat(".").concat(atributoSplit[i]);
 			else
 				atributoComp = atributoSplit[i];
 			boolean isField = HelperAtributeJPA.isField(join.getJavaType(), atributoComp);
 			if (!isField) {
-				joinLoop = getJoin(joinLoop, atributo);
+				joinLoop = getJoin(joinLoop, atributoSplit[i]);
 				_lastJoin = true;
 			} else {
 				_lastJoin = false;
