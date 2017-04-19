@@ -258,19 +258,14 @@ public final class HelperAtributeJPA {
 	}
 
 	public static Object createEntity(Class<?> classe, String atributo, Object... chaves) {
-		Class<?> type = null;
-		if (atributo != null)
-			type = Helper.getTypePropertyComplex(classe, atributo);
-		else
-			type = classe;
 
-		return HelperPojoKey.verifyNewInstancePrimaryKey(type, chaves);
+		return HelperPojoKey.createEntity(classe, atributo, chaves);
 
 	}
 
 	public static Object createEntity(Class<?> classe, Object... chaves) {
 
-		return createEntity(classe, null, chaves);
+		return HelperPojoKey.createEntity(classe, chaves);
 
 	}
 

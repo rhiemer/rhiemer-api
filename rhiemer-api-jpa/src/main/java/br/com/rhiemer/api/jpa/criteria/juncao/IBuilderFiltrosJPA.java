@@ -55,39 +55,41 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		return this;
 	}
 
-	default T equal(String atributo, ParametroCriteriaJPADto parametos, Object... values) {
+	default IBuilderFiltrosJPA<T> equal(String atributo, ParametroCriteriaJPADto parametos, Object... values) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class)
 				.setAtributo(atributo).setValues(values));
-		return (T) this;
+		return this;
 	}
 
-	default T equalAtribute(Object value, Attribute... atributes) {
+	default IBuilderFiltrosJPA<T> equalAtribute(Object value, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(new Object[] { value }));
-		return (T) this;
+		return this;
 	}
 
-	default T equalAtribute(Object value, ParametroCriteriaJPADto parametos, Attribute... atributes) {
+	default IBuilderFiltrosJPA<T> equalAtribute(Object value, ParametroCriteriaJPADto parametos,
+			Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(new Object[] { value }));
-		return (T) this;
+		return this;
 	}
 
-	default T equalAtribute(Object[] values, Attribute... atributes) {
+	default IBuilderFiltrosJPA<T> equalAtribute(Object[] values, Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(values));
-		return (T) this;
+		return this;
 	}
 
-	default T equalAtribute(Object[] values, ParametroCriteriaJPADto parametos, Attribute... atributes) {
+	default IBuilderFiltrosJPA<T> equalAtribute(Object[] values, ParametroCriteriaJPADto parametos,
+			Attribute... atributes) {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(EqualsCriteriaJPA.class)
 				.setAttributes(atributes).setValues(values));
-		return (T) this;
+		return this;
 	}
 
-	default T equal(Map<String, Object> map) {
+	default IBuilderFiltrosJPA<T> equal(Map<String, Object> map) {
 		map.forEach((x, y) -> equal(x, y));
-		return (T) this;
+		return this;
 	}
 
 }

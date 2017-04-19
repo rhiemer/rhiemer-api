@@ -19,7 +19,7 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 	private UniqueKey constraintAnnotation;
 
 	@Override
-	public void initialize(UniqueKey constraintAnnotation) {	
+	public void initialize(UniqueKey constraintAnnotation) {
 		this.constraintAnnotation = constraintAnnotation;
 
 	}
@@ -32,7 +32,6 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 		if (entityManager == null) {
 			return true;
 		}
-		 
 
 		PojoKeyAbstract result = (PojoKeyAbstract) BuilderCriteriaJPA.builderCreate().resultClass(target.getClass())
 				.build().uniqueKeyValida(target).buildQuery(entityManager).getSingleResult();

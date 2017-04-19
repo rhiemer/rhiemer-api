@@ -62,6 +62,8 @@ public class HelperPojoKey {
 
 	public static <T> T newInstancePrimaryKey(Class<T> classe, Object... params) {
 		T result = Helper.newInstance(classe, params);
+		if (result == null)
+			result = Helper.newInstance(classe);
 		setAtributoPrimaryKey(result, params);
 		return result;
 
@@ -107,6 +109,23 @@ public class HelperPojoKey {
 		}
 
 		return null;
+
+	}
+
+	public static Object createEntity(Class<?> classe, String atributo, Object... chaves) {
+		Class<?> type = null;
+		if (atributo != null)
+			type = Helper.getTypePropertyComplex(classe, atributo);
+		else
+			type = classe;
+
+		return verifyNewInstancePrimaryKey(type, chaves);
+
+	}
+
+	public static Object createEntity(Class<?> classe, Object... chaves) {
+
+		return createEntity(classe, null, chaves);
 
 	}
 
