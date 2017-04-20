@@ -1,20 +1,19 @@
 package br.com.rhiemer.api.jpa.validation;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import br.com.rhiemer.api.jpa.annotations.UniqueKey;
 import br.com.rhiemer.api.jpa.builder.BuilderCriteriaJPA;
-import br.com.rhiemer.api.jpa.entity.Entity;
-import br.com.rhiemer.api.jpa.mapper.EntityManagerMapClass;
+import br.com.rhiemer.api.jpa.dao.DaoJPA;
+import br.com.rhiemer.api.jpa.dao.factory.DaoFactory;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKeyAbstract> {
 
 	@Inject
-	private EntityManagerMapClass entityManagerMapClass;
+	private DaoFactory daoFacroty;
 
 	private UniqueKey constraintAnnotation;
 
@@ -27,14 +26,13 @@ public class UniqueKeyValidator implements ConstraintValidator<UniqueKey, PojoKe
 	@Override
 	public boolean isValid(PojoKeyAbstract target, ConstraintValidatorContext context) {
 
-		EntityManager entityManager = entityManagerMapClass
-				.getEntityManagerByEntity((Class<? extends Entity>) target.getClass());
-		if (entityManager == null) {
+		DaoJPA dao = (DaoJPA) daoFacroty.buscarDao(target.getClass());
+		if (dao == null) {
 			return true;
 		}
 
-		PojoKeyAbstract result = (PojoKeyAbstract) BuilderCriteriaJPA.builderCreate().resultClass(target.getClass())
-				.build().uniqueKeyValida(target).buildQuery(entityManager).getSingleResult();
+		PojoKeyAbstract result = dao.excutarQueryUniqueResult(
+				BuilderCriteriaJPA.builderCreate().resultClass(target.getClass()).build().uniqueKeyValida(target));
 		return (result == null);
 	}
 

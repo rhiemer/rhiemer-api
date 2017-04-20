@@ -66,11 +66,26 @@ public interface FiltroCriteriaUniqueKeyJPA<T> extends IBuilderMetodosJPA {
 
 				{
 					uniqueKeyByNome(uniqueKey.nome(), params);
-					break;
+					return (T) this;
 				}
 			}
 
 		}
+
+		for (UniqueKey uniqueKey : arrayUniqueKey) {
+			if (uniqueKey.columnNames().length == params.length) {
+				if (IntStream.range(0, params.length)
+						.filter(i -> params[i] == null
+								|| Helper.isAssignableObject(getResultClass(), uniqueKey.columnNames()[i], params[i]))
+						.findFirst().orElse(-1) >= 0)
+
+				{
+					uniqueKeyByNome(uniqueKey.nome(), params);
+					return (T) this;
+				}
+			}
+		}
+
 		return (T) this;
 
 	}

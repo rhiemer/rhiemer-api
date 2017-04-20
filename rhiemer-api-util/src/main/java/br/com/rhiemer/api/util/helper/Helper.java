@@ -23,6 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -299,6 +300,27 @@ public final class Helper {
 	public static boolean isAssignableFrom(Class classe, String property, Class value) {
 		Class<?> atributeType = getPropertyType(classe, property);
 		return (atributeType.isAssignableFrom(value) || value.isAssignableFrom(atributeType));
+	}
+
+	public static boolean isAssignableObject(Class classe, String property, Object value) {
+		Class<?> atributeType = getPropertyType(classe, property);
+		Object _value = convertObjectReflextionVerifiyNull(value, atributeType);
+		return (atributeType.isAssignableFrom(_value.getClass()) || _value.getClass().isAssignableFrom(atributeType));
+	}
+
+	public static boolean isAssignableFromEnum(Class classe, String property, Class value) {
+		Class<?> atributeType = getPropertyType(classe, property);
+		boolean result = (atributeType.isAssignableFrom(value) || value.isAssignableFrom(atributeType));
+		if (result)
+			return result;
+		else if (atributeType.isEnum()) {
+			Object valueEnum = enumByObject((Class<Enum>) atributeType, value);
+			if (valueEnum != null)
+				return true;
+		}
+
+		return false;
+
 	}
 
 	public static Class getTypePropertyComplex(Class classe, String property) {
@@ -817,8 +839,7 @@ public final class Helper {
 			calendar.setTime(strToDate(s));
 			return strToDate(s);
 		} else {
-			Object result = Helper.getConstructorObject(classe, s);
-			return result;
+			return Helper.newInstance(classe, s);
 		}
 
 	}
@@ -880,7 +901,7 @@ public final class Helper {
 		if (classe.isPrimitive())
 			return parsePrimitive(_objetoTarget, classe);
 
-		Object result = Helper.parseString(_objetoTarget.toString(), classe);
+		Object result = parseString(_objetoTarget.toString(), classe);
 		if (result != null)
 			return result;
 
@@ -888,6 +909,17 @@ public final class Helper {
 		if (constructor != null) {
 			result = newInstance(classe, _objetoTarget);
 			return result;
+		}
+
+		if (classe.isEnum()) {
+			Enum objectValueEnum = (Enum) enumByObject((Class<Enum>) classe, _objetoTarget);
+			if (objectValueEnum != null)
+				return objectValueEnum;
+		}
+
+		if (_objetoTarget.getClass().isEnum()) {
+			Object objectValueEnum = enumToObj((Enum) _objetoTarget);
+			return convertObjectReflextion(objectValueEnum, classe);
 		}
 
 		return null;
@@ -904,26 +936,41 @@ public final class Helper {
 
 	}
 
+	public static boolean compareObjectReflextion(Object objeto1, Object objeto2) {
+		Object _obj = convertObjectReflextionVerifiyNull(objeto1, objeto2.getClass());
+		return _obj.equals(objeto2);
+
+	}
+
 	public static boolean charToBoolean(String value) {
 		return ("true".equalsIgnoreCase(value) || "S".equalsIgnoreCase(value) || "T".equalsIgnoreCase(value)
 				|| "1".equalsIgnoreCase(value));
 	}
 
 	public static <T, O> void setValueProperty(T objeto, String property, O value) {
-
 		Method _methodSet = methodSet(objeto, property);
 		if (_methodSet != null) {
 			invokeMethod(_methodSet, objeto, value);
 			return;
 		}
 
-		Method _method = getMethodObject(objeto.getClass(), property, value);
-		if (_method != null) {
-			invokeMethod(_method, objeto, value);
+		if (invokeMethodVerify(objeto, property, value)) {
 			return;
 		}
 
 		setValueField(objeto, property, value);
+
+	}
+
+	public static <T, O> boolean invokeMethodVerify(T objeto, String property, O value) {
+		Class<?> _classe = getPropertyType(objeto, property);
+		Object _value = _classe == null ? value : convertObjectReflextionVerifiyNull(value, _classe);
+		Method _method = getMethodObject(objeto.getClass(), property, _value);
+		if (_method != null) {
+			invokeMethod(_method, objeto, _value);
+			return true;
+		}
+		return false;
 
 	}
 
@@ -1390,10 +1437,72 @@ public final class Helper {
 
 	}
 
+	public static String nameAcessibeObject(AccessibleObject field) {
+
+		String name = ((Executable) field).getName();
+
+		if (field instanceof Method && (name.startsWith("get") || name.startsWith("set"))) {
+			String _name = name.substring(3, 4).toLowerCase() + name.substring(4);
+			try {
+				if (((Method) field).getDeclaringClass().getField(name) != null)
+					return _name;
+			} catch (NoSuchFieldException | SecurityException e) {
+
+			}
+		}
+
+		return name;
+
+	}
+
 	public static String[] allStrFromFields(Class classe, Class[] annotations, Boolean include) {
 
-		List<AccessibleObject> lista = new ArrayList<AccessibleObject>();
-		List<String> result = new ArrayList<String>();
+		List<AccessibleObject> fields = allFieldsByAnnotation(classe, annotations, include);
+		return fields.stream().map(x -> nameAcessibeObject(x)).toArray(size -> new String[size]);
+
+	}
+
+	public static Object[] valuesFromFields(Object obj, Class[] annotations, Boolean include) {
+
+		List<AccessibleObject> fields = allFieldsByAnnotation(obj.getClass(), annotations, include);
+		return fields.stream().map(x -> valueAccessibleObject(obj, x)).toArray(size -> new Object[size]);
+
+	}
+
+	public static Object[] valuesFromFields(Object obj, Class[] annotations) {
+
+		return valuesFromFields(obj, annotations, true);
+
+	}
+
+	public static Object valueAccessibleObject(Object obj, AccessibleObject field) {
+		if (field instanceof Field)
+			return getValueField(obj, (Field) field);
+		else if (field instanceof Method)
+			return invokeMethod((Method) field, obj);
+		else
+			return null;
+	}
+
+	public static Map<String, Object> mapValuesAcessibeObject(Object obj, List<AccessibleObject> fields) {
+		Map<String, Object> result = new HashMap<>();
+		fields.stream().forEach(x -> result.put(nameAcessibeObject(x), valueAccessibleObject(obj, x)));
+		return result;
+	}
+
+	public static Map<String, Object> mapValuesFieldsByAnnotation(Object obj, Class[] annotations, Boolean include) {
+		List<AccessibleObject> fields = allFieldsByAnnotation(obj.getClass(), annotations, include);
+		return mapValuesAcessibeObject(obj, fields);
+	}
+
+	public static Map<String, Object> mapValuesFieldsByAnnotation(Object obj, Class[] annotations) {
+		List<AccessibleObject> fields = allFieldsByAnnotation(obj.getClass(), annotations, true);
+		return mapValuesAcessibeObject(obj, fields);
+	}
+
+	public static List<AccessibleObject> allFieldsByAnnotation(Class classe, Class[] annotations, Boolean include) {
+
+		List<AccessibleObject> result = new ArrayList<AccessibleObject>();
 		List<AccessibleObject> aAllMethodsFields = allMethodsFields(classe, null);
 		for (AccessibleObject field : aAllMethodsFields) {
 			boolean _include = false;
@@ -1429,12 +1538,12 @@ public final class Helper {
 				}
 
 				if (result.indexOf(_name) == -1)
-					result.add(_name);
+					result.add(field);
 			}
 
 		}
 
-		return (result == null || result.size() == 0) ? null : result.toArray(new String[1]);
+		return result;
 
 	}
 
@@ -2064,6 +2173,7 @@ public final class Helper {
 
 		OptionalInt optinal = IntStream.range(0, arrayClass1.length).filter(idx -> arrayClass1[idx] == null
 				|| arrayClass2[idx] == null || !arrayClass1[idx].isAssignableFrom(arrayClass2[idx])).findFirst();
+
 		return !optinal.isPresent();
 	}
 
@@ -2159,6 +2269,49 @@ public final class Helper {
 		} else {
 			return false;
 		}
+
+	}
+
+	public static <T extends Enum<T>> T enumByString(Class<T> classEnum, String value) {
+		try {
+			return Enum.valueOf(classEnum, value);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+
+	}
+
+	public static <T extends Enum<T>> T enumByObject(Class<T> classEnum, Object value) {
+
+		T enumByString = enumByString(classEnum, value.toString());
+		if (enumByString != null)
+			return enumByString;
+
+		T[] enums = classEnum.getEnumConstants();
+
+		return Arrays.stream(enums).filter(x -> compareEnumByKey(x, value)).findFirst().orElse(null);
+
+	}
+
+	public static <T extends Enum<T>> boolean compareEnumByKey(T obj, Object value) {
+
+		Object[] values = valuesFromFields(obj, ANNOTATIOSID);
+		return Arrays.stream(values).filter(x -> compareObjectReflextion(value, x)).findFirst().isPresent();
+
+	}
+
+	public static <T extends Enum<T>> Object enumToObj(T obj) {
+
+		Object[] values = valuesFromFields(obj, ANNOTATIOSID);
+		if (values != null && values.length != 0)
+			return values[0];
+		return obj.name();
+
+	}
+
+	public static <T extends Enum<T>> String enumToString(T obj) {
+
+		return Optional.ofNullable(enumToObj(obj).toString()).orElse(null);
 
 	}
 
