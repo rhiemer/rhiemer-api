@@ -8,8 +8,11 @@ public class EqualsCriteriaJPA extends FiltroCriteriaJPA {
 
 	@Override
 	public Expression buildSingular(Expression path, Object filtro) {
-		return getBuilder().equal(path, filtro);
+
+		if (filtro instanceof Expression)
+			return getBuilder().equal(path, (Expression) filtro);
+		else
+			return getBuilder().equal(path, filtro);
 	}
-	
 
 }

@@ -32,7 +32,7 @@ public class ParametrizarCriteriaJPAParametro {
 	private Object[] values;
 	private Attribute[] attributes;
 	private Boolean not = false;
-	private Boolean caseSensitve = true;
+	private Boolean caseSensitve = null;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
 	private Object filtro1;
@@ -63,10 +63,11 @@ public class ParametrizarCriteriaJPAParametro {
 		else {
 			operacao = Helper.newInstance(classe);
 			Helper.setValueMethodOrField(operacao, "not", this.getNot());
-			Helper.setValueMethodOrField(operacao, "caseSensitve", this.getCaseSensitve());
+			Helper.setValueMethodOrFieldNotNull(operacao, "caseSensitve", this.getCaseSensitve());
 			Helper.setValueMethodOrField(operacao, "includeNull", this.getIncludeNull());
 			Helper.setValueMethodOrField(operacao, "isExpression", this.getIsExpression());
-			Helper.setValueMethodOrField(operacao, "joinType", this.getJoinType());
+			if (!(operacao instanceof FiltroCriteriaJPA) || this.getJoinType() != null)
+				Helper.setValueMethodOrField(operacao, "joinType", this.getJoinType());
 			Helper.setValueMethodOrField(operacao, "fecth", this.getFecth());
 			Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
 			Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());

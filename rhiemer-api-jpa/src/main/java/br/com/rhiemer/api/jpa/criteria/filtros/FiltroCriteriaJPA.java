@@ -1,5 +1,6 @@
 package br.com.rhiemer.api.jpa.criteria.filtros;
 
+import static javax.persistence.criteria.JoinType.INNER;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +8,7 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
+
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.metamodel.Attribute;
@@ -23,6 +25,10 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 	private Boolean caseSensitve = true;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
+
+	public FiltroCriteriaJPA() {
+		this.setJoinType(INNER);
+	}
 
 	public Boolean getIsExpression() {
 		return isExpression;
@@ -161,12 +167,15 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 	protected Expression buildValue(Expression path, Object filtro) {
 		Expression _path = buildExpression(path);
 		Object _filtro = null;
-		if (getIsExpression())
+		if (getIsExpression()) {
 			_filtro = buildIsExpression(filtro);
-		else
-			_filtro = tranformCaseInsensitive(path, filtro);
+			return buildSingular(_path, (Expression) _filtro);
 
-		return buildSingular(_path, buildValueObjComplex(_filtro));
+		} else {
+			_filtro = tranformCaseInsensitive(path, filtro);
+			return buildSingular(_path, buildValueObjComplex(_filtro));
+		}
+
 	}
 
 	protected Expression buildPathArray(Expression path, Object[] filtro) {

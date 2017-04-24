@@ -7,6 +7,7 @@ import javax.persistence.metamodel.Attribute;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.builder.ParametroCriteriaJPADto;
 import br.com.rhiemer.api.jpa.criteria.filtros.equals.EqualsCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.filtros.like.LikeCriteriaJPA;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
@@ -89,6 +90,49 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 
 	default IBuilderFiltrosJPA<T> equal(Map<String, Object> map) {
 		map.forEach((x, y) -> equal(x, y));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> like(String atributo, Object... values) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(LikeCriteriaJPA.class).setAtributo(atributo)
+				.setValues(values));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> like(String atributo, ParametroCriteriaJPADto parametos, Object... values) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(LikeCriteriaJPA.class)
+				.setAtributo(atributo).setValues(values));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> likeAtribute(Object value, Attribute... atributes) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(LikeCriteriaJPA.class)
+				.setAttributes(atributes).setValues(new Object[] { value }));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> likeAtribute(Object value, ParametroCriteriaJPADto parametos,
+			Attribute... atributes) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(LikeCriteriaJPA.class)
+				.setAttributes(atributes).setValues(new Object[] { value }));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> likeAtribute(Object[] values, Attribute... atributes) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro().setClasse(LikeCriteriaJPA.class)
+				.setAttributes(atributes).setValues(values));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> likeAtribute(Object[] values, ParametroCriteriaJPADto parametos,
+			Attribute... atributes) {
+		getFiltros().add(new ParametrizarCriteriaJPAParametro(parametos).setClasse(LikeCriteriaJPA.class)
+				.setAttributes(atributes).setValues(values));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> like(Map<String, Object> map) {
+		map.forEach((x, y) -> like(x, y));
 		return this;
 	}
 

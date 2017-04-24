@@ -669,6 +669,14 @@ public final class Helper {
 
 	}
 
+	public static <T, O> void setValueMethodOrFieldNotNull(T objeto, String property, O value) {
+		setValueMethodOrFieldNotNull(objeto, property, value, DOT_FIELD);
+	}
+
+	public static <T, O> void setValueMethodOrFieldNotNull(T objeto, String property, O value, String separator) {
+		Optional.ofNullable(value).map(x -> setValueMethodOrField(objeto, property, x, separator)).orElse(value);
+	}
+
 	public static <T, O> void setValueMethodOrField(T objeto, String property, O value) {
 		setValueMethodOrField(objeto, property, value, DOT_FIELD);
 	}

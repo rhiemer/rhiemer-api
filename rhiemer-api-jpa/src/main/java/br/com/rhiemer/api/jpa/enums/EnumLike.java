@@ -1,15 +1,15 @@
 package br.com.rhiemer.api.jpa.enums;
 
+import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperMessage;
+
 public enum EnumLike {
-	
-	
-	
-	INICIO("%%s"),INICO_FIM("%%s%"),FIM("%s%");
-	
+
+	INICIO("%{}"), INICO_FIM("%{}%"), FIM("{}%"), SEM_FORMATCAO(null), AUTO(null);
+
 	private String format;
-	
-	private EnumLike(String format)
-	{
+
+	private EnumLike(String format) {
 		this.format = format;
 	}
 
@@ -17,9 +17,11 @@ public enum EnumLike {
 		return format;
 	}
 
-	public String format(String value)
-	{
-		return String.format(this.format,value);
+	public String format(String value) {
+		if (Helper.isBlank(this.getFormat()))
+			return value;
+		else
+			return HelperMessage.formatMessage(this.getFormat(), value);
 	}
 
 }

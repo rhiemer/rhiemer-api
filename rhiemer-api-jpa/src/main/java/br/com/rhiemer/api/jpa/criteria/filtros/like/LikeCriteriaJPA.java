@@ -4,16 +4,24 @@ import javax.persistence.criteria.Expression;
 
 import br.com.rhiemer.api.jpa.criteria.filtros.FiltroCriteriaJPA;
 import br.com.rhiemer.api.jpa.enums.EnumLike;
+import br.com.rhiemer.api.jpa.helper.HelperLikeCriteria;
 import br.com.rhiemer.api.jpa.helper.HelperPredicateCriteria;
 
 public class LikeCriteriaJPA extends FiltroCriteriaJPA {
-	
-	
-	private EnumLike tipo=EnumLike.INICO_FIM;
+
+	private EnumLike tipo = EnumLike.INICO_FIM;
+
+	public LikeCriteriaJPA() {
+		this.setCaseSensitve(false);
+	}
 
 	@Override
 	public Expression buildSingular(Expression path, Object filtro) {
-		return getBuilder().like(path,getTipo().format(filtro.toString()));
+		if (filtro instanceof Expression)
+			return getBuilder().like(path,
+					HelperLikeCriteria.concatExpressionCriteria(getBuilder(), (Expression) filtro, getTipo()));
+		else
+			return getBuilder().like(path, getTipo().format(filtro.toString()));
 	}
 
 	public EnumLike getTipo() {
@@ -24,6 +32,5 @@ public class LikeCriteriaJPA extends FiltroCriteriaJPA {
 		this.tipo = tipo;
 		return this;
 	}
-	
 
 }

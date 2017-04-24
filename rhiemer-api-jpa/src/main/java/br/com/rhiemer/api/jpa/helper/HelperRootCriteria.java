@@ -148,6 +148,8 @@ public final class HelperRootCriteria {
 		}
 
 		From joinFetch = getJoinByAlias(rootJoin.getFetches(), atributo);
+		if (joinFetch != null && ((Join) joinFetch).getJoinType() == JoinType.INNER)
+			aJoinType = JoinType.INNER;
 		if (fecth || joinFetch != null) {
 			if (joinFetch != null) {
 				if (!replaceJoinType(rootJoin, (Join) joinFetch, joinType))

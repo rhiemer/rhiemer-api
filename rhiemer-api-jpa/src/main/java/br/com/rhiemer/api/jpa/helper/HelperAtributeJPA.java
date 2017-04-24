@@ -215,6 +215,7 @@ public final class HelperAtributeJPA {
 	}
 
 	public static Path getPath(Path path, Object attribute) {
+		
 		if (attribute instanceof String) {
 			return path.get((String) attribute);
 		} else if (attribute instanceof SingularAttribute) {
@@ -224,7 +225,7 @@ public final class HelperAtributeJPA {
 
 	}
 
-	public static Expression getAttribute(Path from, Attribute... attributes) {
+	public static Expression getAttribute(Path from, Attribute... attributes) {		
 		List<Attribute> listAttributes = Helper.convertArgs(attributes);
 		Path path = from;
 		for (Attribute t : listAttributes) {
