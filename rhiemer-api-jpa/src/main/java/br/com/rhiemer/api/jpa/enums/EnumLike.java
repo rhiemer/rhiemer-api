@@ -5,7 +5,7 @@ import br.com.rhiemer.api.util.helper.HelperMessage;
 
 public enum EnumLike {
 
-	INICIO("%{}"), INICO_FIM("%{}%"), FIM("{}%"), SEM_FORMATCAO(null), AUTO(null);
+	INICIO("%{}"), INICO_FIM("%{}%"), FIM("{}%"), SEM_FORMATCAO(null), AUTO("%{}%");
 
 	private String format;
 
@@ -18,7 +18,7 @@ public enum EnumLike {
 	}
 
 	public String format(String value) {
-		if (Helper.isBlank(this.getFormat()))
+		if (Helper.isBlank(this.getFormat()) || value.trim().startsWith("%") || value.trim().endsWith("%"))
 			return value;
 		else
 			return HelperMessage.formatMessage(this.getFormat(), value);

@@ -100,7 +100,7 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 		} else {
 			Object[] values = args.stream().filter(t -> Helper.isNotBlank(t)).toArray();
 			if (values != null && values.length > 0)
-				exps.add(buildValue(path, values));
+				exps.add(buildPathArray(path, values));
 		}
 
 		Expression expJunction = null;

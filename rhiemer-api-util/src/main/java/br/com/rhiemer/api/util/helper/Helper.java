@@ -49,6 +49,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
@@ -65,6 +67,17 @@ public final class Helper {
 	public static final String VIRGULA = ",";
 
 	private Helper() {
+	}
+
+	public static String[] splitRegex(String str, String regex) {
+		List<String> result = new ArrayList<>();
+		Matcher m = Pattern.compile(regex).matcher(str);
+		while (m.find()) {
+			result.add(m.group(1));
+		}
+
+		return result.toArray(new String[] {});
+
 	}
 
 	public static String subsStrIndexOf(String str, String value) {
