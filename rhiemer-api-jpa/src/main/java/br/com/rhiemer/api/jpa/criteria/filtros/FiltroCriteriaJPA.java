@@ -100,7 +100,7 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 		} else {
 			Object[] values = args.stream().filter(t -> Helper.isNotBlank(t)).toArray();
 			if (values != null && values.length > 0)
-				exps.add(buildPathArray(path, values));
+				exps.add(buildPathArrayOrExpression(path, values));
 		}
 
 		Expression expJunction = null;
@@ -178,14 +178,26 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 
 	}
 
-	protected Expression buildPathArray(Expression path, Object[] filtro) {
+	protected Expression buildPathArrayOrExpression(Expression path, Object[] filtro) {
 		Expression _path = buildExpression(path);
-		Object[] _filtro = Arrays.stream(filtro).map(t -> tranformCaseInsensitive(path, t)).toArray();
-		return buildArray(_path, _filtro);
+		Object[] _filtro = null;
+		if (getIsExpression()) {
+			_filtro = buildPathExpression(path, filtro);
+		} else {
+			_filtro = buildPathArray(path, filtro);
+		}
+		return buildSingular(_path, _filtro);
 	}
 
-	protected Expression buildArray(Expression path, Object[] filtro) {
-		return null;
+	protected Expression[] buildPathExpression(Expression path, Object[] filtro) {
+		Expression[] _filtro = (Expression[]) Arrays.stream(filtro).map(t -> buildIsExpression(t))
+				.toArray(size -> new Expression[size]);
+		return _filtro;
+	}
+
+	protected Object[] buildPathArray(Expression path, Object[] filtro) {
+		Object[] _filtro = Arrays.stream(filtro).map(t -> tranformCaseInsensitive(path, t)).toArray();
+		return _filtro;
 	}
 
 	public Expression buildFiltro(FiltroParametro... filtros) {

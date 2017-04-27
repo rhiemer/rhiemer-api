@@ -9,8 +9,11 @@ public class MaiorQueCriteriaJPA extends FiltroCriteriaJPA {
 
 	@Override
 	public Expression buildSingular(Expression path, Object filtro) {
-		return getBuilder().lessThan(path,(Comparable)filtro);
+		
+		if (filtro instanceof Expression)
+			return getBuilder().greaterThan(path, (Expression) filtro);
+		else
+			return getBuilder().greaterThan(path, (Comparable) filtro);
 	}
-	
-	
+
 }

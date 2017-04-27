@@ -15,7 +15,7 @@ public abstract class OrderByCriteriaJPA extends AbstractAtributoCriteriaJPA {
 		return builder;
 	}
 
-	protected void setBuilder(CriteriaBuilder builder) {
+	public void setBuilder(CriteriaBuilder builder) {
 		this.builder = builder;
 	}
 

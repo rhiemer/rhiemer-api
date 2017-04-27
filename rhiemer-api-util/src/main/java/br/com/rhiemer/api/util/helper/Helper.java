@@ -1460,7 +1460,7 @@ public final class Helper {
 
 	public static String nameAcessibeObject(AccessibleObject field) {
 
-		String name = ((Executable) field).getName();
+		String name = field instanceof Field ? ((Field) field).getName() : ((Executable) field).getName();
 
 		if (field instanceof Method && (name.startsWith("get") || name.startsWith("set"))) {
 			String _name = name.substring(3, 4).toLowerCase() + name.substring(4);

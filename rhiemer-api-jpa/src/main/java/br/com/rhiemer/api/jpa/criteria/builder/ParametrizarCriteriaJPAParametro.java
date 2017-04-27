@@ -26,15 +26,15 @@ public class ParametrizarCriteriaJPAParametro {
 
 	private Class<? extends ICriteriaJPA> classe;
 	private ICriteriaJPA objeto;
-	private Boolean fecth = FETCH_DEFAULT;
+	private Boolean fecth;
 	private JoinType joinType;
 	private String atributo;
 	private Object[] values;
 	private Attribute[] attributes;
-	private Boolean not = false;
-	private Boolean caseSensitve = null;
-	private Boolean includeNull = false;
-	private Boolean isExpression = false;
+	private Boolean not;
+	private Boolean caseSensitve;
+	private Boolean includeNull;
+	private Boolean isExpression;
 	private Object filtro1;
 	private Object filtro2;
 	private String path1;
@@ -62,13 +62,12 @@ public class ParametrizarCriteriaJPAParametro {
 			operacao = this.getObjeto();
 		else {
 			operacao = Helper.newInstance(classe);
-			Helper.setValueMethodOrField(operacao, "not", this.getNot());
+			Helper.setValueMethodOrFieldNotNull(operacao, "not", this.getNot());
 			Helper.setValueMethodOrFieldNotNull(operacao, "caseSensitve", this.getCaseSensitve());
-			Helper.setValueMethodOrField(operacao, "includeNull", this.getIncludeNull());
-			Helper.setValueMethodOrField(operacao, "isExpression", this.getIsExpression());
-			if (!(operacao instanceof FiltroCriteriaJPA) || this.getJoinType() != null)
-				Helper.setValueMethodOrField(operacao, "joinType", this.getJoinType());
-			Helper.setValueMethodOrField(operacao, "fecth", this.getFecth());
+			Helper.setValueMethodOrFieldNotNull(operacao, "joinType", this.getJoinType());
+			Helper.setValueMethodOrFieldNotNull(operacao, "includeNull", this.getIncludeNull());
+			Helper.setValueMethodOrFieldNotNull(operacao, "isExpression", this.getIsExpression());
+			Helper.setValueMethodOrFieldNotNull(operacao, "fecth", this.getFecth());
 			Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
 			Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());
 		}
@@ -83,10 +82,10 @@ public class ParametrizarCriteriaJPAParametro {
 		if (operacao instanceof FiltroCriteriaIntervaloAtributoJPA) {
 			if (pathAttribute1 != null)
 				result = ((FiltroCriteriaIntervaloAtributoJPA) operacao).buildFiltroIntervalo(this.getPathAttribute1(),
-						this.getPathAttribute2(), this.getFiltro1());
+						this.getPathAttribute2(), this.getValues());
 			else
 				result = ((FiltroCriteriaIntervaloAtributoJPA) operacao).buildFiltroIntervalo(this.getPath1(),
-						this.getPath2(), this.getFiltro1());
+						this.getPath2(), this.getValues());
 		} else if (operacao instanceof FiltroCriteriaIntervaloValorJPA) {
 			result = ((FiltroCriteriaIntervaloValorJPA) operacao).buildFiltroIntervalo(this.getFiltro1(),
 					this.getFiltro2());

@@ -13,5 +13,7 @@ public class EqualsCriteriaJPA extends FiltroCriteriaJPA {
 		else
 			return getBuilder().equal(path, filtro);
 	}
+	
+	
 
 }
