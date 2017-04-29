@@ -20,7 +20,7 @@ public abstract class OrderByCriteriaJPA extends AbstractAtributoCriteriaJPA {
 	}
 
 	public Order build() {
-		Path path = builderAtributoCriteria();
+		Path path = builderAtributoCriteria();		
 		return buildOrderBy(path);
 	}
 

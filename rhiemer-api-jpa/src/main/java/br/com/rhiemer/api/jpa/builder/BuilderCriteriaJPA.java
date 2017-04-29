@@ -19,6 +19,7 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 	private List<ParametrizarCriteriaJPAParametro> orderBys = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> joins = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
+	private List<ParametrizarCriteriaJPAParametro> queryParametros = new ArrayList<>();
 	
 
 	public BuilderCriteriaJPA()
@@ -56,6 +57,12 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 	public List<ParametrizarCriteriaJPAParametro> getFetchs() {
 		return this.fetchs;
 	}
+	
+	@Override
+	public List<ParametrizarCriteriaJPAParametro> getQueryParametros() {
+		return queryParametros;
+	}
+
 
 	@Override
 	protected ParametrizarCriteria getParametrizarCriteriaInternal() {
@@ -75,6 +82,8 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 		return new BuilderCreate();
 	}
 	
+	
+
 	public static class BuilderCreate {
 
 		private Class<?> createClass;

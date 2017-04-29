@@ -20,6 +20,8 @@ import br.com.rhiemer.api.jpa.criteria.join.IJoinCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.query.parametros.IQueryParametros;
+import br.com.rhiemer.api.jpa.enums.EnumLike;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public class ParametrizarCriteriaJPAParametro {
@@ -41,6 +43,7 @@ public class ParametrizarCriteriaJPAParametro {
 	private String path2;
 	private Attribute[] pathAttribute1;
 	private Attribute[] pathAttribute2;
+	private EnumLike tipoLike;
 
 	public ParametrizarCriteriaJPAParametro() {
 		super();
@@ -56,7 +59,7 @@ public class ParametrizarCriteriaJPAParametro {
 		this.setIsExpression(parametrizaCriteriaJPADto.getIsExpression());
 	}
 
-	protected ICriteriaJPA clone(CriteriaBuilder builder, Root root) {
+	protected ICriteriaJPA clone(CriteriaBuilder builder, Root root, CriteriaQuery query) {
 		ICriteriaJPA operacao = null;
 		if (this.getObjeto() != null)
 			operacao = this.getObjeto();
@@ -68,11 +71,13 @@ public class ParametrizarCriteriaJPAParametro {
 			Helper.setValueMethodOrFieldNotNull(operacao, "includeNull", this.getIncludeNull());
 			Helper.setValueMethodOrFieldNotNull(operacao, "isExpression", this.getIsExpression());
 			Helper.setValueMethodOrFieldNotNull(operacao, "fecth", this.getFecth());
+			Helper.setValueMethodOrFieldNotNull(operacao, "tipoLike", this.getTipoLike());
 			Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
 			Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());
 		}
 		Helper.setValueMethodOrField(operacao, "root", root);
 		Helper.setValueMethodOrField(operacao, "builder", builder);
+		Helper.setValueMethodOrField(operacao, "query", query);
 		return operacao;
 	}
 
@@ -102,6 +107,8 @@ public class ParametrizarCriteriaJPAParametro {
 			((IBuilderMetodosJuncaoJPAWhere) operacao).builderQuery(builder, root, query);
 		} else if (operacao instanceof IBuilderMetodosJuncaoJPA) {
 			result = ((IBuilderMetodosJuncaoJPA) operacao).builderMetodoJuncao(builder, root, query);
+		} else if (operacao instanceof IQueryParametros) {
+			((IQueryParametros) operacao).build();
 		}
 
 		if (result != null) {
@@ -110,7 +117,7 @@ public class ParametrizarCriteriaJPAParametro {
 	}
 
 	public void build(CriteriaBuilder builder, Root root, CriteriaQuery query, List<Predicate> predicates) {
-		ICriteriaJPA operacao = clone(builder, root);
+		ICriteriaJPA operacao = clone(builder, root, query);
 		execute(operacao, builder, root, query, predicates);
 	}
 
@@ -265,6 +272,15 @@ public class ParametrizarCriteriaJPAParametro {
 
 	public ParametrizarCriteriaJPAParametro setIsExpression(Boolean isExpression) {
 		this.isExpression = isExpression;
+		return this;
+	}
+
+	public EnumLike getTipoLike() {
+		return tipoLike;
+	}
+
+	public ParametrizarCriteriaJPAParametro setTipoLike(EnumLike tipoLike) {
+		this.tipoLike = tipoLike;
 		return this;
 	}
 

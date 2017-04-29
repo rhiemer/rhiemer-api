@@ -13,7 +13,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.Attribute;
 
-import br.com.rhiemer.api.util.constantes.ConstantesAPI;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public final class HelperRootCriteria {
@@ -54,7 +53,7 @@ public final class HelperRootCriteria {
 	}
 
 	public static Path getAttributeOrJoin(From rootJoin, String atributo, Boolean fecth, JoinType joinType,
-			boolean breakJoin, boolean last) {
+			boolean breakJoin, boolean last, boolean createJoin) {
 
 		String[] atributoSplit = atributo.split(DOT_FIELD);
 		From joinLoop = rootJoin;
@@ -69,7 +68,10 @@ public final class HelperRootCriteria {
 				atributoComp = atributoSplit[i];
 			boolean isField = HelperAtributeJPA.isField(rootJoin.getJavaType(), atributoComp);
 			if (!isField) {
-				joinLoop = createJoin(joinLoop, atributoSplit[i], fecth, joinType);
+				if (createJoin)
+					joinLoop = createJoin(joinLoop, atributoSplit[i], fecth, joinType);
+				else
+					joinLoop = getJoin(joinLoop, atributoSplit[i]);
 				_lastJoin = true;
 			} else {
 				if (_lastJoin)
@@ -83,19 +85,35 @@ public final class HelperRootCriteria {
 
 		if (breakJoin || (last && _lastJoin) || (_lastJoin && pathAtt == null))
 			return joinLoop;
-		else
+		else {
+			if (createJoin && pathAtt != null && pathAtt.getAlias() == null)
+				pathAtt.alias(atributo);
 			return pathAtt;
+		}
+
+	}
+
+	public static Path fieldCriteira(Class<?> classe, From rootJoin, String atributo) {
+
+		return getAttributeOrJoin(rootJoin, atributo, null, null, false, false, false);
+
+	}
+
+	public static Boolean fieldInCriteira(Class<?> classe, From rootJoin, String atributo) {
+
+		Path path = fieldCriteira(classe, rootJoin, atributo);
+		return path != null;
 
 	}
 
 	public static Path getAttribute(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
 
-		return getAttributeOrJoin(rootJoin, atributo, fecth, joinType, false, false);
+		return getAttributeOrJoin(rootJoin, atributo, fecth, joinType, false, false, true);
 	}
 
 	public static From createJoinComplex(From rootJoin, String atributo, Boolean fecth, JoinType joinType) {
 
-		return (From) getAttributeOrJoin(rootJoin, atributo, fecth, joinType, true, false);
+		return (From) getAttributeOrJoin(rootJoin, atributo, fecth, joinType, true, false, true);
 
 	}
 

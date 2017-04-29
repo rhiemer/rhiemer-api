@@ -30,12 +30,14 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -51,6 +53,8 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
@@ -59,6 +63,7 @@ import org.apache.commons.lang3.StringUtils;
 import br.com.rhiemer.api.util.annotations.entity.Chave;
 import br.com.rhiemer.api.util.annotations.entity.ToString;
 import br.com.rhiemer.api.util.exception.APPSystemException;
+import br.com.rhiemer.api.util.lambda.optinal.HelperOptional;
 import br.com.rhiemer.api.util.pojo.PojoKeyAbstract;
 
 public final class Helper {
@@ -1219,6 +1224,44 @@ public final class Helper {
 		return classResult(ao);
 	}
 
+	public static Class<?> getGenericParameterTypeAccessibleObject(AccessibleObject ao) {
+		Type listType = null;
+
+		if (ao instanceof Method) {
+			listType = ((Method) ao).getGenericReturnType();
+
+		} else if (ao instanceof Field) {
+			listType = ((Field) ao).getGenericType();
+		}
+
+		if (listType != null && listType instanceof ParameterizedType
+				&& ((ParameterizedType) listType).getActualTypeArguments() != null
+				&& ((ParameterizedType) listType).getActualTypeArguments().length > 0) {
+			Type elementType = ((ParameterizedType) listType).getActualTypeArguments()[0];
+			return (Class<?>) elementType;
+		}
+
+		return null;
+	}
+
+	public static Class<?> classGenericType(Class<?> classe, String field) {
+		AccessibleObject ao = getFieldOrMethod(classe, field);
+		if (ao == null)
+			return null;
+		return getGenericParameterTypeAccessibleObject(ao);
+	}
+
+	public static Class<?> classResultOrGenericType(Class<?> classe, String field) {
+		AccessibleObject ao = getFieldOrMethod(classe, field);
+		if (ao == null)
+			return null;
+		Class<?> result = getGenericParameterTypeAccessibleObject(ao);
+		if (result != null)
+			return result;
+		result = classResult(ao);
+		return result;
+	}
+
 	public static AccessibleObject getFieldOrMethod(Class<?> classe, String field) {
 		return getFieldOrMethod(classe, field, "get");
 	}
@@ -2334,6 +2377,32 @@ public final class Helper {
 
 		return Optional.ofNullable(enumToObj(obj).toString()).orElse(null);
 
+	}
+
+	public static <T extends Annotation> List<T> annotationsByType(Class<?> classe, Class<T> classeAnnotation) {
+
+		List<T> lista = new ArrayList<>();
+		Class<?> classePai = classe;
+		while (classePai != null && !classePai.equals(Object.class)) {
+			T[] array = classePai.getAnnotationsByType(classeAnnotation);
+			if (array.length > 0)
+				lista.addAll(Arrays.asList(array));
+			classePai = classePai.getSuperclass();
+		}
+
+		return lista;
+	}
+
+	public static <T extends Annotation> List<T> annotationsByTypeDesc(Class<?> classe, Class<T> classeAnnotation) {
+		List<T> lista = annotationsByType(classe, classeAnnotation);
+		return reverseCollection(lista);
+	}
+
+	public static <T, C extends Collection<T>> C reverseCollection(C collection) {
+		C newCollection = (C) newInstance(collection.getClass());
+		collection.stream().collect(Collectors.toCollection(ArrayDeque::new)).descendingIterator()
+				.forEachRemaining(t -> newCollection.add(t));
+		return newCollection;
 	}
 
 }

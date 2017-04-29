@@ -32,6 +32,8 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		else
 			return (T) this;
 	}
+	
+	
 
 	default IBuilderFiltrosJPA<T> anterior() {
 		if (this instanceof MetodosJuncaoJPA)
@@ -51,7 +53,7 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(objeto));
 		return objeto;
 	}
-
+	
 	default MetodosJuncaoJPAAnd<T> and() {
 		MetodosJuncaoJPAAnd<T> objeto = new MetodosJuncaoJPAAnd(this);
 		getFiltros().add(new ParametrizarCriteriaJPAParametro().setObjeto(objeto));

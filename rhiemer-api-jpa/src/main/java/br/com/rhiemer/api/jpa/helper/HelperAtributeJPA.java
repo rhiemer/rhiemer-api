@@ -80,6 +80,11 @@ public final class HelperAtributeJPA {
 	public static <T extends Annotation> T annotationMappedList(Class<?> classe, String fieldStr) {
 		return annotationStr(ANNOTATIONS_LIST, classe, fieldStr);
 	}
+	
+	
+	public static <T extends Annotation> boolean isAnnotationMappedList(Class<?> classe, String fieldStr) {
+		return annotationStr(ANNOTATIONS_LIST, classe, fieldStr) != null;
+	}
 
 	public static <T extends Annotation> T annotationAtributo(AccessibleObject field) {
 		return annotationAccessibleObject(ANNOTATIONS_ATRIBUTO, field);
@@ -106,7 +111,9 @@ public final class HelperAtributeJPA {
 		if (Helper.isBlank(mappedBy))
 			return null;
 
-		Class<?> classResult = Helper.classResult(classe, fieldStr);
+		Class<?> classResult = Helper.classResultOrGenericType(classe, fieldStr);
+		if (classResult == null)
+		  return null;
 		Annotation aJoin = annotationJoin(classResult, mappedBy);
 		return (T) aJoin;
 

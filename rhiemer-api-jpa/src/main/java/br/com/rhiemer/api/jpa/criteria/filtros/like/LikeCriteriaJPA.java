@@ -8,7 +8,7 @@ import br.com.rhiemer.api.jpa.helper.HelperLikeCriteria;
 
 public class LikeCriteriaJPA extends FiltroCriteriaJPA {
 
-	private EnumLike tipo = EnumLike.INICO_FIM;
+	private EnumLike tipoLike = EnumLike.INICO_FIM;
 
 	public LikeCriteriaJPA() {
 		this.setCaseSensitve(false);
@@ -18,19 +18,19 @@ public class LikeCriteriaJPA extends FiltroCriteriaJPA {
 	public Expression buildSingular(Expression path, Object filtro) {
 		if (filtro instanceof Expression)
 			return getBuilder().like(path,
-					HelperLikeCriteria.concatExpressionCriteria(getBuilder(), (Expression) filtro, getTipo()));
+					HelperLikeCriteria.concatExpressionCriteria(getBuilder(), (Expression) filtro, getTipoLike()));
 		else {
-			return getBuilder().like(path, getTipo().format(filtro.toString()));
+			return getBuilder().like(path, getTipoLike().format(filtro.toString()));
 		}
 
 	}
 
-	public EnumLike getTipo() {
-		return tipo;
+	public EnumLike getTipoLike() {
+		return tipoLike;
 	}
 
-	public LikeCriteriaJPA setTipo(EnumLike tipo) {
-		this.tipo = tipo;
+	public LikeCriteriaJPA setTipoLike(EnumLike tipoLike) {
+		this.tipoLike = tipoLike;
 		return this;
 	}
 
