@@ -4,7 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import br.com.rhiemer.api.rest.annotations.RESTful;
+import br.com.rhiemer.api.util.annotations.rest.RESTful;
 import br.com.rhiemer.api.util.cdi.PackageEntitiesCdi;
 import br.com.rhiemer.api.util.exception.ConversaoTipoIdException;
 import br.com.rhiemer.api.util.helper.Helper;

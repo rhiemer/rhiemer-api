@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -24,7 +25,7 @@ public interface IBuilderExecucaoAtributos extends ICriteriaJPA {
 
 	List<IExecucao> getParametrosExecucao();
 
-	default void builderExecucaoAtributos(CriteriaBuilder builder, Root root, CriteriaQuery query) {
+	default void builderExecucaoAtributos(CriteriaBuilder builder, Root root, AbstractQuery query) {
 		if (getParametrosExecucao() == null)
 			return;
 

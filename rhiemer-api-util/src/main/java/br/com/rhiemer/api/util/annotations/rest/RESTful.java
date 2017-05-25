@@ -1,4 +1,4 @@
-package br.com.rhiemer.api.rest.annotations;
+package br.com.rhiemer.api.util.annotations.rest;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

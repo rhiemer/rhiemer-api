@@ -2,7 +2,7 @@ package br.com.rhiemer.api.rest.full;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import br.com.rhiemer.api.rest.annotations.RESTful;
+import br.com.rhiemer.api.util.annotations.rest.RESTful;
 import br.com.rhiemer.api.util.cdi.PackageEntitiesCdi;
 
 @ApplicationScoped

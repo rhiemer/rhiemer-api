@@ -1,6 +1,6 @@
 package br.com.rhiemer.api.jpa.helper;
 
-import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 
@@ -19,7 +19,7 @@ public final class HelperQueryCriteria {
 
 	}
 
-	public static void setQueyDistinctJoin(CriteriaQuery query, From root) {
+	public static void setQueyDistinctJoin(AbstractQuery query, From root) {
 		boolean distinct = isQueyDistinct(root);
 		if (distinct && !query.isDistinct())
 			query.distinct(true);

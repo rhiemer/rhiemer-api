@@ -1,6 +1,5 @@
 package br.com.rhiemer.api.jpa.criteria.juncao;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +21,7 @@ import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MaiorQueCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MaiorQueOuIgualCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MenorQueCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MenorQueOuIgualCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryJPA;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
@@ -614,5 +614,9 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		return betweenCampoAtribute(new Attribute[] { pathAttribute1 }, new Attribute[] { pathAttribute2 }, filtro,
 				parametos);
 	}
+	
+	
+
+
 
 }

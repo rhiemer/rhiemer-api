@@ -3,6 +3,7 @@ package br.com.rhiemer.api.jpa.criteria.join.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -32,7 +33,7 @@ public interface IBuilderFiltrosJoin<T> extends ICriteriaJPA {
 		return (T)this;
 	}	
 	
-	default List<Predicate> builderJoins(CriteriaBuilder builder, Root root, CriteriaQuery query) {
+	default List<Predicate> builderJoins(CriteriaBuilder builder, Root root, AbstractQuery query) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (getJoins() != null && getJoins().size() > 0)
 			getJoins().stream().forEach(t -> t.build(builder, root, query, predicates));

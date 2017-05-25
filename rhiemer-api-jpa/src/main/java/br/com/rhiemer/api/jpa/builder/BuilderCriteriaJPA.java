@@ -1,7 +1,9 @@
 package br.com.rhiemer.api.jpa.builder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -9,21 +11,23 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryJPA;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryRetornoDTO;
 import br.com.rhiemer.api.util.dao.parametros.execucao.IExecucao;
 import br.com.rhiemer.api.util.dto.Pager;
-import br.com.rhiemer.api.util.helper.Helper;
 
-public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetodosFiltrosExecucaoJPA<BuilderCriteriaJPA> {
+public class BuilderCriteriaJPA extends BuilderCriteria
+		implements IBuilderMetodosFiltrosExecucaoJPA<BuilderCriteriaJPA> {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> orderBys = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> joins = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> queryParametros = new ArrayList<>();
-	
+	private Map<String, SubQueryJPA> mapSubQueryAlias = new HashMap<>();
+	private Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot = new HashMap<>();
 
-	public BuilderCriteriaJPA()
-	{
+	public BuilderCriteriaJPA() {
 		super();
 	}
 
@@ -42,7 +46,7 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 	public List<ParametrizarCriteriaJPAParametro> getFiltros() {
 		return this.filtros;
 	}
-	
+
 	@Override
 	public List<ParametrizarCriteriaJPAParametro> getOrderBys() {
 		return this.orderBys;
@@ -57,12 +61,21 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 	public List<ParametrizarCriteriaJPAParametro> getFetchs() {
 		return this.fetchs;
 	}
-	
+
 	@Override
 	public List<ParametrizarCriteriaJPAParametro> getQueryParametros() {
 		return queryParametros;
 	}
 
+	@Override
+	public Map<String, SubQueryJPA> getMapSubQueryAlias() {
+		return this.mapSubQueryAlias;
+	}
+
+	@Override
+	public Map<String, SubQueryRetornoDTO> getMapSubQueryJpaRoot() {
+		return this.mapSubQueryJpaRoot;
+	}
 
 	@Override
 	protected ParametrizarCriteria getParametrizarCriteriaInternal() {
@@ -77,12 +90,10 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 			}
 		};
 	}
-	
+
 	public static BuilderCreate builderCreate() {
 		return new BuilderCreate();
 	}
-	
-	
 
 	public static class BuilderCreate {
 
@@ -123,7 +134,7 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 			this.transformMap = transformMap;
 			return this;
 		}
-		
+
 		public BuilderCreate parametrosExecucao(IExecucao... parametrosExecucao) {
 			this.parametrosExecucao = parametrosExecucao;
 			return this;
@@ -134,9 +145,5 @@ public class BuilderCriteriaJPA extends BuilderCriteria implements IBuilderMetod
 		}
 
 	}
-
-	
-
-	
 
 }

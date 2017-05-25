@@ -1,8 +1,8 @@
 package br.com.rhiemer.api.jpa.criteria.builder;
 
-import static br.com.rhiemer.api.jpa.constantes.ConstantesCriteriaJPA.FETCH_DEFAULT;
 import java.util.List;
 
+import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -21,6 +21,7 @@ import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.query.parametros.IQueryParametros;
+import br.com.rhiemer.api.jpa.criteria.subquery.ISubQueryJPA;
 import br.com.rhiemer.api.jpa.enums.EnumLike;
 import br.com.rhiemer.api.util.helper.Helper;
 
@@ -59,7 +60,7 @@ public class ParametrizarCriteriaJPAParametro {
 		this.setIsExpression(parametrizaCriteriaJPADto.getIsExpression());
 	}
 
-	protected ICriteriaJPA clone(CriteriaBuilder builder, Root root, CriteriaQuery query) {
+	protected ICriteriaJPA clone(CriteriaBuilder builder, Root root, AbstractQuery query) {
 		ICriteriaJPA operacao = null;
 		if (this.getObjeto() != null)
 			operacao = this.getObjeto();
@@ -81,7 +82,7 @@ public class ParametrizarCriteriaJPAParametro {
 		return operacao;
 	}
 
-	protected void execute(ICriteriaJPA operacao, CriteriaBuilder builder, Root root, CriteriaQuery query,
+	protected void execute(ICriteriaJPA operacao, CriteriaBuilder builder, Root root, AbstractQuery query,
 			List<Predicate> predicates) {
 		Object result = null;
 		if (operacao instanceof FiltroCriteriaIntervaloAtributoJPA) {
@@ -98,7 +99,8 @@ public class ParametrizarCriteriaJPAParametro {
 			result = ((FiltroCriteriaJPA) operacao).build(this.getValues());
 		} else if (operacao instanceof OrderByCriteriaJPA) {
 			Order order = ((OrderByCriteriaJPA) operacao).build();
-			query.orderBy(order);
+			if (query instanceof CriteriaQuery)
+				((CriteriaQuery) query).orderBy(order);
 		} else if (operacao instanceof IAtributoCreateCriteriaJPA) {
 			((IAtributoCreateCriteriaJPA) operacao).builderAtributoCriteria();
 		} else if (operacao instanceof IJoinCriteriaJPA) {
@@ -116,7 +118,7 @@ public class ParametrizarCriteriaJPAParametro {
 		}
 	}
 
-	public void build(CriteriaBuilder builder, Root root, CriteriaQuery query, List<Predicate> predicates) {
+	public void build(CriteriaBuilder builder, Root root, AbstractQuery query, List<Predicate> predicates) {
 		ICriteriaJPA operacao = clone(builder, root, query);
 		execute(operacao, builder, root, query, predicates);
 	}

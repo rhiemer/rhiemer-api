@@ -1,5 +1,6 @@
 package br.com.rhiemer.api.jpa.criteria.juncao;
 
+
 import java.util.ArrayList;
 import java.util.List;
 

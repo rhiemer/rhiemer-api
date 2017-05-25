@@ -3,7 +3,7 @@ package br.com.rhiemer.api.rest.full;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import br.com.rhiemer.api.rest.annotations.RESTful;
+import br.com.rhiemer.api.util.annotations.rest.RESTful;
 import br.com.rhiemer.api.util.annotations.rest.RestClientMetodoClasse;
 import br.com.rhiemer.api.util.helper.JsonHelper;
 import br.com.rhiemer.api.util.proxy.ProxyCallMetodoHandlerJavassit;
