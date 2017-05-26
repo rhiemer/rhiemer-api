@@ -30,7 +30,7 @@ public class SubQueryJPA<T> extends MetodosJuncaoJPA<T> implements ISubQueryJPA<
 	private List<ParametrizarCriteriaJPAParametro> fetchs = new ArrayList<>();
 	private List<ParametrizarCriteriaJPAParametro> queryParametros = new ArrayList<>();
 	private Map<String, SubQueryJPA> mapSubQueryAlias = new HashMap<>();
-	private Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot = new HashMap<>();
+	private Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot;
 
 	public SubQueryJPA() {
 		super();
@@ -55,10 +55,17 @@ public class SubQueryJPA<T> extends MetodosJuncaoJPA<T> implements ISubQueryJPA<
 		this.classeString = classeString;
 	}
 
+
 	public SubQueryJPA(Class<?> classe) {
 		super();
 		this.classe = classe;
 	}
+	
+	public SubQueryJPA setMapSubQueryJpaRoot(Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot) {
+		this.mapSubQueryJpaRoot = mapSubQueryJpaRoot;
+		return this;
+	}
+
 
 	@Override
 	public SubQueryRetornoDTO builderSubQueryMetodos(CriteriaBuilder builder, Root root, AbstractQuery query) {

@@ -8,6 +8,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
 import br.com.rhiemer.api.jpa.criteria.join.builder.IBuilderFiltrosFetch;
 import br.com.rhiemer.api.jpa.criteria.join.builder.IBuilderFiltrosJoin;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderFiltrosJPA;
@@ -17,6 +18,12 @@ import br.com.rhiemer.api.jpa.criteria.subquery.IBuilderSubQuery;
 
 public interface IBuilderMetodosFiltrosJPA<T> extends IBuilderFiltrosJPA<T>, IBuilderOrderBy<T>,
 		IBuilderQueryParametros<T>, IBuilderFiltrosJoin<T>, IBuilderFiltrosFetch<T>, IBuilderSubQuery<T> {
+
+	@Override
+	default void adicionarFiltro(ParametrizarCriteriaJPAParametro parametro) {
+		IBuilderFiltrosJPA.super.adicionarFiltro(parametro);
+		parametro.setMapSubQueryJpaRoot(getMapSubQueryJpaRoot());
+	}
 
 	default List<Predicate> builderAll(CriteriaBuilder builder, Root root, AbstractQuery query) {
 		this.builderQueryParametros(builder, root, query);

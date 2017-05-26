@@ -1,6 +1,7 @@
 package br.com.rhiemer.api.jpa.criteria.builder;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.criteria.AbstractQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -15,13 +16,14 @@ import br.com.rhiemer.api.jpa.criteria.atributos.IAtributoCreateCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.FiltroCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloAtributoJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.between.FiltroCriteriaIntervaloValorJPA;
+import br.com.rhiemer.api.jpa.criteria.filtros.subquery.AbstractFiltroCriteriaSubQueryJPA;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.join.IJoinCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderMetodosJuncaoJPAWhere;
 import br.com.rhiemer.api.jpa.criteria.orderby.OrderByCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.query.parametros.IQueryParametros;
-import br.com.rhiemer.api.jpa.criteria.subquery.ISubQueryJPA;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryRetornoDTO;
 import br.com.rhiemer.api.jpa.enums.EnumLike;
 import br.com.rhiemer.api.util.helper.Helper;
 
@@ -45,6 +47,9 @@ public class ParametrizarCriteriaJPAParametro {
 	private Attribute[] pathAttribute1;
 	private Attribute[] pathAttribute2;
 	private EnumLike tipoLike;
+	private Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot;
+	private SubQueryRetornoDTO subQueryRetornoDTO;
+	private String subQueryAlias;
 
 	public ParametrizarCriteriaJPAParametro() {
 		super();
@@ -75,6 +80,9 @@ public class ParametrizarCriteriaJPAParametro {
 			Helper.setValueMethodOrFieldNotNull(operacao, "tipoLike", this.getTipoLike());
 			Helper.setValueMethodOrField(operacao, "attributes", this.getAttributes());
 			Helper.setValueMethodOrField(operacao, "atributo", this.getAtributo());
+			Helper.setValueMethodOrField(operacao, "mapSubQueryJpaRoot", this.getMapSubQueryJpaRoot());
+			Helper.setValueMethodOrField(operacao, "subQueryRetornoDTO", this.getSubQueryRetornoDTO());
+			Helper.setValueMethodOrField(operacao, "subQueryAlias", this.getSubQueryAlias());
 		}
 		Helper.setValueMethodOrField(operacao, "root", root);
 		Helper.setValueMethodOrField(operacao, "builder", builder);
@@ -85,7 +93,9 @@ public class ParametrizarCriteriaJPAParametro {
 	protected void execute(ICriteriaJPA operacao, CriteriaBuilder builder, Root root, AbstractQuery query,
 			List<Predicate> predicates) {
 		Object result = null;
-		if (operacao instanceof FiltroCriteriaIntervaloAtributoJPA) {
+		if (operacao instanceof AbstractFiltroCriteriaSubQueryJPA) {
+			result = ((AbstractFiltroCriteriaSubQueryJPA) operacao).builderSubQuery(builder, query, root);
+		} else if (operacao instanceof FiltroCriteriaIntervaloAtributoJPA) {
 			if (pathAttribute1 != null)
 				result = ((FiltroCriteriaIntervaloAtributoJPA) operacao).buildFiltroIntervalo(this.getPathAttribute1(),
 						this.getPathAttribute2(), this.getValues());
@@ -283,6 +293,33 @@ public class ParametrizarCriteriaJPAParametro {
 
 	public ParametrizarCriteriaJPAParametro setTipoLike(EnumLike tipoLike) {
 		this.tipoLike = tipoLike;
+		return this;
+	}
+
+	public Map<String, SubQueryRetornoDTO> getMapSubQueryJpaRoot() {
+		return mapSubQueryJpaRoot;
+	}
+
+	public ParametrizarCriteriaJPAParametro setMapSubQueryJpaRoot(Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot) {
+		this.mapSubQueryJpaRoot = mapSubQueryJpaRoot;
+		return this;
+	}
+
+	public SubQueryRetornoDTO getSubQueryRetornoDTO() {
+		return subQueryRetornoDTO;
+	}
+
+	public ParametrizarCriteriaJPAParametro setSubQueryRetornoDTO(SubQueryRetornoDTO subQueryRetornoDTO) {
+		this.subQueryRetornoDTO = subQueryRetornoDTO;
+		return this;
+	}
+
+	public String getSubQueryAlias() {
+		return subQueryAlias;
+	}
+
+	public ParametrizarCriteriaJPAParametro setSubQueryAlias(String subQueryAlias) {
+		this.subQueryAlias = subQueryAlias;
 		return this;
 	}
 

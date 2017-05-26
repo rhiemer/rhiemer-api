@@ -10,12 +10,15 @@ import javax.persistence.criteria.Root;
 import br.com.rhiemer.api.jpa.criteria.interfaces.ICriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.juncao.IBuilderFiltrosJPA;
 import br.com.rhiemer.api.util.helper.Helper;
+import br.com.rhiemer.api.util.helper.HelperFindEntityClass;
 
 public interface IBuilderSubQuery<T> extends ICriteriaJPA {
 
 	Map<String, SubQueryJPA> getMapSubQueryAlias();
 
-	Map<String, SubQueryRetornoDTO> getMapSubQueryJpaRoot();
+	default Map<String, SubQueryRetornoDTO> getMapSubQueryJpaRoot() {
+		return null;
+	}
 
 	default T addSubQuerys(List<SubQueryJPA> filtros) {
 		filtros.stream().forEach(t -> subQuery(t));
@@ -28,17 +31,19 @@ public interface IBuilderSubQuery<T> extends ICriteriaJPA {
 	}
 
 	default SubQueryJPA<T> subQuery(SubQueryJPA subQuery) {
+		subQuery.setMapSubQueryJpaRoot(getMapSubQueryJpaRoot());
 		getMapSubQueryAlias().put(subQuery.getAlias(), subQuery);
 		return subQuery;
 	}
 
 	default SubQueryJPA<T> subQuery(Class<?> classe) {
-		SubQueryJPA<T> objeto = new SubQueryJPA((IBuilderFiltrosJPA) this, classe);
+		SubQueryJPA<T> objeto = new SubQueryJPA((IBuilderFiltrosJPA) this, classe)
+				.setAlias(HelperFindEntityClass.aliasClass(classe));
 		return subQuery(objeto);
 	}
 
 	default SubQueryJPA<T> subQuery(String classeName) {
-		SubQueryJPA<T> objeto = new SubQueryJPA((IBuilderFiltrosJPA) this, classeName);
+		SubQueryJPA<T> objeto = new SubQueryJPA((IBuilderFiltrosJPA) this, classeName).setAlias(classeName);
 		return subQuery(objeto);
 	}
 
@@ -55,10 +60,9 @@ public interface IBuilderSubQuery<T> extends ICriteriaJPA {
 	default void builderSubQuerys(CriteriaBuilder builder, Root root, AbstractQuery query) {
 		if (getMapSubQueryJpaRoot() == null)
 			return;
-		getMapSubQueryJpaRoot().clear();
-		getMapSubQueryJpaRoot().put("root",new SubQueryRetornoDTO(query,root));
 		if (getMapSubQueryAlias() != null && getMapSubQueryAlias().size() > 0)
-			getMapSubQueryAlias().forEach((t, x) -> getMapSubQueryJpaRoot().put(t, x.builderSubQueryMetodos(builder,root,query)));
+			getMapSubQueryAlias()
+					.forEach((t, x) -> getMapSubQueryJpaRoot().put(t, x.builderSubQueryMetodos(builder, root, query)));
 	}
 
 }

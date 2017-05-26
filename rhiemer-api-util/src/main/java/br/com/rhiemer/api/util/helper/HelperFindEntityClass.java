@@ -27,6 +27,8 @@ public final class HelperFindEntityClass {
 		Class<?> result = null;
 		try {
 			result = Class.forName(className);
+			if (result != null)
+				return result;
 		} catch (ClassNotFoundException e) {
 
 		}
@@ -57,13 +59,13 @@ public final class HelperFindEntityClass {
 
 	public static boolean compareNameClass(Class<?> classe, String name) {
 
-		if (classe.getName() != null && classe.getName().equals(name))
+		if (classe.getName() != null && classe.getName().equalsIgnoreCase(name))
 			return true;
 
-		if (classe.getCanonicalName() != null && classe.getCanonicalName().equals(name))
+		if (classe.getCanonicalName() != null && classe.getCanonicalName().equalsIgnoreCase(name))
 			return true;
 
-		if (classe.getSimpleName() != null && classe.getSimpleName().equals(name))
+		if (classe.getSimpleName() != null && classe.getSimpleName().equalsIgnoreCase(name))
 			return true;
 
 		return false;
@@ -71,7 +73,7 @@ public final class HelperFindEntityClass {
 
 	public static boolean compareAliasClass(Class<?> classe, String name) {
 		String aliasClasse = aliasClass(classe);
-		if (aliasClasse.equals(name))
+		if (aliasClasse.equalsIgnoreCase(name))
 			return true;
 		else
 			return false;

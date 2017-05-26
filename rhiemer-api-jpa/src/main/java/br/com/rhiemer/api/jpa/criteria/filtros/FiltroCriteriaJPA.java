@@ -1,30 +1,39 @@
 package br.com.rhiemer.api.jpa.criteria.filtros;
 
 import static javax.persistence.criteria.JoinType.INNER;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
-
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.metamodel.Attribute;
 
 import br.com.rhiemer.api.jpa.criteria.atributos.AbstractAtributoCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryRetornoDTO;
 import br.com.rhiemer.api.jpa.helper.HelperAtributeJPA;
 import br.com.rhiemer.api.jpa.helper.HelperRootCriteria;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA implements IFiltroCriteriaJPA {
 
+	private final String PATTERN_ALIAS_SUBQUERY = "(\\{(.+?)\\})+";
+
 	private CriteriaBuilder builder;
 	private Boolean not = false;
 	private Boolean caseSensitve = true;
 	private Boolean includeNull = false;
 	private Boolean isExpression = false;
+	private Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot;
 
 	public FiltroCriteriaJPA() {
 		this.setJoinType(INNER);
@@ -74,21 +83,69 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 		return this;
 	}
 
+	public FiltroCriteriaJPA setMapSubQueryJpaRoot(Map<String, SubQueryRetornoDTO> mapSubQueryJpaRoot) {
+		this.mapSubQueryJpaRoot = mapSubQueryJpaRoot;
+		return this;
+	}
+
 	public Expression build(Object... filtros) {
 		Path path = builderAtributoCriteria();
 		return buildFiltro(path, filtros);
+	}
+
+	public Map<String, SubQueryRetornoDTO> getMapSubQueryJpaRoot() {
+		return this.mapSubQueryJpaRoot;
 	}
 
 	protected Boolean getFiltroIsArray() {
 		return false;
 	}
 
-	public String atributoBuild() {
+	protected String[] getRootSubQueryField(String field) {
+		Pattern pattern = Pattern.compile(PATTERN_ALIAS_SUBQUERY);
+		Matcher matcher = pattern.matcher(field);
+		if (matcher.find()) {
+			String _group1 = matcher.group(1);
+			String strMatcher = matcher.group(2);
+			if (field.indexOf(_group1) == 0) {
+				String[] result = new String[2];
+				result[0] = strMatcher;
+				result[1] = field.substring(_group1.length() + 1);
+				return result;
+			}
+		}
+		return null;
+
+	}
+
+	protected SubQueryRetornoDTO findSubQueryRetornoDTO(String queryAlias) {
+		SubQueryRetornoDTO subQueryRetornoDTO = Optional.ofNullable(getMapSubQueryJpaRoot()).map(t -> t.get(queryAlias))
+				.orElse(null);
+		if (subQueryRetornoDTO != null && subQueryRetornoDTO.getRoot() != null)
+			return subQueryRetornoDTO;
+		else
+			return null;
+	}
+
+	protected String atributoStrBuildNull(String atributo) {
+		String[] fields = getRootSubQueryField(atributo);
+		if (fields != null) {
+			SubQueryRetornoDTO subQueryRetornoDTO = findSubQueryRetornoDTO(fields[0]);
+			return subQueryRetornoDTO != null ? fields[1] : null;
+		} else
+			return null;
+	}
+
+	protected String atributoStrBuild(String atributo) {
+		return Optional.ofNullable(atributoStrBuildNull(atributo)).map(t -> t).orElse(atributo);
+	}
+
+	protected String atributoBuild() {
 		Attribute[] _attributes = getAttributes();
 		if (_attributes != null && _attributes.length > 0)
 			return HelperAtributeJPA.attributeToString(_attributes);
 		else
-			return getAtributo();
+			return atributoStrBuild(getAtributo());
 	}
 
 	public Expression buildFiltro(Expression path, Object... filtros) {
@@ -151,8 +208,8 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 		return _path;
 	}
 
-	protected Expression buildIsExpression(Object filtro) {
-		Expression exp = HelperRootCriteria.getExpressionObj(getRoot(), getFecth(), getJoinType(), filtro);
+	protected Expression buildIsExpression(Object filtro, From from) {
+		Expression exp = HelperRootCriteria.getExpressionObj(from, getFecth(), getJoinType(), filtro);
 		Expression _exp = buildExpression(exp);
 		return _exp;
 	}
@@ -160,19 +217,47 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 	protected Object buildValueObjComplex(Object filtro) {
 
 		String attr = atributoBuild();
-		return HelperAtributeJPA.createEntity(getRoot().getJavaType(), attr, filtro);
+		return HelperAtributeJPA.createEntity(rootBuild(filtro).getJavaType(), attr, filtro);
 
+	}
+
+	protected From rootBuild(Object filtro) {
+		if (filtro == null || !(filtro instanceof String))
+			return getRoot();
+		else {
+			String[] fields = getRootSubQueryField(filtro.toString());
+			if (fields != null) {
+				SubQueryRetornoDTO subQueryRetornoDTO = findSubQueryRetornoDTO(fields[0]);
+				if (subQueryRetornoDTO != null)
+					return subQueryRetornoDTO.getRoot();
+				else
+					return getRoot();
+			} else
+				return getRoot();
+		}
 	}
 
 	protected Expression buildValue(Expression path, Object filtro) {
 		Expression _path = buildExpression(path);
 		Object _filtro = null;
-		if (getIsExpression()) {
-			_filtro = buildIsExpression(filtro);
+		Object _filtroParam = filtro;
+
+		Boolean _isExpression = getIsExpression();
+		if (!_isExpression) {
+			String _filtroExp = atributoStrBuildNull(filtro.toString());
+			if (_filtroExp != null) {
+				_isExpression = true;
+				_filtroParam = _filtroExp;
+			}
+		}
+
+		if (_isExpression) {
+			From from = rootBuild(filtro);
+			_filtro = buildIsExpression(_filtroParam, from);
 			return buildSingular(_path, (Expression) _filtro);
 
 		} else {
-			_filtro = tranformCaseInsensitive(path, filtro);
+			_filtro = tranformCaseInsensitive(path, _filtroParam);
 			return buildSingular(_path, buildValueObjComplex(_filtro));
 		}
 
@@ -190,7 +275,7 @@ public abstract class FiltroCriteriaJPA extends AbstractAtributoCriteriaJPA impl
 	}
 
 	protected Expression[] buildPathExpression(Expression path, Object[] filtro) {
-		Expression[] _filtro = (Expression[]) Arrays.stream(filtro).map(t -> buildIsExpression(t))
+		Expression[] _filtro = (Expression[]) Arrays.stream(filtro).map(t -> buildIsExpression(t, rootBuild(t)))
 				.toArray(size -> new Expression[size]);
 		return _filtro;
 	}
