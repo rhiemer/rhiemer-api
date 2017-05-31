@@ -23,10 +23,12 @@ import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MaiorQueCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MaiorQueOuIgualCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MenorQueCriteriaJPA;
 import br.com.rhiemer.api.jpa.criteria.filtros.maiormenor.MenorQueOuIgualCriteriaJPA;
+import br.com.rhiemer.api.jpa.criteria.subquery.IBuilderSubQuery;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryJPA;
 import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryRetornoDTO;
 import br.com.rhiemer.api.util.helper.Helper;
 
-public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
+public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA, IBuilderSubQuery<T> {
 
 	default void adicionarFiltro(ParametrizarCriteriaJPAParametro parametro) {
 		getFiltros().add(parametro);
@@ -619,6 +621,35 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 				parametos);
 	}
 
+	default SubQueryJPA<T> exists(String subQueryAlias, boolean not) {
+		SubQueryJPA _subQuery = subQuery(subQueryAlias);
+		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(ExistsCriteriaJPA.class)
+				.setSubQueryAlias(subQueryAlias).setNot(not));
+		return _subQuery;
+	}
+
+	default SubQueryJPA<T> exists(String subQueryAlias) {
+		return exists(subQueryAlias, false);
+	}
+
+	default SubQueryJPA<T> exists(Class<?> classeSubQuery, boolean not) {
+		SubQueryJPA _subQuery = subQuery(classeSubQuery);
+		return exists(_subQuery.getAlias(), not);
+	}
+
+	default SubQueryJPA<T> exists(Class<?> classeSubQuery) {
+		return exists(classeSubQuery, false);
+	}
+
+	default SubQueryJPA<T> exists(Class<?> classeSubQuery, String subQueryAlias, boolean not) {
+		SubQueryJPA _subQuery = subQuery(classeSubQuery, subQueryAlias);
+		return exists(_subQuery.getAlias(), not);
+	}
+
+	default SubQueryJPA<T> exists(Class<?> classeSubQuery, String subQueryAlias) {
+		return exists(classeSubQuery, subQueryAlias, false);
+	}
+
 	default IBuilderFiltrosJPA<T> exists(SubQueryRetornoDTO subQueryRetornoDTO, boolean not) {
 		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(ExistsCriteriaJPA.class)
 				.setSubQueryRetornoDTO(subQueryRetornoDTO).setNot(not));
@@ -629,14 +660,21 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		return exists(subQueryRetornoDTO, false);
 	}
 
-	default IBuilderFiltrosJPA<T> exists(String subQueryAlias, boolean not) {
-		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(ExistsCriteriaJPA.class)
-				.setSubQueryAlias(subQueryAlias).setNot(not));
-		return this;
+	default SubQueryJPA<T> notExists(String subQueryAlias) {
+		SubQueryJPA _subQuery = subQuery(subQueryAlias);
+		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(NotExistsCriteriaJPA.class)
+				.setSubQueryAlias(subQueryAlias));
+		return _subQuery;
 	}
 
-	default IBuilderFiltrosJPA<T> exists(String subQueryAlia) {
-		return exists(subQueryAlia, false);
+	default SubQueryJPA<T> notExists(Class<?> classeSubQuery) {
+		SubQueryJPA _subQuery = subQuery(classeSubQuery);
+		return notExists(_subQuery.getAlias());
+	}
+
+	default SubQueryJPA<T> notExists(Class<?> classeSubQuery, String subQueryAlias) {
+		SubQueryJPA _subQuery = subQuery(classeSubQuery, subQueryAlias);
+		return notExists(_subQuery.getAlias());
 	}
 
 	default IBuilderFiltrosJPA<T> notExists(SubQueryRetornoDTO subQueryRetornoDTO) {
@@ -645,10 +683,20 @@ public interface IBuilderFiltrosJPA<T> extends IBuilderMetodosJPA {
 		return this;
 	}
 
-	default IBuilderFiltrosJPA<T> notExists(String subQueryAlias) {
+	default IBuilderFiltrosJPA<T> notExistsSubQuery(String subQueryAlias) {
 		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(NotExistsCriteriaJPA.class)
 				.setSubQueryAlias(subQueryAlias));
 		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> existsSubQuery(String subQueryAlias, boolean not) {
+		adicionarFiltro(new ParametrizarCriteriaJPAParametro().setClasse(ExistsCriteriaJPA.class)
+				.setSubQueryAlias(subQueryAlias).setNot(not));
+		return this;
+	}
+
+	default IBuilderFiltrosJPA<T> existsSubQuery(String subQueryAlia) {
+		return existsSubQuery(subQueryAlia, false);
 	}
 
 }

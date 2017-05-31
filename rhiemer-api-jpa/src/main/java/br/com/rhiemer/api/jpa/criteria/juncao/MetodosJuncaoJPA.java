@@ -1,16 +1,19 @@
 package br.com.rhiemer.api.jpa.criteria.juncao;
 
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import br.com.rhiemer.api.jpa.criteria.builder.ParametrizarCriteriaJPAParametro;
+import br.com.rhiemer.api.jpa.criteria.subquery.SubQueryJPA;
 import br.com.rhiemer.api.util.helper.Helper;
 
 public abstract class MetodosJuncaoJPA<T> {
 
 	private List<ParametrizarCriteriaJPAParametro> filtros = new ArrayList<>();
-	private Boolean not=false;
+	private Boolean not = false;
 	final private IBuilderFiltrosJPA<T> anterior;
 
 	public MetodosJuncaoJPA() {
@@ -21,19 +24,19 @@ public abstract class MetodosJuncaoJPA<T> {
 	public MetodosJuncaoJPA(IBuilderFiltrosJPA<T> anterior) {
 		super();
 		this.anterior = anterior;
-		this.not=false;
+		this.not = false;
 	}
-	
+
 	public MetodosJuncaoJPA(boolean not) {
 		super();
 		this.anterior = null;
-		this.not=not;
+		this.not = not;
 	}
-	
-	public MetodosJuncaoJPA(boolean not,IBuilderFiltrosJPA<T> anterior) {
+
+	public MetodosJuncaoJPA(boolean not, IBuilderFiltrosJPA<T> anterior) {
 		super();
 		this.anterior = anterior;
-		this.not=not;
+		this.not = not;
 	}
 
 	public List<ParametrizarCriteriaJPAParametro> getFiltros() {
@@ -61,7 +64,9 @@ public abstract class MetodosJuncaoJPA<T> {
 		} while (_anterior != null);
 		return (T) _root;
 	}
-	
-	
+
+	public Map<String, SubQueryJPA> getMapSubQueryAlias() {
+		return Optional.ofNullable(getAnterior()).map(t -> t.getMapSubQueryAlias()).orElse(null);
+	}
 
 }
